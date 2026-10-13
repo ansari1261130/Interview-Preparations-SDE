@@ -1,10 +1,11 @@
-# 10b · LLD Problems Tier-1: Machine Coding Study Guide
+# 10b · Low-Level Design (LLD) Problems Tier 1: Machine-Coding Study Guide
 
 Interview-ready Java 17 designs for five high-frequency low-level design rounds. Each problem focuses on
 clear requirements, extensible objects, readable code, deterministic tests, and concrete concurrency notes.
 Code is shown as package sections; each public top-level type belongs in its own `.java` file with that name.
 
 **Table of Contents**
+- [Beginner reading rule for every problem](#beginner-reading-rule-for-every-problem)
 - [How to present an LLD in 45-90 minutes](#how-to-present-an-lld-in-45-90-minutes)
 - [Q1. Design Parking Lot](#q1-design-parking-lot)
 - [Q2. Design Tic-Tac-Toe](#q2-design-tic-tac-toe)
@@ -15,6 +16,104 @@ Code is shown as package sections; each public top-level type belongs in its own
 - [Flashcards](#flashcards)
 
 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
+
+## Beginner reading rule for every problem
+
+Each solution has two layers. The **beginner primer** explains the real-world problem, mental model,
+responsibility split, pattern-recognition signals, flow, alternatives, and scale path. The existing detailed
+answer then provides diagrams, Java code, tests, concurrency notes, and interview follow-ups.
+
+Expand these terms when speaking: Least Recently Used (LRU), Least Frequently Used (LFU), Electric Vehicle
+(EV), Automated Number Plate Recognition (ANPR), Unified Payments Interface (UPI), Application Programming
+Interface (API), database (DB), and Software Development Engineer level 1 or 2 (SDE-1 or SDE-2).
+
+### Mental model
+
+Treat each problem as a small backend product with one central workflow and a few stateful objects. A parking
+lot allocates scarce spots, a board game validates moves, a cache evicts memory entries, and a rate limiter
+spends request allowance. The names change, but the design rhythm is similar:
+
+- A public service or facade owns the use case and keeps multi-object updates atomic.
+- Entities own local state and invariants, such as spot occupancy, board cells, cache nodes, or token counts.
+- Interfaces represent policies that may change: allocation, pricing, dice, cache behavior, or time source.
+- Records and enums carry immutable facts, request results, statuses, and supported modes.
+- Tests and synchronization prove that invalid moves, duplicate allocation, and concurrent overspending fail safely.
+
+### How to think through any question here
+
+1. Restate the user action in plain language: park, move, roll, get or put, or ask for permission.
+2. Identify the scarce or protected state: one spot, one cell, one turn, limited cache capacity, or limited tokens.
+3. Write the invariant before naming classes, for example no two vehicles in one spot or no request consumes a
+   missing token.
+4. Split responsibilities into models, the coordinating service, and replaceable policy interfaces.
+5. Define the main success flow and the exact point where state changes.
+6. Say what happens on failure: throw, return empty, return false, keep old state, or compensate.
+7. Add concurrency only around shared mutation; avoid making every object globally synchronized.
+8. End with the scale path: indexed lookup, database transactions, Redis, cleanup, metrics, or production libraries.
+
+### Pattern recognition cues
+
+| If the question mentions... | Think about... | Why it fits |
+|---|---|---|
+| Nearest, cheapest, compatible, or first available spot | Strategy for allocation | The selection rule changes without changing ticket lifecycle code. |
+| Payment, ticket status, and releasing a resource | Transaction boundary and compensation | Payment failure must not release the parking spot. |
+| A board, turns, illegal moves, and winner detection | Referee service plus board invariants | One object should validate order while the board protects cells or positions. |
+| Random dice or bot moves | Injectable strategy | Tests need deterministic behavior while production can use randomness. |
+| Least recently used | Hash map plus doubly linked list | The map finds nodes and the list tracks recency in constant time. |
+| Least frequently used | Frequency buckets plus tie-breaking recency | Eviction depends on count first and age within the count second. |
+| Burst plus steady average request rate | Token bucket | Capacity allows burst; refill rate controls long-term throughput. |
+| Exact recent request count | Sliding-window log | Timestamps can answer whether requests are inside the current window. |
+| Multiple servers enforcing one decision | External atomic authority | A single Java lock does not protect state across processes. |
+| Time-dependent behavior | Inject `Clock` or `TimeProvider` | Tests become deterministic and production can use system time. |
+
+### Abbreviations and key terms
+
+| Short form | Expanded form | Plain meaning |
+|---|---|---|
+| AI | Artificial Intelligence | Computer logic that chooses moves or decisions, such as a future game bot. |
+| ANPR | Automated Number Plate Recognition | Camera-based vehicle number detection at a parking gate. |
+| API | Application Programming Interface | The methods or endpoints callers use, such as `enter`, `exit`, `get`, or `allow`. |
+| DB | Database | Durable storage that can replace in-memory maps for tickets, games, or limiter state. |
+| EV | Electric Vehicle | A vehicle type that may need a compatible charging spot. |
+| FAANG | Facebook, Amazon, Apple, Netflix, Google | Shorthand for large product-company interview style. |
+| HTTP | Hypertext Transfer Protocol | Web request protocol that often sits in front of a rate limiter. |
+| ID | Identifier | A stable value that names an entity, ticket, player, key, client, or request. |
+| IP | Internet Protocol | Network address often used as a simple rate-limiter client key. |
+| JVM | Java Virtual Machine | The runtime process where Java locks protect only in-process state. |
+| LFU | Least Frequently Used | Cache policy that evicts the item with the smallest access count. |
+| LLD | Low-Level Design | Class, interface, method, and object-interaction design. |
+| LRU | Least Recently Used | Cache policy that evicts the item not touched for the longest time. |
+| O(1) | Constant time | Operation time stays roughly the same as data size grows. |
+| SDE-1 | Software Development Engineer level 1 | Entry-level engineering interview expectation. |
+| SDE-2 | Software Development Engineer level 2 | Mid-level expectation with more trade-off and scale discussion. |
+| TTL | Time To Live | Expiry duration after which cache or limiter state can be removed. |
+| UI | User Interface | Screen or console layer that should stay outside core design logic. |
+| UPI | Unified Payments Interface | Indian digital payment mode that can be modeled as a payment strategy. |
+| UTC | Coordinated Universal Time | Time standard used for deterministic timestamps across systems. |
+| UUID | Universally Unique Identifier | Generated unique identifier for tickets, payments, or loans. |
+| Invariant | Invariant | Rule that must always stay true, such as one vehicle per spot. |
+| Strategy | Strategy pattern | Interface-based way to swap allocation, pricing, dice, cache, or time behavior. |
+| Atomic update | Atomic update | A group of state changes that must succeed or fail together. |
+| Token bucket | Token bucket algorithm | Rate-limit algorithm where time refills tokens and requests spend them. |
+| Sliding window | Sliding-window algorithm | Rate-limit algorithm that counts only requests inside a recent time interval. |
+
+### Common beginner traps
+
+- Starting with design patterns before writing the invariant and failure cases.
+- Putting all logic in one manager class, which hides where state actually belongs.
+- Treating `get` as read-only in cache designs even though it updates recency or frequency metadata.
+- Forgetting that a single Java lock does not protect multiple application instances.
+- Returning success-shaped values after invalid moves or payment failures instead of failing explicitly.
+- Using system time or randomness directly in tests, making behavior non-deterministic.
+
+### How to study this file
+
+1. Read each beginner primer first and explain the simple problem aloud in one minute.
+2. Draw the responsibility map from memory, then compare it with the code and class diagram.
+3. Read the short answer until you can deliver it without memorizing exact words.
+4. Walk through the detailed flow and say which object changes state at each step.
+5. Use the tests as active practice: predict the result, then explain the failure behavior.
+6. Finish with the flashcards and invent one follow-up change, such as Redis rate limiting or cache Time To Live.
 
 ## How to present an LLD in 45-90 minutes
 
@@ -31,6 +130,54 @@ Code is shown as package sections; each public top-level type belongs in its own
 
 ### Q1. Design Parking Lot
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
+
+#### Beginner primer
+
+**Simple problem:** A driver enters, receives one compatible free parking spot and a ticket, then later pays
+and leaves. The system must never allocate the same spot to two vehicles.
+
+**Mental model:** This is a **resource-allocation system** plus a **ticket lifecycle**. Floors contain spots;
+the ticket proves that one vehicle currently owns one spot. `ParkingLot` coordinates the use case,
+`ParkingSpot` protects occupancy rules, allocation and pricing interfaces hold replaceable policies, and the
+payment processor isolates an external boundary.
+
+**Thought process:** Identify the scarce resource (`ParkingSpot`), write the invariant (one vehicle per spot),
+model the ownership record (`Ticket`), then separate policies that can change. Recognize **Strategy** when
+the prompt says nearest/cheapest allocation or hourly/dynamic pricing. Recognize **Repository** when
+in-memory ticket storage may later become database storage.
+
+**Flow:** validate vehicle → atomically select and occupy a compatible spot → create active ticket → later
+load ticket → calculate fee → collect payment → mark ticket paid → release spot → return receipt. If
+allocation fails, create no ticket. If payment fails, do not release the spot.
+
+**Alternatives and scale:** A small lot can scan every spot; a larger lot keeps free-spot indexes per type and
+floor. One process can use a lock around allocation. Multiple servers require a database transaction,
+conditional update, or unique active-allocation constraint. A single large `ParkingLot` class was rejected
+because pricing, allocation, payment, and persistence change for different reasons.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+|---|---|---|---|
+| `VehicleType` enum | Names supported vehicle categories. | Constants are read-only; no inputs, mutation, return value, or failure behavior. | Used by `Vehicle`, `SpotType.fits`, and `HourlyPricingStrategy`. |
+| `SpotType` enum | Names spot categories and compatibility rules. | `fits(VehicleType)` takes a vehicle type, changes no state, returns whether it fits; no explicit validation. | Owned by `ParkingSpot`; depends on `VehicleType`. |
+| `TicketStatus` enum | Tracks ticket lifecycle. | Constants represent active, paid, or lost; no methods or mutation. | Stored in `Ticket` and checked by `ParkingLot.exit`. |
+| `PaymentMode` enum | Lists accepted payment modes. | Constants are selected by the caller; no methods or mutation. | Passed to `PaymentProcessor.pay` and stored in `Payment`. |
+| `Vehicle` record | Carries vehicle number and type. | Canonical constructor stores inputs immutably; accessors return fields; no validation. | Passed into `ParkingLot.enter` and `ParkingSpot.canFit`. |
+| `Payment` record | Captures payment result. | Canonical constructor stores id, amount, mode, and success flag; no mutation or validation. | Returned by `PaymentProcessor` and embedded in `ExitReceipt`. |
+| `ExitReceipt` record | Returns exit outcome. | Canonical constructor stores ticket id, amount, and payment; no mutation or validation. | Created by `ParkingLot.exit` after successful payment and release. |
+| `ParkingSpot` class | Owns one physical spot and its occupied vehicle. | Constructor stores ids and type; `id` returns id; `canFit` reads occupancy and type; `park` sets vehicle or throws `IllegalStateException`; `release` clears vehicle; `toString` returns display text. | Belongs to `ParkingFloor`; referenced by `Ticket` and allocation strategy. |
+| `ParkingFloor` record | Groups spots under a floor id. | Canonical constructor stores id and spot list; accessors return them; no defensive copy or validation. | Stored in `ParkingLot`; scanned by `FirstFitAllocationStrategy`. |
+| `Ticket` class | Records active ownership of one spot by one vehicle. | Constructor stores immutable details and starts active; accessors return fields; `markPaid` changes status to paid; no validation. | Created and stored by `ParkingLot`; read by pricing and exit flow. |
+| `SpotAllocationStrategy` interface | Defines how a compatible spot is selected. | `allocate(Collection<ParkingFloor>, Vehicle)` returns a spot or fails according to implementation; it should not mutate maps itself. | Implemented by `FirstFitAllocationStrategy` and injected into `ParkingLot`. |
+| `FirstFitAllocationStrategy` class | Picks the first compatible spot by floor order. | `allocate` scans floors and spots, changes no state directly, returns a free spot, or throws `IllegalStateException` when full. | Uses `ParkingFloor.spots` and `ParkingSpot.canFit`. |
+| `PricingStrategy` interface | Defines fee calculation. | `price(Ticket, Instant)` returns amount in integer units; implementation decides validation and rounding. | Implemented by `HourlyPricingStrategy`; used by `ParkingLot.exit`. |
+| `HourlyPricingStrategy` class | Calculates hourly fee by vehicle type. | `price` reads ticket and exit time, mutates nothing, returns rounded-up fee with at least one minute; no explicit invalid-time failure. | Depends on `Ticket.entryTime` and `VehicleType`. |
+| `PaymentProcessor` interface | Abstracts external payment. | `pay(String, long, PaymentMode)` returns a `Payment` or throws on invalid or failed processing. | Implemented by `InMemoryPaymentProcessor`; called by `ParkingLot.exit`. |
+| `InMemoryPaymentProcessor` class | Simulates successful payment. | `pay` takes ticket id, amount, and mode, returns successful `Payment`, and throws `IllegalArgumentException` for non-positive amount. | Creates `Payment` with `UUID`; has no stored state. |
+| `ParkingLot` class | Coordinates atomic enter and exit workflows. | Constructor registers floors and policies; `enter` locks, rejects duplicate active vehicle, parks spot, stores and returns ticket; `exit` locks, validates ticket, prices, pays, marks paid, releases spot, removes ticket, and returns receipt; throws on invalid ticket, full lot, duplicate vehicle, or payment failure. | Owns floors and active tickets; uses all strategies, `Clock`, `Ticket`, and `ParkingSpot`. |
+| `Main` class | Demonstrates one parking flow. | `main(String[])` builds sample objects, calls `enter` and `exit`, prints receipt; mutates only demo state; exceptions bubble up. | Wires model and service classes for a runnable example. |
+| `ParkingLotTest` class | Verifies core parking behavior. | Helper builds one-spot lot; tests call service methods and use assertions; failures surface as JUnit assertion errors or expected exceptions. | Exercises `ParkingLot`, strategies, records, and enums. |
 
 **Why they ask:** It tests entity modeling, allocation, payments, and atomic updates under contention.
 
@@ -504,6 +651,38 @@ class ParkingLotTest {
 ### Q2. Design Tic-Tac-Toe
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
+#### Beginner primer
+
+**Simple problem:** Two players alternately place marks on a board. Reject illegal moves and announce a win
+or draw. The game must never accept two moves for one turn or overwrite an occupied cell.
+
+**Mental model:** `Game` is the referee, `Board` owns cells, `Player` owns a mark, and `Move` records one
+action. Start with a board scan after every move because it is easiest to prove correct. The row, column,
+and diagonal counters are an optimization: add `+1` for one mark and `-1` for the other; an absolute total
+equal to board size means one player filled the whole line.
+
+**Pattern recognition and flow:** A fixed two-player game needs no heavy pattern. A **Strategy** becomes
+useful only when human and bot algorithms choose moves differently. Verify active game and turn → verify
+bounds and empty cell → place mark → update win counters → declare win/draw or switch turn.
+
+**Alternatives and scale:** Scanning the board is simpler; counters make win checks constant time but add
+state that must stay consistent with the board. A State-pattern class per status is over-engineering for
+three simple statuses. Extensions include arbitrary board size, multiple players, undo, replay, and bots;
+network play additionally needs authoritative turn ordering.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+|---|---|---|---|
+| `Mark` enum | Represents X, O, and empty cells with scoring values. | Constructor stores score; `score()` returns integer contribution; no mutation or failure. | Used by `Board.place`, `Player`, and `MoveResult`. |
+| `GameStatus` enum | Represents game lifecycle outcome. | Constants are read-only; no inputs, mutation, return value, or failure behavior. | Stored in `Game` and returned by `MoveResult`. |
+| `Player` record | Carries player id, display name, and mark. | Canonical constructor stores fields immutably; accessors return values; no validation. | Passed to `Game` and compared by player id during moves. |
+| `MoveResult` record | Reports status and next turn after a move. | Canonical constructor stores status and next mark; accessors return fields; no mutation or validation. | Returned by `Game.move`. |
+| `Board` class | Owns cells, counters, and fullness checks. | Constructor creates empty board; `place(Mark,int,int)` validates bounds and vacancy, mutates cell and counters, returns win boolean, and throws `IllegalArgumentException` for invalid moves; `full()` returns whether all cells are used. | Hidden inside `Game`; depends on `Mark.score`. |
+| `Game` class | Coordinates turns and lifecycle. | Constructor validates X and O players, creates board, and sets first turn; `move(String,int,int)` is synchronized, validates active game and turn, delegates placement, updates status or turn, returns `MoveResult`, and throws for finished or illegal moves. | Owns `Board`, two `Player` records, and `GameStatus`. |
+| `Main` class | Demonstrates a small game. | `main(String[])` creates players and game, performs moves, and prints results; exceptions bubble up. | Uses public model records, enums, and `Game`. |
+| `TicTacToeTest` class | Verifies win, occupancy, and turn validation. | Test methods call `move` and assertions; expected invalid operations throw `IllegalArgumentException`; assertion failures fail the test. | Exercises `Game`, `Player`, `MoveResult`, and `GameStatus`. |
+
 **Why they ask:** It checks clean validation, turn handling, and O(1) win detection without over-engineering.
 
 **Short answer (say this first, 20-40 sec):**
@@ -775,6 +954,38 @@ class TicTacToeTest {
 
 ### Q3. Design Snake & Ladder
 `🟢 Beginner` `🔥` `Must-know SDE-1`
+
+#### Beginner primer
+
+**Simple problem:** Players take turns rolling a die and moving on a numbered board. Landing on a ladder
+moves up; landing on a snake moves down. The first player to reach the final cell wins.
+
+**Mental model:** `Game` controls turns, `Board` answers “where do I finally land?”, `Dice` generates a move,
+and each `Player` has one position. Snakes and ladders are both a jump from one cell to another, so one map
+models both.
+
+**Thought process and patterns:** Define ambiguous rules first: must the player land exactly on the last cell,
+can jumps chain, and are cycles forbidden? Use **Strategy** for dice or winning rules only if variants are
+required. Inject randomness so tests can use a deterministic die.
+
+**Flow and alternatives:** current player rolls → calculate tentative cell → handle overshoot according to
+the chosen rule → follow jump map → update position → declare winner or advance turn. A chain of jump
+objects is more object-oriented but a map is clearer for fixed jumps. Validate unique sources, in-range
+destinations, snake/ladder direction, and absence of cycles.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+|---|---|---|---|
+| `Player` record | Identifies one participant. | Canonical constructor stores id and name immutably; accessors return fields; no validation. | Used as queue element and key in `Game.positions`. |
+| `Jump` record | Represents one snake or ladder endpoint pair. | Compact constructor validates positive, different endpoints, stores fields, and throws `IllegalArgumentException` for invalid jumps. | Passed to `Board`; read by `Board` constructor. |
+| `TurnResult` record | Reports one completed turn. | Canonical constructor stores player, roll, from, to, and won flag; no mutation or validation. | Returned by `Game.playTurn` and used by demo/tests. |
+| `Dice` interface | Abstracts dice rolling. | `roll()` takes no input, mutates according to implementation, returns roll value; failures are implementation-defined. | Implemented by `RandomDice`; injected into `Game` and test lambdas. |
+| `RandomDice` class | Produces a random six-sided roll. | `roll()` reads random generator, returns 1 through 6, and has no explicit failure behavior. | Implements `Dice` for production-like play. |
+| `Board` class | Applies board size, overshoot, and jump rules. | Constructor validates jumps against final cell and throws `IllegalArgumentException` for outside jumps; `nextPosition(int,int)` returns current cell on overshoot or jump destination; `finalCell()` returns target cell. | Used by `Game`; owns jump map from `Jump` records. |
+| `Game` class | Owns turn queue, positions, and finished flag. | Constructor requires at least two players, initializes positions, and throws `IllegalArgumentException` otherwise; `playTurn()` is synchronized, rolls, moves, updates position or finished state, returns `TurnResult`, and throws `IllegalStateException` after finish; `position(Player)` returns stored cell. | Coordinates `Board`, `Dice`, `Player`, and `TurnResult`. |
+| `Main` class | Demonstrates a playable loop. | `main(String[])` builds board, game, and players, loops until a winning turn, and prints progress; exceptions bubble up. | Wires `Board`, `Jump`, `RandomDice`, and `Game`. |
+| `SnakeLadderTest` class | Verifies jumps, overshoot, and win behavior. | Test methods use deterministic dice lambdas and assertions; invalid post-win turn throws `IllegalStateException`; assertion failures fail tests. | Exercises records, `Board`, and `Game`. |
 
 **Why they ask:** It checks turn queues, testable randomness, board rules, and clean separation of model from game loop.
 
@@ -1052,6 +1263,35 @@ class SnakeLadderTest {
 
 ### Q4. Design LRU Cache and LFU Cache
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
+
+#### Beginner primer
+
+**Terminology:** Least Recently Used (LRU) evicts the item not accessed for the longest time. Least
+Frequently Used (LFU) evicts the item with the smallest access count; recency usually breaks frequency ties.
+
+**Mental model:** A hash map answers “where is this key?” quickly. A doubly linked list answers “which item
+is oldest?” quickly. LRU combines them, so each access moves one node to the front and eviction removes the
+tail. LFU adds frequency buckets and tracks the smallest non-empty frequency.
+
+**Responsibilities and invariants:** `Node` stores key/value and links; the cache owns the map, sentinel
+nodes, capacity, and mutation methods. For LFU, the key map, frequency lists, and `minFrequency` must agree
+after every operation. `get` both returns a value and updates usage; `put` inserts/updates and may evict.
+
+**Alternatives and scale:** This is primarily a data-structure design, so do not force a Gang of Four
+pattern. Java `LinkedHashMap` is best when library use is allowed; manual nodes demonstrate constant-time
+behavior. One lock is clearer than lock-free pointer updates. A distributed cache adds partitioning,
+replication, expiry, and consistency and belongs in High-Level Design.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+|---|---|---|---|
+| `Cache<K,V>` interface | Defines common cache operations. | `get(K)` returns `Optional<V>` and may update policy metadata; `put(K,V)` inserts or updates and may evict; failure behavior is implementation-defined. | Implemented by `LruCache` and `LfuCache`. |
+| `LruCache.Node<K,V>` class | Stores one LRU entry and list links. | Private constructor stores key and value; fields are mutated by list helpers; no public methods or explicit failures. | Owned only by `LruCache`; linked between sentinel nodes. |
+| `LruCache<K,V>` class | Implements least-recently-used eviction. | Constructor validates non-negative capacity; synchronized `get` returns optional value and moves hit to front; synchronized `put` ignores capacity zero, updates or inserts, evicts tail when full; helpers mutate links; negative capacity throws `IllegalArgumentException`. | Implements `Cache`; owns map, sentinel nodes, and `Node` objects. |
+| `LfuCache<K,V>` class | Implements least-frequently-used eviction with recency tie-break. | Constructor validates non-negative capacity; synchronized `get` returns optional value and increases frequency; synchronized `put` ignores zero capacity, updates or inserts, evicts oldest key in min-frequency bucket; negative capacity throws `IllegalArgumentException`. | Implements `Cache`; owns value map, frequency map, buckets, and `minFrequency`. |
+| `Main` class | Demonstrates LRU usage. | `main(String[])` creates cache, calls `put` and `get`, prints optional result; exceptions bubble up. | Uses `Cache` interface with `LruCache` implementation. |
+| `CacheTest` class | Verifies LRU, LFU, and LFU tie-breaking. | Test methods perform cache operations and assert expected empties or values; assertion failures fail tests. | Exercises both `Cache` implementations through the interface. |
 
 **Why they ask:** It validates O(1) data-structure design, generic APIs, edge cases, and eviction correctness.
 
@@ -1375,6 +1615,38 @@ class CacheTest {
 
 ### Q5. Design Rate Limiter
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
+
+#### Beginner primer
+
+**Simple problem:** Before an operation runs, decide whether a client is within an allowed request rate.
+Concurrent requests must never overspend the same allowance.
+
+**Mental model:** A token bucket has fixed capacity. Time adds tokens up to that capacity; each accepted
+request removes one. Capacity permits a burst, while refill rate controls the long-term average.
+`RateLimiter` locates a client bucket, `Bucket` owns token math, and `TimeProvider` isolates the clock.
+
+**Pattern recognition and flow:** Use **Strategy** when plans may select token bucket, fixed window, or
+sliding window. Find bucket → calculate elapsed time → add `elapsed × refillRate`, capped at capacity → if
+one token remains, subtract and allow; otherwise reject.
+
+**Alternatives and scale:** Fixed window is simplest but allows boundary bursts. Sliding log is accurate but
+stores timestamps. Token bucket balances memory and burst support. A synchronized bucket works in one Java
+Virtual Machine (JVM). Multiple instances need one atomic authority, often a Redis script or database
+update, plus Time To Live (TTL) cleanup. Decide whether shared-limiter failure fails open or closed.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+|---|---|---|---|
+| `RateLimiter` interface | Defines the allow-or-reject decision. | `allow(String)` takes a client id, may mutate per-client state, returns true for accepted and false for rejected; validation is implementation-defined. | Implemented by token bucket and sliding-window limiters. |
+| `TimeProvider` interface | Abstracts current time. | `millis()` takes no input, changes no required state, returns current time in milliseconds; failure behavior is implementation-defined. | Implemented by `SystemTimeProvider` and test fake clock. |
+| `SystemTimeProvider` class | Uses system wall-clock time. | `millis()` returns `System.currentTimeMillis()` and has no explicit failure behavior. | Injected into production limiter examples. |
+| `TokenBucketRateLimiter.Bucket` class | Holds mutable token state for one client. | Private constructor stores token count and last refill time; fields mutate inside synchronized bucket block; no public methods. | Stored in `TokenBucketRateLimiter.buckets`. |
+| `TokenBucketRateLimiter` class | Enforces burst plus refill limits per client. | Constructor validates positive capacity and refill; `allow` creates or locks a bucket, refills tokens by elapsed time, subtracts one token on success, returns false when empty, and guards negative elapsed time with zero. | Implements `RateLimiter`; depends on `TimeProvider` and `Bucket`. |
+| `SlidingWindowLogRateLimiter` class | Enforces exact recent request count per client. | Constructor validates positive limit and window; `allow` creates or locks a timestamp deque, removes expired entries, returns false at limit, otherwise appends current time and returns true. | Implements `RateLimiter`; depends on `TimeProvider` and per-client deques. |
+| `Main` class | Demonstrates token bucket decisions. | `main(String[])` builds limiter, calls `allow`, and prints booleans; constructor or runtime exceptions bubble up. | Uses `RateLimiter`, `TokenBucketRateLimiter`, and `SystemTimeProvider`. |
+| `RateLimiterTest.FakeClock` class | Provides deterministic test time. | `millis()` returns stored time; `advance(long)` mutates time by input milliseconds and returns void; no explicit validation. | Implements `TimeProvider` for tests. |
+| `RateLimiterTest` class | Verifies burst, refill, strict window, and client isolation. | Test methods call `allow`, advance fake time, and assert booleans; assertion failures fail tests. | Exercises both limiter implementations and `FakeClock`. |
 
 **Why they ask:** It tests algorithm choice, per-client state, time handling, and thread-safe mutation.
 

@@ -5,6 +5,7 @@ Continuation of Tier-2 HLD case studies plus AI-system designs connected to Lafz
 **Legend:** 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
 ## Table of Contents
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [8. Design Proximity Service Yelp](#8-design-proximity-service-yelp)
 - [9. Design Hotel Booking Airbnb](#9-design-hotel-booking-airbnb)
 - [10. Design Leaderboard or Top-K Heavy Hitters](#10-design-leaderboard-or-top-k-heavy-hitters)
@@ -18,8 +19,142 @@ Continuation of Tier-2 HLD case studies plus AI-system designs connected to Lafz
 - [Revision Cheat Sheet](#revision-cheat-sheet)
 - [Flashcards](#flashcards)
 
+## Beginner guide to this file
+
+### What this file teaches
+This file teaches advanced high-level design (HLD) patterns across geo search, booking, leaderboards, scheduling,
+email, observability, retrieval-augmented generation, large language model assistants, and Model Context Protocol
+tool platforms. Interviewers use these cases to test whether you can pick the right consistency level, scale the
+hard part, and explain production risk.
+
+### Mental model
+Think of this file as a toolkit of specialized engines: geo candidate engines, booking locks, ranked counters,
+time schedulers, mail pipelines, telemetry pipelines, retrieval indexes, model orchestrators, and governed tool
+gateways.
+
+- Candidate generation narrows huge data sets before ranking or exact validation.
+- Correctness gates protect bookings, schedules, audits, and privileged tool calls.
+- Streams and queues preserve replay for leaderboards, email, monitoring, and artificial intelligence workflows.
+- Caches and indexes make reads fast but require authoritative rechecks where correctness matters.
+- Safety, isolation, and cost controls become first-class design requirements for AI systems.
+
+### How to think through any question here
+1. Identify the specialist workload: geo, inventory, ranking, time, mail, telemetry, retrieval, model, or tools.
+2. State the invariant, such as no double booking, no missed due job, no data leak, or answer with citations.
+3. Split ingestion/write path, query/read path, and background repair or evaluation path.
+4. Choose the index or ordering structure that matches the access pattern.
+5. Estimate the largest dimension: cells, listing-days, users, schedules, messages, samples, chunks, tokens, or calls.
+6. Add guardrails: idempotency, authorization, leases, replay, rate limits, budgets, and audit.
+7. Describe graceful degradation when a shard, provider, stream, index, or model fails.
+
+### Pattern recognition cues
+| If the question mentions... | Think about... | Why it fits |
+|---|---|---|
+| Nearby places or radius | Cell candidates plus exact distance filtering | Geo cells make search scalable before ranking. |
+| Room nights or listing dates | Conditional inventory rows | Final booking must atomically own every date. |
+| Top K, rank, or heavy hitters | Sorted sets or sketches | Exact rank and approximate trends need different data structures. |
+| Cron, delayed jobs, or retries | Durable due store plus leases | Schedulers must avoid missed work and tolerate duplicates. |
+| Mailbox, labels, or spam | Immutable message plus per-user index | One message can appear in many mailbox views. |
+| Metrics, logs, or traces | Ingestion buffer and time-series storage | Writes are huge and queries are time-windowed. |
+| Retrieval-augmented answers | Chunk, embed, retrieve, re-rank, cite | Quality depends on retrieval before generation. |
+| Large language model costs | Queue, rate limit, cache, and route models | Model calls are slow, expensive, and provider-limited. |
+| Agent tool calls | Gateway, policy, audit, and vault | Tool execution needs governance and tenant isolation. |
+
+### Abbreviations and key terms
+| Short form | Expanded form | Plain meaning |
+|---|---|---|
+| ACL | Access control list | Permission list used to filter documents or tool access. |
+| AI | Artificial intelligence | Systems that use models for retrieval, generation, or decisions. |
+| ANN | Approximate nearest neighbor | Fast vector search that trades perfect recall for speed. |
+| API | Application programming interface | Contract used by clients and services. |
+| BM25 | Best Matching 25 | Classic keyword ranking function used in search. |
+| CRDT | Conflict-free replicated data type | Data structure that can merge concurrent offline edits. |
+| DAU | Daily active users | Count of unique users active in one day. |
+| DB | Database | Durable storage for important state. |
+| DLQ | Dead-letter queue | Queue for repeatedly failed jobs. |
+| FAANG | Facebook, Amazon, Apple, Netflix, Google | Shorthand for large product-company interview style. |
+| FIFO | First in, first out | Queue order where earliest accepted item is processed first. |
+| GB | Gigabyte | Roughly one billion bytes. |
+| H3 | Hexagonal hierarchical geospatial index | Grid system for geo search. |
+| HA | High availability | Ability to keep serving during partial failures. |
+| HLD | High-level design | Component-level system design discussion. |
+| HNSW | Hierarchical navigable small world | Popular vector index structure for approximate search. |
+| HTTP | Hypertext Transfer Protocol | Web protocol used for APIs and streaming formats. |
+| ID | Identifier | Unique value for a row, user, tool, job, or request. |
+| IO | Input/output | Disk or network reading and writing. |
+| ISR | In-sync replicas | Kafka replicas caught up enough to be eligible for failover. |
+| KB | Kilobyte | Roughly one thousand bytes. |
+| KV | Key-value | Data model that retrieves by exact key. |
+| LLM | Large language model | Model that generates or reasons over text. |
+| MB | Megabyte | Roughly one million bytes. |
+| MCP | Model Context Protocol | Protocol for connecting agents to tools and context. |
+| MIME | Multipurpose Internet Mail Extensions | Email body and attachment format. |
+| ML | Machine learning | Model-based prediction, ranking, filtering, or spam detection. |
+| MRR | Mean reciprocal rank | Retrieval quality metric based on first relevant result position. |
+| OAuth | Open Authorization | Delegated authorization protocol for scoped access. |
+| OLAP | Online analytical processing | Analytics storage optimized for aggregate queries. |
+| OT | Operational transformation | Collaborative-editing technique that transforms concurrent edits. |
+| QPS | Queries per second | Request throughput. |
+| RAG | Retrieval-augmented generation | Pattern that retrieves context before asking a model to answer. |
+| S2 | Spherical geometry cell library | Cell-based geo-indexing approach. |
+| SaaS | Software as a service | Hosted third-party application or connector. |
+| SDE-1 | Software Development Engineer level 1 | Entry-level engineering interview bar. |
+| SDE-2 | Software Development Engineer level 2 | Mid-level engineering interview bar. |
+| SFU | Selective forwarding unit | Video server that forwards selected media streams. |
+| SLA | Service-level agreement | External promise for availability or latency. |
+| SLO | Service-level objective | Internal reliability target, often for alerts. |
+| SMTP | Simple Mail Transfer Protocol | Internet email delivery protocol. |
+| SQL | Structured Query Language | Relational query language and shorthand for relational databases. |
+| SSE | Server-sent events | One-way server-to-client streaming protocol. |
+| TB | Terabyte | Roughly one trillion bytes. |
+| TSDB | Time-series database | Database optimized for timestamped metrics. |
+| TTL | Time to live | Expiration duration for cache or temporary state. |
+| TURN | Traversal Using Relays around NAT | Relay protocol for media when direct connectivity fails. |
+| UX | User experience | How responsive and understandable the product feels. |
+| WAL | Write-ahead log | Durable command log written before applying state changes. |
+| WebRTC | Web Real-Time Communication | Browser media protocol for real-time audio and video. |
+| ZADD | Redis sorted-set add command | Adds or updates a member score in a sorted set. |
+| ZREVRANGE | Redis reverse range command | Reads top members from a sorted set. |
+| ZREVRANK | Redis reverse rank command | Reads a member rank from a sorted set. |
+| ZSET | Redis sorted set | Ordered set keyed by member score. |
+
+### Common beginner traps
+- Using a search index as the final authority for booking, permission, or payment decisions.
+- Treating exact rank, approximate heavy hitters, and trend detection as the same problem.
+- Promising exactly-once scheduled execution instead of leases plus idempotent workers.
+- Ignoring cardinality in monitoring labels or vector-index size in retrieval systems.
+- Calling a large language model directly without queues, budgets, rate limits, or fallback.
+- Letting agents call tools without scoped authorization, audit, or tenant isolation.
+- Forgetting evaluation and citation quality for retrieval-augmented generation answers.
+
+### How to study this file
+1. Group cases by pattern: geo, inventory, ranking, scheduling, pipelines, retrieval, model orchestration, and security.
+2. For each case, write the invariant in one sentence before reading the detailed answer.
+3. Use the diagrams to trace ingestion/write path and query/read path separately.
+4. Convert each flashcard into a follow-up answer with one trade-off and one failure mode.
+5. For artificial intelligence cases, always add quality, cost, privacy, evaluation, and fallback discussion.
+
+### Scalability and production lens
+These systems often fail because one dimension silently explodes: labels, vectors, tokens, schedules, hotel dates,
+mailboxes, tool calls, or media streams. Production answers should state guardrails, quotas, replay paths,
+evaluation metrics, tenant isolation, and what degraded result is safer than an incorrect result.
+
 ## 8. Design Proximity Service Yelp
 Tier 2 · SDE-2 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Find nearby businesses that match a location, category, filters, and ranking rules. **Mental
+model:** It is a map search funnel: cells create candidates, exact distance removes mistakes, and ranking orders
+the survivors. **Thought process:** Clarify business types, radius, personalization, ad mixing, freshness, and
+review/rating needs. Reads dominate because nearby search is frequent; writes are business updates, reviews, and
+aggregate refreshes. Core data is business, geo cell, review, rating aggregate, and search document. The
+bottleneck is hot city cells and ranking latency; consistency is eventual for ratings but source-of-truth details
+must be correct. **Request flow:** Write path stores business or review data, emits events to update geo/search
+indexes and rating aggregates. Read path checks cell cache, queries neighbor cells, exact-filters by distance,
+ranks, and hydrates details. **Key trade-offs and alternatives:** Elasticsearch is quick to build; S2 or H3 gives
+predictable sharding. **How it scales:** Partition by city or geo prefix, cache cell candidates, personalize
+after cache, rebuild stale indexes from database events, and fall back to distance plus rating.
 
 ### 1. Clarifying questions to ask
 - Nearby restaurants only or all businesses? Need filters, reviews, ads, personalization?
@@ -100,6 +235,21 @@ Proximity service is geo candidate generation plus ranking. Approximate cell loo
 
 ## 9. Design Hotel Booking Airbnb
 Tier 2 · SDE-2 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Let guests search listings and reserve nights without two guests owning the same inventory.
+**Mental model:** Search is a catalog, but booking is a calendar lock: every requested night must move from
+available to held or booked together. **Thought process:** Ask homes versus hotels, inventory granularity,
+holds, cancellation, pricing, and payment flow. Reads are search and availability checks; writes are holds,
+payments, confirmations, cancellations, and calendar sync. Core data is listing, availability row, hold, booking,
+price snapshot, and search document. The bottleneck is large listing-day inventory and popular destinations;
+consistency must be strong only on the final availability service. **Request flow:** Write path creates a hold by
+conditionally updating all date rows, charges payment, creates booking, and marks dates booked. Read path serves
+search from denormalized index and rechecks authoritative availability before commit. **Key trade-offs and
+alternatives:** Per-day rows are simple but large; interval structures save space but complicate concurrent
+locking. **How it scales:** Shard availability by listing, cache popular searches, expire holds quickly, reconcile
+payment success, and reject stale search results on final booking.
 
 ### 1. Clarifying questions to ask
 - Homes, hotels, or both? Need search, pricing, reviews, payments, cancellation?
@@ -183,6 +333,19 @@ Hotel booking is search-heavy but booking-correctness critical. Final reservatio
 ## 10. Design Leaderboard or Top-K Heavy Hitters
 Tier 2 · SDE-2 must-know
 
+### 0. Beginner primer
+
+**Simple problem:** Accept many score updates and quickly return top players, ranks, or trending items. **Mental
+model:** A leaderboard is a sorted scoreboard; heavy hitters are a memory-saving sketch of what appears most
+often. **Thought process:** Clarify exact rank versus approximation, season resets, windows, ties, and anti-cheat.
+Writes are score events; reads are top K, rank, and around-me queries. Core data is score event, leaderboard ID,
+member, score, snapshot, and sketch state. The bottleneck is huge sorted sets or hot boards; consistency can be
+slightly stale if the product exposes lag. **Request flow:** Write path validates and deduplicates a score,
+appends it to Kafka, processor updates Redis sorted set and durable snapshot. Read path queries Redis for top or
+rank through an API. **Key trade-offs and alternatives:** Redis sorted sets give exact rank but use memory;
+Count-Min or Space-Saving sketches are cheap but approximate. **How it scales:** Shard by board, season, region,
+or score range, merge top results, rebuild from snapshot plus event log, and isolate hot tournaments.
+
 ### 1. Clarifying questions to ask
 - Global, per-region, per-game, per-season, or sliding time window?
 - Exact ranks or approximate heavy hitters acceptable?
@@ -261,6 +424,21 @@ Leaderboards are Redis sorted-set systems until scale forces sharding or approxi
 ## 11. Design Distributed Job Scheduler
 Tier 2 · SDE-2 must-know
 
+### 0. Beginner primer
+
+**Simple problem:** Run jobs at the right time, retry failures, and avoid losing work when machines die. **Mental
+model:** It is a train timetable plus dispatch office: schedules define future departures, scanners find due
+trains, and leases prevent two dispatchers from claiming the same train forever. **Thought process:** Clarify
+cron versus one-time jobs, time zones, priorities, long jobs, retries, and duplicate tolerance. Writes are
+schedule changes, job instances, heartbeats, completions, and retry records; reads are due-job scans and job
+status. Core data is schedule, next run time, job instance, lease, attempt, and history. The bottleneck is minute
+boundary spikes and due scanning; consistency aims for no missed jobs, while duplicates are handled by
+idempotent workers. **Request flow:** Write path creates schedule metadata and next due bucket. Read/dispatch
+path scans due partitions, enqueues jobs, workers claim leases, heartbeat, and complete. **Key trade-offs and
+alternatives:** Database polling is simple but can overload; time buckets and sorted sets scale better. **How it
+scales:** Partition scanners, use leases, requeue expired jobs, add backpressure, and pause claiming if the queue
+is unavailable.
+
 ### 1. Clarifying questions to ask
 - Cron, delayed jobs, one-time jobs, or DAG workflows?
 - Need exactly-once, priorities, retries, time zones, long jobs?
@@ -338,6 +516,20 @@ Schedulers are delayed-queue systems. Durable due-time discovery, leases, retrie
 
 ## 12. Design Email Service Gmail
 Tier 2 · SDE-2 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Send, receive, store, search, label, and sync email reliably for many users. **Mental model:**
+The raw email is an immutable parcel, while each user's mailbox index is a set of labels and pointers to parcels.
+**Thought process:** Clarify mailbox-only versus full Simple Mail Transfer Protocol, spam, attachments, search,
+retention, and mobile sync. Writes are inbound mail, outbound send, labels, spam decisions, and indexing; reads
+are mailbox listing, message fetch, and search. Core data is MIME blob, mailbox index row, thread, attachment,
+search document, and delivery state. The bottleneck is storage volume and indexing throughput; consistency must
+never lose messages, but search can lag. **Request flow:** Write path stores sent or received message blob,
+updates mailbox index, enqueues delivery, spam scan, and search indexing. Read path lists mailbox rows, fetches
+message blobs, or queries the per-user inverted index. **Key trade-offs and alternatives:** Separate blobs reduce
+duplication; aggressive spam filtering risks false positives. **How it scales:** Partition mailbox index by user,
+replicate blobs, retry SMTP delivery with bounce, tier attachments, and degrade search before mailbox listing.
 
 ### 1. Clarifying questions to ask
 - Mailbox storage only or full SMTP send/receive? Include search, spam, attachments?
@@ -419,6 +611,20 @@ Email is durable message storage plus async delivery and indexing. Separate immu
 ## 13. Design Metrics Logging and Monitoring System
 Tier 2 · SDE-2 must-know
 
+### 0. Beginner primer
+
+**Simple problem:** Ingest metrics, logs, and traces, store them cheaply, query dashboards, and fire reliable
+alerts. **Mental model:** It is a telemetry river: agents pour events into a buffer, processors compress and
+index them, and query systems read time windows. **Thought process:** Clarify metrics versus logs versus traces,
+push or pull, retention, cardinality, tenant isolation, and alert freshness. Writes are enormous batched samples
+and log events; reads are dashboard queries and alert evaluations. Core data is metric sample, label set, log
+event, trace span, alert rule, and retention tier. The bottleneck is ingestion volume and label cardinality;
+consistency favors freshness and durability over strict transactions. **Request flow:** Write path batches data
+from agents, appends to Kafka, processors write time-series and log stores. Read path queries by time range,
+uses caches, and alert evaluators scan windows with leases. **Key trade-offs and alternatives:** Full log indexing
+is powerful but expensive; metadata indexes plus object storage reduce cost. **How it scales:** Partition by
+tenant and label hash, downsample, enforce label limits, buffer locally, and let Kafka absorb spikes.
+
 ### 1. Clarifying questions to ask
 - Metrics, logs, traces, or all three? Pull or push?
 - Retention, cardinality, query latency, alerting SLA?
@@ -498,6 +704,21 @@ Monitoring systems are write-heavy pipelines. Cardinality, retention cost, query
 
 ## 14. Design RAG Semantic Search for 100M Documents
 Tier 2 · SDE-2 must-know · Scaled Lafz project
+
+### 0. Beginner primer
+
+**Simple problem:** Search a huge document collection by meaning and optionally generate cited answers. **Mental
+model:** It is a library with semantic fingerprints: documents are cut into chunks, each chunk gets an embedding,
+and questions retrieve nearby fingerprints before the model writes. **Thought process:** Clarify document types,
+permissions, freshness, recall, latency, and whether answers need citations. Writes are ingestion jobs, chunks,
+embeddings, tombstones, and evaluation results; reads are query embedding, vector retrieval, reranking, and answer
+generation. Core data is document, chunk, vector, access control list, index job, and evaluation metric. The
+bottleneck is vector index size and embedding throughput; consistency must protect permissions more than instant
+freshness. **Request flow:** Write path parses, chunks, deduplicates, embeds, and upserts vector shards. Read path
+embeds the query, applies filters, retrieves candidates, reranks, and streams a cited answer. **Key trade-offs
+and alternatives:** pgvector is convenient at moderate scale; dedicated approximate nearest neighbor shards fit
+hundreds of millions of chunks. **How it scales:** Shard vectors, cache query embeddings, over-fetch for filters,
+replicate shards, evaluate recall and faithfulness, and return passages if the model fails.
 
 ### 1. Clarifying questions to ask
 - Document types, update rate, languages, permissions, freshness SLA?
@@ -583,6 +804,21 @@ Large RAG is an ingestion, ANN indexing, retrieval-quality, and evaluation probl
 ## 15. Design LLM-powered Assistant at Scale
 Tier 2 · SDE-2 must-know · Scaled Email Reply Assistant
 
+### 0. Beginner primer
+
+**Simple problem:** Turn user context into useful generated replies while controlling latency, cost, safety, and
+provider failures. **Mental model:** The assistant is an orchestrator around an expensive expert: it trims the
+question, checks budget, retrieves context, calls the model, streams tokens, and records feedback. **Thought
+process:** Clarify chat versus email drafting, streaming, privacy, provider limits, and human review. Writes are
+requests, model calls, feedback, and cost records; reads are conversation history, prompt templates, cache, and
+streamed responses. Core data is request, tenant, prompt version, conversation, model call, cache entry, and
+budget. The bottleneck is provider token limits and tail latency; consistency centers on audit, quota, and final
+state. **Request flow:** Write path accepts a request, checks safety and budget, enqueues or dispatches,
+retrieves context, calls the model, and stores final output. Read path streams tokens through a gateway and lets
+clients reconnect by request ID. **Key trade-offs and alternatives:** Synchronous calls are simple; queues handle
+rate limits and fallback. **How it scales:** Use tenant queues, token buckets, prompt and semantic cache, model
+routing, token caps, fallback providers, and evaluation jobs.
+
 ### 1. Clarifying questions to ask
 - Chat assistant, email reply drafting, or agentic workflow? Need streaming?
 - Model providers, rate limits, data privacy, prompt retention, human review?
@@ -664,6 +900,21 @@ An LLM assistant is orchestration around expensive unreliable models. The senior
 
 ## 16. Design MCP-based Tool Platform for AI Agents
 Tier 2 · SDE-2 must-know · Stretch
+
+### 0. Beginner primer
+
+**Simple problem:** Let artificial intelligence agents discover and call tools safely across tenants, users, and
+external systems. **Mental model:** It is a controlled airport for tool calls: the gateway checks passports,
+policy decides allowed gates, vault releases scoped secrets, and audit records every trip. **Thought process:**
+Clarify internal versus public platform, tool types, authorization, approvals, sandboxing, and audit retention.
+Writes are tool registration, policy changes, tool calls, approvals, and audit events; reads are discovery,
+schema lookup, and audit queries. Core data is tool registry, tenant policy, OAuth grant, secret reference, tool
+call, and audit event. The bottleneck is policy and routing latency, while consistency is strict for authorization
+and audit. **Request flow:** Write path validates tool schema, stores versioned metadata, and later records each
+tool call before or during execution. Read path discovers allowed tools, validates token and scope, routes to the
+tool or sandbox, then returns typed results. **Key trade-offs and alternatives:** Direct calls are faster but
+ungoverned; gateway control adds safety. **How it scales:** Keep gateways stateless, cache policy safely, rate
+limit tenants, retry only idempotent tools, isolate secrets, and fail closed for high-risk audit outages.
 
 ### 1. Clarifying questions to ask
 - Internal enterprise platform or public tool marketplace?

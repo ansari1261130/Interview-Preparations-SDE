@@ -5,11 +5,109 @@ This part covers pointer-heavy and data-structure-heavy interview problems. Focu
 **Legend:** 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
 ## Table of Contents
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [Linked List](#linked-list)
 - [Stack and Monotonic Stack](#stack-and-monotonic-stack)
 - [Queue and Heap](#queue-and-heap)
 - [Flashcards](#flashcards)
 - [Revision Cheat Sheet](#revision-cheat-sheet)
+
+## Beginner guide to this file
+
+### What this file teaches
+
+This file teaches pointer and container Data Structures and Algorithms (DSA): linked lists, stacks, queues,
+heaps, and cache structures. Interviewers ask these because they expose whether you can maintain object identity,
+rewire references safely, and choose the right container for ordering. Backend work uses the same ideas in task
+queues, priority scheduling, least-recently-used caches, parsers, and stream statistics.
+
+### Mental model
+
+Think of linked lists as train cars, stacks as plates, queues as checkout lines, and heaps as a small control
+tower that always points to the next most important item.
+
+- Linked-list pointers must be saved before rewiring, or the rest of the train is lost.
+- Dummy nodes make head changes look like ordinary middle changes.
+- Slow-fast pointers measure distance, middle, or cycles without extra memory.
+- Stacks remember the most recent unresolved item.
+- Queues preserve arrival order; two stacks can create that order with amortized work.
+- Heaps keep only the current best candidate instead of sorting everything.
+
+### How to think through any question here
+
+1. Identify the operation: rewire nodes, detect a cycle, match nested symbols, keep a running minimum, or pick
+   the next smallest or largest item.
+2. Say the brute force and why it repeats work: array copies, scans, sorting all items, or searching old nodes.
+3. Decide what identity matters: node object, value, index, recency, priority, or half of a stream.
+4. Choose the container: dummy pointer, slow-fast pointers, stack, deque, hash map, doubly linked list, or heap.
+5. State the invariant before coding: what prev, cur, tail, stack top, heap top, or cache head means.
+6. Save next pointers before mutation and update both sides of a doubly linked list together.
+7. Dry run empty, one-element, duplicate, boundary, and capacity-one cases.
+
+### Pattern recognition cues
+
+| If the question mentions... | Think about... | Why it fits |
+|---|---|---|
+| Remove or insert near linked-list head | Dummy node | It avoids special-case head rewiring. |
+| Reverse links in-place | prev, cur, next loop | You must save the next node before changing cur.next. |
+| Middle, nth from end, or cycle | Slow-fast or gap pointers | Pointer speed or distance encodes position. |
+| Merge sorted linked lists | Dummy tail or min-heap | Sorted stream heads are enough to choose the next node. |
+| Deep copy with random references | Old-to-new map | Object identity, not value, defines the copied edges. |
+| O(1) cache get and put | HashMap plus doubly linked list | Lookup and recency update need different structures. |
+| Matching brackets or postfix operators | Stack | The most recent unresolved item is needed first. |
+| Next greater or nearest smaller | Monotonic stack | Worse candidates can be removed permanently. |
+| Queue using stacks | Amortized transfer | One reversal exposes the oldest item for many pops. |
+| Kth largest or streaming median | Heap or two heaps | You need a boundary item without fully sorting. |
+| Cooldown scheduling | Frequency counting or max-heap | The most frequent task controls idle slots. |
+
+### Abbreviations and key terms
+
+| Short form | Expanded form | Plain meaning |
+|---|---|---|
+| BFS | Breadth-First Search | Explore nodes level by level; appears in graph-copy follow-ups. |
+| DFS | Depth-First Search | Explore one path deeply before backing up. |
+| DLL | Doubly Linked List | A list where each node has previous and next links. |
+| DSA | Data Structures and Algorithms | Efficient data organization and problem-solving steps. |
+| FAANG | Facebook/Meta, Amazon, Apple, Netflix, Google | Shorthand for large technology-company interview style. |
+| FIFO | First In, First Out | Queue order: earliest inserted item leaves first. |
+| I | One | Roman numeral used in Next Greater Element I. |
+| k or K | Problem-specific count or rank | Group size, number of lists, or kth statistic. |
+| L0, L1, Ln | List positions zero, one, and n | Notation for nodes in reorder-list prompts. |
+| LFU | Least Frequently Used | Cache policy evicting the lowest-use item. |
+| LRU | Least Recently Used | Cache policy evicting the oldest recently used item. |
+| N | Total node count | Often the sum of nodes across lists. |
+| n and m | Input sizes | Common names for list, array, or string lengths. |
+| O(...) | Order of growth | Big-O runtime or memory estimate. |
+| Pn | Problem number | The numbered practice problem label. |
+| Q | Question | Used in flashcards for the prompt side. |
+| SDE-1 | Software Development Engineer level 1 | Entry-level software engineering interview scope. |
+| TTL | Time To Live | Expiration duration for cache entries. |
+
+### Common beginner traps
+
+- Reassigning cur.next before saving the original next pointer.
+- Forgetting that changing the head needs either a dummy node or a returned new head.
+- Comparing linked-list node values when the problem needs node identity.
+- Popping stack operands in the wrong order for subtraction or division.
+- Leaving expired or stale heap entries in problems that need lazy deletion.
+- Treating amortized O(1) queue operations as if every individual transfer is a bug.
+- Updating only one side of a doubly linked list in cache code.
+
+### How to study this file
+
+1. Draw nodes and arrows before reading the Java solution; mark what each pointer means.
+2. Read the short answer and identify the container that owns the invariant.
+3. Step through the detailed answer with a tiny input of zero, one, two, or three nodes/items.
+4. Re-type the Java code only after you can say the update order without looking.
+5. Use flashcards to recall patterns, then actively practice by changing one edge case.
+6. Review the cheat sheet after solving to connect each problem to dummy nodes, stacks, queues, or heaps.
+
+### Scalability and production lens
+
+In production, these structures need extra engineering around concurrency, memory pressure, and observability.
+A cache may require locks, expiration, metrics, and back-pressure; a priority queue may need stable tie-breaking;
+and linked structures can create garbage-collection pressure. In interviews, mention the simple single-threaded
+structure first, then discuss what changes when operations are concurrent or data no longer fits in memory.
 
 ## Linked List
 Linked list problems test pointer safety. Use dummy nodes for head changes, slow-fast pointers for distance/cycles, and always save `next` before rewiring.
@@ -59,6 +157,14 @@ class Solution {
 ### P1. Reverse Linked List (LeetCode 206)
 `🟢 Easy` `🔥` `Must-know SDE-1` · Pattern: Pointer reversal · Commonly reported at: Amazon, Microsoft, Meta, Google
 **Problem:** Reverse singly linked list. Example `1->2->3 -> 3->2->1`.
+
+**How to recognize and think:** This asks for the same nodes in reverse order, so terms like `reverse`,
+`singly linked`, and `in-place` point to pointer reversal. A stack solution first saves every node and then
+walks them back out, spending memory just to remember an order the links can encode. The improvement is to
+carry a three-node window: `prev` is already reversed, `cur` is the first untouched node, and `nxt` protects
+the remaining list before `cur.next` changes. Picture a zipper moving right: after `2`, you have `2->1` and
+`3` still safe. Call out empty head, one node, and two nodes.
+
 **How to recognize the pattern:** Need flip `next` pointers in-place.
 **Brute force:** Push values/nodes to stack — O(n), O(n)
 **Optimal:** Maintain `prev`, `cur`, `next` and rewire.
@@ -93,6 +199,14 @@ class Solution {
 ### P2. Merge Two Sorted Lists (LeetCode 21)
 `🟢 Easy` `🔥` `Must-know SDE-1` · Pattern: Dummy node merge · Commonly reported at: Amazon, Microsoft, Google
 **Problem:** Merge two sorted linked lists. Example `1->2->4` and `1->3->4 -> 1->1->2->3->4->4`.
+
+**How to recognize and think:** The plain task is to interleave two already sorted linked streams into one
+sorted stream. Words such as `merge`, `sorted`, and `lists` tell you not to sort from scratch.
+Collect-and-sort throws away the fact that each input head is already the smallest remaining item in its own
+list. The dummy node is the small trick: `tail` always marks the finished answer, while `a` and `b` are the
+only candidates that can come next. On `1->2->4` and `1->3->4`, compare heads, append one, advance that list,
+and repeat. Mention one empty list, equal values, negative values, and stable handling of duplicates.
+
 **How to recognize the pattern:** Two sorted streams need stable smallest-first merge.
 **Brute force:** Collect values and sort — O(n log n), O(n)
 **Optimal:** Dummy head and tail pointer choose smaller node.
@@ -133,6 +247,14 @@ class Solution {
 ### P3. Linked List Cycle and Cycle Start (LeetCode 142)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Floyd slow-fast · Commonly reported at: Amazon, Microsoft, Google, Meta
 **Problem:** Detect cycle and return entry node; if none, return null. Example tail connects to node at index 1 -> return that node.
+
+**How to recognize and think:** This is about pointer motion on a list that may never hit `null`. Phrases like
+`cycle`, `entry`, and `O(1) space` rule out a visited set, even though storing node identities is the simplest
+safe brute force. A naive walk until the end is not slow; it is incorrect because it can run forever. The fast
+pointer gains one step per round on the slow pointer, so inside a loop it must eventually lap it. After the
+meeting, moving one pointer from head and one from the meeting point aligns both distances to the entry.
+Imagine two runners on a track. Test no cycle, a self-loop, and a two-node loop.
+
 **How to recognize the pattern:** Need cycle detection with O(1) space.
 **Brute force:** Store visited nodes — O(n), O(n)
 **Optimal:** Slow/fast meet if cycle exists; reset one pointer to head, move both one step to entry.
@@ -174,6 +296,14 @@ class Solution {
 ### P4. Remove Nth Node From End (LeetCode 19)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Gap two pointers with dummy · Commonly reported at: Amazon, Microsoft, Meta
 **Problem:** Remove nth node from end. Example `1->2->3->4->5, n=2 -> 1->2->3->5`.
+
+**How to recognize and think:** The wording `nth from end` means the node is easier to locate by a fixed gap
+than by its value. Counting length first works but spends a separate pass just to learn where the second pass
+should stop. The dummy node handles deleting the head uniformly. Move `fast` `n+1` hops ahead from dummy; from
+then on, `slow` is always exactly one node before the future deletion target when `fast` reaches `null`. For
+`1->2->3->4->5`, `n=2`, the gap leaves `slow` before `4`, then `slow.next` is bypassed. Say head removal, a
+single-node list, tail removal, and invalid `n` if the platform does not guarantee it.
+
 **How to recognize the pattern:** Need node relative to end in one pass.
 **Brute force:** Count length, remove length-n — O(n), O(1)
 **Optimal:** Dummy; move fast `n+1` steps, then move both until fast null.
@@ -210,6 +340,14 @@ class Solution {
 ### P5. Reorder List (LeetCode 143)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Middle, reverse, merge · Commonly reported at: Meta, Amazon, Microsoft
 **Problem:** Reorder `L0->L1->...->Ln` to `L0->Ln->L1->Ln-1...`. Example `1->2->3->4 -> 1->4->2->3`.
+
+**How to recognize and think:** The target order alternates front, back, next front, next back, so words like
+`L0`, `Ln`, and `reorder in-place` hint at splitting the list. An array solution stores every node so it can
+index from both ends, but the back half can be reached by reversing links instead. The turning point is `find
+middle -> reverse second half -> weave`. After splitting `1->2` from `3->4`, reverse the second side to `4->3`
+and splice one node from each side. The invariant is that the first half tail never points into the old second
+half, preventing cycles. Check odd length, even length, and two nodes.
+
 **How to recognize the pattern:** Alternating first half with reversed second half.
 **Brute force:** Store nodes in array and connect ends — O(n), O(n)
 **Optimal:** Find middle, reverse second half, weave two lists.
@@ -264,6 +402,14 @@ class Solution {
 ### P6. Add Two Numbers (LeetCode 2)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Digit-by-digit with carry · Commonly reported at: Amazon, Microsoft, Google
 **Problem:** Add two numbers stored reverse-order in linked lists. Example `2->4->3 + 5->6->4 -> 7->0->8`.
+
+**How to recognize and think:** Read the lists as digits written least-significant first. The clues are `add`,
+`reverse order`, and `carry`; converting to an integer can overflow and ignores the digit-by-digit
+representation the input already gives. Column addition is the useful model. At every loop, the output list
+contains exactly the processed lower digits, and `carry` is the only information needed from them. If one list
+ends, treat its digit as zero. In the sample, `4+6` writes `0` and carries `1`, so the next sum becomes
+`3+4+1`. Bring up different lengths, a leftover final carry, and all-zero inputs.
+
 **How to recognize the pattern:** Linked-list arithmetic with carry.
 **Brute force:** Convert to number — overflow risk, O(n)
 **Optimal:** Traverse both lists, create result digit `sum%10`, carry `sum/10`.
@@ -309,6 +455,15 @@ class Solution {
 ### P7. Copy List with Random Pointer (LeetCode 138)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Hash map old-to-new · Commonly reported at: Amazon, Meta, Microsoft
 **Problem:** Deep-copy list where each node has `next` and `random`. Example random pointers must point to copied nodes, not originals.
+
+**How to recognize and think:** A `random` pointer makes the list more like a small graph than a plain chain,
+and the word `deep-copy` means copied pointers must target copied nodes. Searching the copied list for each
+random target repeats identity lookups and breaks when values duplicate. The Java code uses a map from
+original object to clone: pass one creates every clone, pass two wires `next` and `random` through that map.
+The invariant before wiring is that every real target, including a future random target, already has a clone;
+`null` maps back to `null`. Picture `A.random = C` becoming `copyA.random = copyC`. Check null randoms,
+self-randoms, and an empty list.
+
 **How to recognize the pattern:** Graph-like references require identity mapping.
 **Brute force:** For each random pointer, search copied target — O(n^2)
 **Better:** HashMap original node to clone — O(n), O(n)
@@ -345,6 +500,14 @@ class Solution {
 ### P8. LRU Cache (LeetCode 146)
 `🔴 Hard` `🔥` `Must-know SDE-1` · Pattern: HashMap plus doubly linked list · Commonly reported at: Amazon, Microsoft, Google, Meta
 **Problem:** Implement `get` and `put` in O(1), evict least recently used. Example capacity 2 evicts older key.
+
+**How to recognize and think:** A least recently used (LRU) cache combines two promises: find by key quickly
+and evict by recency quickly. A plain list can remember order, but every `get` scans for the key and every
+update must hunt for the node. The map supplies direct node access; the doubly linked list supplies
+constant-time removal and insertion. Keep sentinels as bookends: `head.next` is most recent, `tail.prev` is
+least recent, and the map contains exactly the real nodes between them. A `get` pulls its node to the front; a
+full `put` drops `tail.prev`. Speak through updates to an existing key, capacity one, and repeated reads.
+
 **How to recognize the pattern:** Need fast key lookup and fast recency updates.
 **Brute force:** List scan for keys — O(n)
 **Optimal:** Map key to node; doubly linked list keeps most recent after head and LRU before tail.
@@ -421,6 +584,15 @@ class LRUCache {
 ### P9. Merge K Sorted Lists (LeetCode 23)
 `🔴 Hard` `🔥` `Must-know SDE-1` · Pattern: Min-heap k-way merge · Commonly reported at: Amazon, Google, Meta, Microsoft
 **Problem:** Merge `k` sorted linked lists. Example `[[1,4,5],[1,3,4],[2,6]] -> 1->1->2->3->4->4->5->6`.
+
+**How to recognize and think:** Here there are many sorted linked streams, not just two. The phrases `k sorted
+lists` and `global minimum` point at repeatedly choosing the smallest current head. Flattening all nodes and
+sorting ignores that each list is already ordered and stores the whole input. A min-heap keeps only one
+frontier node per nonempty list. The heap invariant is simple: it contains the smallest unused node from each
+active list, so polling gives the next overall node; pushing the successor of the polled node restores the
+frontier. With starts `1,1,2`, poll a `1` and offer its `4` or `3`. Cover no lists, null lists, and duplicate
+values.
+
 **How to recognize the pattern:** K sorted streams; repeatedly need global minimum head.
 **Brute force:** Collect all nodes and sort — O(N log N), O(N)
 **Better:** Divide and conquer merge pairs — O(N log k), O(log k) recursion
@@ -459,6 +631,14 @@ class Solution {
 ### P10. Reverse Nodes in k-Group (LeetCode 25)
 `🔴 Hard` `🔥` `Stretch` · Pattern: Bounded linked-list reversal · Commonly reported at: Amazon, Microsoft, Google
 **Problem:** Reverse nodes in groups of `k`; leave incomplete group unchanged. Example `1->2->3->4->5, k=2 -> 2->1->4->3->5`.
+
+**How to recognize and think:** The important words are `groups of k` and `leave incomplete group unchanged`.
+Using an array per group is safe, but it spends extra storage and still must reconnect boundaries carefully.
+The safer in-place idea is to find the kth node before reversing anything; if it is missing, stop without
+touching the partial group. During reversal, set `prev` to `groupNext`, so the new tail already points to the
+rest of the list. After `1,2` becomes `2,1`, `groupPrev` moves to old start `1`. This avoids losing the suffix
+or looping. Mention `k=1`, a final short group, and an empty list.
+
 **How to recognize the pattern:** Repeated local reversal with exact group size.
 **Brute force:** Use array per group — O(n), O(k)
 **Optimal:** Dummy node; find kth node; reverse links until group end.
@@ -543,6 +723,14 @@ class Solution {
 ### P11. Valid Parentheses (LeetCode 20)
 `🟢 Easy` `🔥` `Must-know SDE-1` · Pattern: Stack matching · Commonly reported at: Amazon, Microsoft, Google
 **Problem:** Validate bracket string. Example `"()[]{}" -> true`, `"(]" -> false`.
+
+**How to recognize and think:** Bracket validation is about nesting, not counts. Clues are matching pairs such
+as `()`, `[]`, `{}` and the fact that the most recently opened bracket must close first. Repeatedly deleting
+adjacent pairs can rescan the same string many times. The stack version records expectations instead of
+openings: pushing `)` for `(` means the top always says which closer must arrive next. If a closer appears
+while the stack is empty, or differs from the top, the string is invalid immediately. A tiny trace is `(`
+pushes `)`, then `)` pops it. Say starting with a closer, leftover openings, and the empty string.
+
 **How to recognize the pattern:** Last opened bracket must close first.
 **Brute force:** Repeatedly remove matched pairs — O(n^2)
 **Optimal:** Push opening brackets; each closing bracket must match stack top.
@@ -570,6 +758,15 @@ class Solution {
 ### P12. Min Stack (LeetCode 155)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Auxiliary min stack · Commonly reported at: Amazon, Microsoft, Bloomberg
 **Problem:** Stack with push/pop/top/getMin in O(1). Example push `-2,0,-3`; min is `-3`.
+
+**How to recognize and think:** The stack must answer the current minimum after arbitrary pops. Scanning the
+whole stack for every `getMin` repeats the same comparison history. Store that history beside each value: a
+pushed pair is `(value, minimum up to this node)`. Then the second field in the top pair is correct because
+everything below it was present when it was created. When the top is popped, the previous pair automatically
+exposes the previous minimum, so duplicate minima work without special counters. Trace `-2` stores `-2`, `0`
+still stores `-2`, `-3` stores `-3`. Check duplicate lows, negative numbers, and whether the caller guarantees
+valid operations.
+
 **How to recognize the pattern:** Need current aggregate min under pop operations.
 **Brute force:** Scan stack for min — O(n) getMin
 **Optimal:** Store pair `(value,currentMin)` per push.
@@ -603,6 +800,14 @@ class MinStack {
 ### P13. Evaluate Reverse Polish Notation (LeetCode 150)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Operand stack · Commonly reported at: Amazon, LinkedIn, Microsoft
 **Problem:** Evaluate postfix expression. Example `["2","1","+","3","*"] -> 9`.
+
+**How to recognize and think:** Reverse Polish Notation (RPN) puts the operator after the operands, so there
+is no precedence parsing to do. Building an expression tree is heavier than needed because every operator can
+be evaluated as soon as it appears. The stack holds results of completed subexpressions. On an operator, pop
+the right operand first (`b`), then the left (`a`), and push `a op b`; that order matters for subtraction and
+division. For `2 1 + 3 *`, `+` collapses to `3`, then `*` collapses to `9`. Call out negative number tokens,
+Java division truncating toward zero, and a single-token expression.
+
 **How to recognize the pattern:** Operator follows its operands; last two values are needed.
 **Brute force:** Build expression tree — overkill O(n)
 **Optimal:** Push numbers; on operator pop b then a, push `a op b`.
@@ -646,6 +851,15 @@ class Solution {
 ### P14. Daily Temperatures (LeetCode 739)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Monotonic decreasing stack · Commonly reported at: Amazon, Google, Microsoft
 **Problem:** Days until warmer temperature. Example `[73,74,75,71,69,72,76,73] -> [1,1,4,2,1,1,0,0]`.
+
+**How to recognize and think:** The question asks, for each day, how far to the next strictly warmer day.
+Brute force scans right from every day, revisiting the same cold stretches. A decreasing stack of indices
+keeps only unresolved days. When a warmer temperature arrives, it resolves every cooler index on top; the
+distance is current index minus popped index. Equal temperatures stay unresolved because they are not warmer.
+Picture `76` as a hot day that clears several earlier cooler cards from the stack. The stack invariant is
+decreasing temperatures from bottom to top among waiting days. Test a fully decreasing array, equal adjacent
+temperatures, and one day.
+
 **How to recognize the pattern:** Need next greater element distance.
 **Brute force:** For each day scan right — O(n^2)
 **Optimal:** Stack unresolved indices with decreasing temperatures.
@@ -676,6 +890,14 @@ class Solution {
 ### P15. Next Greater Element I (LeetCode 496)
 `🟢 Easy` `🔥` `Must-know SDE-1` · Pattern: Monotonic stack plus map · Commonly reported at: Amazon, Adobe, Microsoft
 **Problem:** For each value in `nums1`, find next greater in `nums2`. Example `nums1=[4,1,2], nums2=[1,3,4,2] -> [-1,3,-1]`.
+
+**How to recognize and think:** Many queries in `nums1` ask for information from the same reference array
+`nums2`. Scanning from each queried value repeats the same right-side search. Process `nums2` once with a
+monotonic decreasing stack: values on the stack have not yet met a greater value. When `3` appears after `1`,
+it resolves `1`; when `4` appears, it resolves `3`. Store those answers in a map, then each `nums1` value is
+just a lookup. The invariant is that anything left in the stack has no greater element seen so far. Mention
+the `-1` case, a descending array, and the unique-value assumption of this problem.
+
 **How to recognize the pattern:** Next greater for many queries on a reference array.
 **Brute force:** For each query scan right in `nums2` — O(n*m)
 **Optimal:** Precompute value -> next greater using stack.
@@ -704,6 +926,14 @@ class Solution {
 ### P16. Largest Rectangle in Histogram (LeetCode 84)
 `🔴 Hard` `🔥` `Must-know SDE-1` · Pattern: Monotonic increasing stack · Commonly reported at: Google, Amazon, Microsoft
 **Problem:** Max rectangle area in histogram. Example `[2,1,5,6,2,3] -> 10`.
+
+**How to recognize and think:** A rectangle using a bar can extend only until a shorter bar blocks it, so the
+useful clue is nearest smaller height on both sides. Expanding left and right for every bar repeats boundary
+searches. The increasing stack keeps indices whose right boundary is still unknown. When the current height is
+smaller, the popped bar has just found its right boundary; the new stack top is the nearest smaller bar to its
+left. At height `2` in `[2,1,5,6,2,3]`, popping `6` then `5` reveals area `5*2=10`. Remember the
+sentinel-style final flush, increasing input, decreasing input, and zero heights.
+
 **How to recognize the pattern:** For each bar, need nearest smaller on both sides.
 **Brute force:** Expand each bar left/right — O(n^2)
 **Optimal:** Increasing stack; when current is smaller, popped bar gets right boundary.
@@ -769,6 +999,14 @@ class Kth {
 ### P17. Implement Queue using Stacks (LeetCode 232)
 `🟢 Easy` `🔥` `Must-know SDE-1` · Pattern: Amortized transfer stacks · Commonly reported at: Amazon, Microsoft, Bloomberg
 **Problem:** Implement FIFO queue using two stacks. Example push `1,2`, pop returns `1`.
+
+**How to recognize and think:** A queue is first-in, first-out (FIFO), but each stack is last-in, first-out.
+Moving every element back and forth on each pop repeats the reversal work. The improvement is to reverse only
+when necessary: pushes go to `in`; pops and peeks use `out`; if `out` is empty, pour all of `in` into it once.
+Then the oldest item sits on top of `out`, and everything still in `in` is newer than everything in `out`.
+With pushes `1,2`, the transfer makes `out` top `1`. Discuss alternating operations, empty checks, and the
+one-element case.
+
 **How to recognize the pattern:** Need reverse stack order once to expose oldest item.
 **Brute force:** On each pop, move all items twice — O(n) per pop
 **Optimal:** `in` stack for pushes, `out` stack for pops; transfer only when `out` empty.
@@ -807,6 +1045,14 @@ class MyQueue {
 ### P18. Kth Largest Element in an Array (LeetCode 215)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Min-heap of size K · Commonly reported at: Amazon, Microsoft, Meta
 **Problem:** Return kth largest element. Example `[3,2,1,5,6,4], k=2 -> 5`.
+
+**How to recognize and think:** The words `kth largest` ask for an order statistic, not a completely sorted
+array. Sorting ranks every element even though only the top `k` can affect the answer. The heap approach keeps
+a small leaderboard: a min-heap of size `k` contains the largest `k` values seen so far, and its root is the
+current kth largest. After inserting a new value, if the heap grows to `k+1`, discard the smallest because it
+cannot be in the top `k`. For `[3,2,1,5,6,4]`, the final heap holds `5,6`. Include duplicates, `k=1`, and
+`k=n`.
+
 **How to recognize the pattern:** Need kth statistic, not full sorted order.
 **Brute force:** Sort — O(n log n), O(1) or O(n)
 **Better:** Quickselect average O(n), worst O(n^2)
@@ -833,6 +1079,14 @@ class Solution {
 ### P19. Find Median from Data Stream (LeetCode 295)
 `🔴 Hard` `🔥` `Must-know SDE-1` · Pattern: Two heaps · Commonly reported at: Amazon, Google, Microsoft, Meta
 **Problem:** Support `addNum` and `findMedian`. Example add `1,2` -> `1.5`, add `3` -> `2`.
+
+**How to recognize and think:** A data stream median changes after each insertion, so repeatedly sorting the
+full history redoes old work. The two-heap picture splits numbers into a lower half and an upper half. The
+max-heap `lo` owns smaller values, the min-heap `hi` owns larger values, and balancing keeps their sizes equal
+or lets `lo` have one extra. The Java insert pushes through `lo` then `hi` to preserve ordering before
+rebalancing. Median is either `lo.peek()` or the average of both tops. Trace `1,2`: lower has `1`, upper has
+`2`, median `1.5`. Mention negatives, even versus odd counts, and long casts for sums.
+
 **How to recognize the pattern:** Need dynamic median after inserts.
 **Brute force:** Sort list after every insert — O(n log n) per query
 **Better:** Insert into sorted list — O(n) insert
@@ -862,6 +1116,14 @@ class MedianFinder {
 ### P20. Task Scheduler (LeetCode 621)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Greedy counting or max-heap cooldown · Commonly reported at: Amazon, Microsoft, Google
 **Problem:** Minimum intervals to execute tasks with cooldown `n`. Example `AAABBB`, `n=2 -> 8`.
+
+**How to recognize and think:** Cooldown scheduling is driven by frequency, not by task order in the input.
+Simulating one interval at a time keeps choosing among the same 26 task counts and can obscure the lower
+bound. The busiest tasks create frames: with max frequency `f`, there are `f-1` full gaps of length `n+1`,
+plus every task tied at that max in the last column. Other tasks can fill idle holes, but they cannot shrink
+that skeleton. For `AAABBB`, `n=2`, picture `A _ _ A _ _ A` and place `B` in the same columns, giving `8`.
+Check `n=0`, all unique tasks, and multiple max-frequency tasks.
+
 **How to recognize the pattern:** Most frequent task creates idle slots unless filled by others.
 **Brute force:** Simulate each interval choosing valid task — O(time * 26)
 **Better:** Max-heap with cooldown queue simulates correctly.

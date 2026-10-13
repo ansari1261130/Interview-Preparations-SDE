@@ -5,6 +5,7 @@ This company question bank is rebuilt from public interview-prep sources and int
 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
 ## Table of Contents
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [How to verify public company claims](#q1-how-should-mohd-verify-public-company-interview-claims)
 - [Q2. Google](#q2-how-should-mohd-prepare-for-google)
 - [Q3. Amazon](#q3-how-should-mohd-prepare-for-amazon)
@@ -19,12 +20,145 @@ This company question bank is rebuilt from public interview-prep sources and int
 - [Revision Cheat Sheet](#revision-cheat-sheet)
 - [Flashcards](#flashcards)
 
+## Beginner guide to this file
+
+### What this file teaches
+
+This file teaches how to convert public reports about Facebook/Meta, Amazon, Apple, Netflix, and Google
+(FAANG-style) and other global company loops into a practical preparation plan. Interviewers ask company-fit
+questions because they want to see whether you understand the role, level, and evaluation signals instead of
+blindly copying a stale interview post. In backend work, this same skill appears when you translate changing
+requirements, public docs, or incident reports into safe engineering priorities without overclaiming.
+
+### Mental model
+
+Treat public interview reports like a weather forecast, not a contract: they suggest where to prepare, but the
+recruiter and current job description decide the actual route.
+
+- Source quality tells you how much confidence to place in a report.
+- Level matters: Software Development Engineer level 1 (SDE-1) signals differ from level 2 (SDE-2).
+- Data Structures and Algorithms (DSA) patterns are practice priorities, not guaranteed questions.
+- Low-Level Design (LLD) and High-Level Design (HLD) scope depends heavily on role and team.
+- Behavioral rubrics are company-specific, but honest Situation, Task, Action, Result (STAR) evidence travels.
+- Verification keeps you from claiming a company process, compensation rule, or outcome as fact.
+
+### How to think through any question here
+
+1. Start with the official recruiter packet, job description, and role level; those override public reports.
+2. Cluster public reports by same country, level, role family, and recency before drawing a pattern.
+3. Translate each signal into practice: coding pattern, design topic, project story, or behavioral story.
+4. Separate certainty from preparation value: say what is reported, then what you will practice.
+5. Ask the recruiter verification questions about round names, tools, design scope, and evaluation rubric.
+6. For SDE-1, protect fundamentals first; for SDE-2, add design, ownership, and trade-off depth.
+7. Keep a change log so new public information updates priorities without rewriting your whole plan.
+
+### Pattern recognition cues
+
+| If the question mentions... | Think about... | Why it fits |
+|---|---|---|
+| Recent public reports | Verify recency, country, level, and role | Reports are useful but changeable |
+| Coding-heavy company | DSA speed, edge cases, and complexity talk | Coding rounds reward reliable execution |
+| Values or culture loop | STAR story mapped to the company rubric | Behavioral evidence can decide close calls |
+| SDE-2 or experienced role | LLD, HLD, project depth, and trade-offs | Higher levels test ownership, not only syntax |
+| Team-specific company | Product/domain research plus fundamentals | Round content can vary by team |
+| Marketplace or consumer product | Data model, trust, ranking, and reliability | Product systems have user and business trade-offs |
+| Enterprise platform | APIs, permissions, integration, and supportability | Enterprise users need stable contracts |
+| Recruiter conflict with public post | Follow the recruiter and record the change | Current process beats stale anecdotes |
+
+### Abbreviations and key terms
+
+| Short form | Expanded form | Plain meaning |
+|---|---|---|
+| A/B | A/B test | Controlled comparison between two product or system variants |
+| ACID | Atomicity, Consistency, Isolation, Durability | Transaction guarantees for relational databases |
+| AI | Artificial Intelligence | Software behavior that reasons, predicts, or generates |
+| API | Application Programming Interface | Contract for software-to-software communication |
+| BFS | Breadth-First Search | Graph or tree traversal level by level |
+| BI | Business Intelligence | Reporting and analytics work |
+| CAP | Consistency, Availability, Partition tolerance | Distributed-system trade-off framework |
+| CIDR | Classless Inter-Domain Routing | Network address range notation |
+| CRUD | Create, Read, Update, Delete | Basic data operations in applications |
+| CS | Computer Science | Core computing fundamentals |
+| DB | Database | Persistent data store |
+| DBMS | Database Management System | Software that manages databases |
+| DFS | Depth-First Search | Graph or tree traversal going deep before wide |
+| DP | Dynamic Programming | Solving overlapping subproblems with stored results |
+| DSA | Data Structures and Algorithms | Coding-interview problem-solving toolkit |
+| ETA | Estimated Time of Arrival | Expected completion time |
+| ETag | Entity Tag | HTTP caching/version identifier |
+| FAANG | Facebook/Meta, Amazon, Apple, Netflix, Google | Shorthand for large selective technology companies |
+| GC | Garbage Collection | Automatic memory cleanup in managed runtimes |
+| GenAI | Generative Artificial Intelligence | AI that creates content such as text or code |
+| HLD | High-Level Design | System architecture and scale design |
+| HR | Human Resources | Recruiting and employment-process function |
+| HTTP | Hypertext Transfer Protocol | Protocol used by web APIs |
+| IDE | Integrated Development Environment | Coding tool with editor, build, and debugging support |
+| IP | Internet Protocol | Network addressing protocol |
+| JPA | Java Persistence API | Java specification for object-relational persistence |
+| JVM | Java Virtual Machine | Runtime that executes Java bytecode |
+| L3, L4, E4 | Level 3, Level 4, Engineer 4 | Company-specific level labels; verify with recruiter |
+| LLD | Low-Level Design | Class, object, and component-level design |
+| LP | Leadership Principle | Culture rubric item, especially in Amazon-style loops |
+| LRU | Least Recently Used | Cache eviction rule removing the least recently used item |
+| MAQ | MAQ Software | Employer name in the resume context |
+| ML | Machine Learning | Systems that learn patterns from data |
+| NoSQL | Not Only SQL | Non-relational database family |
+| OA | Online Assessment | Timed remote coding or aptitude assessment |
+| OOP | Object-Oriented Programming | Modeling behavior with classes and objects |
+| OS | Operating System | Software managing processes, memory, files, and devices |
+| PDF | Portable Document Format | Common document file format |
+| Qn. | Question number | Numbered question heading |
+| RAG | Retrieval-Augmented Generation | AI pattern that retrieves context before generating output |
+| REST | Representational State Transfer | Resource-oriented API style using HTTP |
+| SaaS | Software as a Service | Hosted product delivered over the internet |
+| SDK | Software Development Kit | Library and tools for building on a platform |
+| SDE | Software Development Engineer | Engineering role title |
+| SLO | Service-Level Objective | Reliability target for a service |
+| SOLID | Single responsibility, Open-closed, Liskov substitution, Interface segregation, Dependency inversion | Object-oriented design principles |
+| SQL | Structured Query Language | Relational database query language |
+| STAR | Situation, Task, Action, Result | Behavioral answer structure |
+| TCP | Transmission Control Protocol | Reliable transport protocol |
+| TLS | Transport Layer Security | Encryption protocol for network traffic |
+| TTL | Time To Live | Expiration time for cached or networked data |
+| UDP | User Datagram Protocol | Lightweight transport protocol without delivery guarantees |
+| URL | Uniform Resource Locator | Address of a web resource |
+| US | United States | Country reference; location affects process reports |
+| UX | User Experience | How a user experiences a product |
+| YOE | Years of Experience | Work-experience count |
+
+### Common beginner traps
+
+- Saying a company always asks a topic because one public post mentioned it.
+- Practicing only company-tagged problems and skipping the underlying pattern.
+- Ignoring recruiter guidance when it conflicts with online anecdotes.
+- Preparing senior system design depth while SDE-1 coding fundamentals are still weak.
+- Copying culture language without an honest STAR story behind it.
+- Turning public compensation or process rumors into claims instead of verification questions.
+
+### How to study this file
+
+1. Read the short answer to understand the recommended priority for each company.
+2. Use the detailed answer to build a practice checklist: DSA, design, project, and behavioral items.
+3. Turn every public-report statement into a verification question for the recruiter.
+4. Practice the listed problem families, then explain why the pattern fits instead of memorizing titles.
+5. Use flashcards for recall and active mocks for timing, communication, and follow-up depth.
+6. Recheck sources before a real loop because public reports and company processes change.
+7. Apply one structure and one level rule to every Coach's note: answer with source signal, role level,
+   practice priority, and recruiter verification question; for Software Development Engineer level 1 (SDE-1),
+   protect coding and fundamentals; for SDE-2, add Low-Level Design (LLD) and High-Level Design (HLD) scope,
+   ownership stories, and trade-off depth without claiming any process is guaranteed.
+
 ## How to verify public company claims
 
 ### Q1. How should Mohd verify public company interview claims?
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Company processes change quickly; accuracy matters more than copying stale interview-experience posts.
+
+**Coach's note:** Interviewers evaluate source judgment: can you use public reports without treating them as
+official policy? Use structure: what the report says, why it may vary, what to practice, and what to verify
+with the recruiter. Beginner mistake: copying a stale post into a claim about the company. For SDE-1, verify
+coding format and tools; for SDE-2, also verify LLD/HLD depth, project expectations, and behavioral rubric.
 
 **Short answer (say this first, 20-40 sec):**
 Use this guide as a preparation map, not a guarantee. Before each interview, ask the recruiter for round names, expected topics, coding environment, design scope, and behavioral rubric. Then cross-check public reports across LeetCode company tags, LeetCode Discuss, Glassdoor, GeeksforGeeks interview experiences, Interviewing.io/company guides, and official recruiter prep docs.
@@ -76,6 +210,11 @@ Use this guide as a preparation map, not a guarantee. Before each interview, ask
 `⚫ FAANG` `🔥` `Must-know SDE-1/SDE-2`
 
 **Why they ask:** Google prep is easy to dilute with design and trivia, but junior loops are usually coding-heavy.
+
+**Coach's note:** Interviewers evaluate whether you can turn Google public reports into a focused, verified
+practice plan. For this section, translate reports into DSA speed, edge-case discipline, complexity
+explanation, and Googleyness-style collaboration stories. Beginner mistake: saying Google always asks one
+fixed list of problems or ignoring recruiter guidance.
 
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter screen, coding phone screen or OA, multiple coding-heavy interviews, and Googleyness. System design is more common at L4+/SDE-2-like loops and uncommon for pure L3 new-grad loops. Mohd should prioritize DSA speed, crisp complexity analysis, and STAR stories about SQL tuning, automation, and RAG search.
@@ -135,6 +274,11 @@ Commonly reported: recruiter screen, coding phone screen or OA, multiple coding-
 
 **Why they ask:** Amazon is one of the clearest examples where behavioral evidence can weigh as much as coding.
 
+**Coach's note:** Interviewers evaluate whether you can turn Amazon public reports into a focused, verified
+practice plan. For this section, translate reports into DSA plus Leadership Principle stories with verified
+STAR evidence from SQL tuning, automation, or projects. Beginner mistake: reciting principles without a story
+or inventing metrics for impact.
+
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter/OA, coding rounds, technical design or project deep dive depending on level, and a loop anchored in Leadership Principles. A bar-raiser-style round is often behavioral-heavy. Mohd should prepare DSA plus 8-10 STAR stories mapped to the 16 LPs.
 
@@ -193,6 +337,11 @@ Commonly reported: recruiter/OA, coding rounds, technical design or project deep
 
 **Why they ask:** Microsoft loops vary by team, so preparation must cover coding, fundamentals, project depth, and values.
 
+**Coach's note:** Interviewers evaluate whether you can turn Microsoft public reports into a focused, verified
+practice plan. For this section, translate reports into coding, fundamentals, project depth, and
+growth-mindset stories matched to the specific team. Beginner mistake: assuming every Microsoft loop is
+identical across teams and locations.
+
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter, OA/phone screen, technical interviews covering coding and CS fundamentals, design or project discussion as appropriate, and a final manager/as-appropriate conversation. Mohd should connect Java/Spring, SQL, Azure/Fabric, and automation work to customer impact.
 
@@ -243,6 +392,11 @@ Commonly reported: recruiter, OA/phone screen, technical interviews covering cod
 
 **Why they ask:** Meta coding rounds are commonly reported as fast-paced and require high accuracy under time pressure.
 
+**Coach's note:** Interviewers evaluate whether you can turn Meta public reports into a focused, verified
+practice plan. For this section, translate reports into fast coding practice, clean communication, and
+verified impact stories while checking current AI-tool policy. Beginner mistake: training only on speed and
+skipping correctness, tests, or behavioral evidence.
+
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter, coding screen, onsite coding rounds often expecting two problems per round, and behavioral. Product/system design is common at E4+ and above; AI-enabled coding interviews have been reported, so verify current rules before practicing.
 
@@ -290,6 +444,11 @@ Commonly reported: recruiter, coding screen, onsite coding rounds often expectin
 
 **Why they ask:** Apple interviews are team-specific, so generic prep must be supplemented by product and domain research.
 
+**Coach's note:** Interviewers evaluate whether you can turn Apple public reports into a focused, verified
+practice plan. For this section, translate reports into team-specific domain research, fundamentals, privacy
+awareness, and craftsmanship stories. Beginner mistake: giving generic FAANG prep without studying the product
+or team area.
+
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter, technical screens, team-specific coding/deep technical rounds, design or domain-specific engineering discussion, and behavioral. Mohd should prepare robust code, privacy/quality trade-offs, and precise backend fundamentals.
 
@@ -331,6 +490,11 @@ Commonly reported: recruiter, technical screens, team-specific coding/deep techn
 `⚫ FAANG` `🔥` `Stretch`
 
 **Why they ask:** Netflix often expects mature ownership and design judgment; junior-style preparation may be insufficient.
+
+**Coach's note:** Interviewers evaluate whether you can turn Netflix public reports into a focused, verified
+practice plan. For this section, translate reports into ownership, design maturity, reliability trade-offs,
+and candid communication practice for experienced-style loops. Beginner mistake: claiming Netflix process
+details as fixed or preparing only junior coding basics.
 
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter, technical screens, coding/design/project rounds, and culture interview. Netflix tends to hire experienced engineers, so SDE-1-style openings are less common; Mohd should verify level expectations and prepare high-ownership stories.
@@ -374,6 +538,11 @@ Commonly reported: recruiter, technical screens, coding/design/project rounds, a
 
 **Why they ask:** Uber-style India prep often combines DSA, practical OOP, marketplace thinking, and real-time systems.
 
+**Coach's note:** Interviewers evaluate whether you can turn Uber public reports into a focused, verified
+practice plan. For this section, translate reports into marketplace, real-time systems, DSA, object modeling,
+and logistics trade-offs. Beginner mistake: treating Uber-style prep as only LeetCode without marketplace
+constraints.
+
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter, coding screen/OA, DSA, machine coding or LLD, system design for SDE2+, and behavioral/project deep dive. Public India experiences mention OOP machine-coding rounds, so Mohd should practice timed Java designs.
 
@@ -415,6 +584,11 @@ Commonly reported: recruiter, coding screen/OA, DSA, machine coding or LLD, syst
 `🔴 Advanced` `🔥` `Stretch`
 
 **Why they ask:** Airbnb-style prep blends DSA, product empathy, marketplace trust, and booking correctness.
+
+**Coach's note:** Interviewers evaluate whether you can turn Airbnb public reports into a focused, verified
+practice plan. For this section, translate reports into marketplace trust, booking correctness, product
+empathy, DSA, and design trade-offs. Beginner mistake: discussing travel-product ideas without backend
+correctness and failure cases.
 
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter, coding phone screen, virtual onsite with coding, design/architecture, and culture. Mohd should practice intervals/date ranges, marketplace search, trust/safety, and customer-empathy stories.
@@ -458,6 +632,11 @@ Commonly reported: recruiter, coding phone screen, virtual onsite with coding, d
 
 **Why they ask:** Adobe India reports commonly mix DSA with Java/OOP, CS fundamentals, and project depth.
 
+**Coach's note:** Interviewers evaluate whether you can turn Adobe public reports into a focused, verified
+practice plan. For this section, translate reports into Java, object-oriented programming, CS fundamentals,
+project depth, and product-quality stories. Beginner mistake: assuming Adobe is only design-brand knowledge
+and skipping backend fundamentals.
+
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter/OA, coding technical rounds, Java/OOP/CS fundamentals, LLD or project/design for experienced roles, and managerial/HR. Mohd should prepare DSA plus Java, DBMS, OS, networks, Spring, and a polished GenAI/API project deep dive.
 
@@ -499,6 +678,11 @@ Commonly reported: recruiter/OA, coding technical rounds, Java/OOP/CS fundamenta
 `🔴 Advanced` `🔥` `Must-know product-company`
 
 **Why they ask:** Atlassian is known publicly for values-focused hiring and practical code/design discussions.
+
+**Coach's note:** Interviewers evaluate whether you can turn Atlassian public reports into a focused, verified
+practice plan. For this section, translate reports into values evidence, practical code design, collaboration,
+and maintainable engineering trade-offs. Beginner mistake: quoting values without showing a verified behavior
+from your own work.
 
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter, coding screen, code design/LLD or practical coding, system/design collaboration, and values interview. Mohd should prepare maintainable Java designs plus stories mapped to Atlassian values.

@@ -5,6 +5,7 @@ This companion file continues `20a_Company_Question_Bank_Global_FAANG.md`. Proce
 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
 ## Table of Contents
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [Q12. Salesforce](#q12-how-should-mohd-prepare-for-salesforce)
 - [Q13. Walmart Global Tech](#q13-how-should-mohd-prepare-for-walmart-global-tech)
 - [Q14. Mastercard](#q14-how-should-mohd-prepare-for-mastercard)
@@ -18,12 +19,132 @@ This companion file continues `20a_Company_Question_Bank_Global_FAANG.md`. Proce
 - [Revision Cheat Sheet](#revision-cheat-sheet)
 - [Flashcards](#flashcards)
 
+## Beginner guide to this file
+
+### What this file teaches
+
+This file teaches how to prepare for product-company, fintech, and India backend loops by translating public
+reports into safe practice priorities. Interviewers ask these questions because they want a candidate who can
+connect company domain signals, such as payments, retail, food delivery, or enterprise workflows, to backend
+fundamentals. In real work, the same skill helps you read changing product requirements and prioritize secure
+Application Programming Interface (API) design, data correctness, latency, and reliability without pretending
+that one public report is official process.
+
+### Mental model
+
+Think of each company section like a map legend: it does not show the exact road on interview day, but it tells
+you which terrain to practice before you travel.
+
+- Online Assessment (OA) reports point to timed problem-solving and hidden-test discipline.
+- Data Structures and Algorithms (DSA) practice builds the common coding base across companies.
+- Low-Level Design (LLD) and machine-coding signals point to classes, APIs, edge cases, and tests.
+- High-Level Design (HLD) signals point to architecture, scale, consistency, and failure modes.
+- Fintech sections emphasize correctness, security, auditability, and careful communication.
+- Product-company sections emphasize domain modeling, trade-offs, and operational reliability.
+
+### How to think through any question here
+
+1. Identify the domain first: enterprise, retail, payments, graph/search, marketplace, or delivery.
+2. Convert the domain into backend risks: correctness, concurrency, latency, privacy, audit, or scale.
+3. Map reported rounds into practice blocks: DSA, Java, Structured Query Language (SQL), LLD, HLD, or HR.
+4. Separate preparation from claims: public reports guide practice but must be verified before a real loop.
+5. Choose projects and Situation, Task, Action, Result (STAR) stories that honestly match the domain signal.
+6. For Software Development Engineer level 1 (SDE-1), prioritize clean coding and fundamentals.
+7. For Software Development Engineer level 2 (SDE-2), add design depth, trade-offs, and ownership examples.
+
+### Pattern recognition cues
+
+| If the question mentions... | Think about... | Why it fits |
+|---|---|---|
+| Payments, cards, or fintech | Idempotency, security, audit logs, and precision | Money systems punish ambiguity and data loss |
+| Retail, cart, inventory, or pricing | Concurrency, stock correctness, and order workflows | Product systems need accurate state under load |
+| CRM or enterprise workflows | Permissions, multi-tenancy, stable APIs, integrations | Enterprise platforms optimize trust and supportability |
+| Graph, feed, or search | Ranking, freshness, indexing, and relevance | Network products depend on fast discovery |
+| Food delivery or marketplace | Location, matching, availability, and surge load | Real-time operations have changing supply and demand |
+| Machine coding | Object model, edge cases, tests, and extensibility | The round checks maintainable implementation |
+| Security or personal data | Least privilege, encryption, validation, and privacy | Backend engineers handle sensitive records |
+| Public company report | Practice priority plus verification reminder | Reports are useful but not official promises |
+
+### Abbreviations and key terms
+
+| Short form | Expanded form | Plain meaning |
+|---|---|---|
+| ACID | Atomicity, Consistency, Isolation, Durability | Transaction guarantees for relational databases |
+| AI | Artificial Intelligence | Software behavior that reasons, predicts, or generates |
+| API | Application Programming Interface | Contract used by services and clients |
+| BST | Binary Search Tree | Tree where left values are smaller and right values are larger |
+| CRM | Customer Relationship Management | Systems for sales, support, and customer workflows |
+| CRUD | Create, Read, Update, Delete | Basic application data operations |
+| CS | Computer Science | Core computing fundamentals |
+| CV | Curriculum Vitae | Resume-style document summarizing experience |
+| DB | Database | Persistent data store |
+| DBMS | Database Management System | Software that manages databases |
+| DP | Dynamic Programming | Solving overlapping subproblems with stored answers |
+| DSA | Data Structures and Algorithms | Coding-interview problem-solving toolkit |
+| FAANG | Facebook/Meta, Amazon, Apple, Netflix, Google | Shorthand for large selective technology companies |
+| GET | Hypertext Transfer Protocol GET method | HTTP method commonly used to read data |
+| GenAI | Generative Artificial Intelligence | AI that creates content such as text or code |
+| HLD | High-Level Design | Architecture and scale design |
+| HR | Human Resources | Recruiting and employment-process function |
+| HTTPS | Hypertext Transfer Protocol Secure | HTTP protected with Transport Layer Security |
+| JPA | Java Persistence API | Java specification for object-relational persistence |
+| JUnit | Java Unit | Java testing framework name, not a daily abbreviation |
+| JWT | JSON Web Token | Signed token format often used for authentication |
+| LFU | Least Frequently Used | Cache eviction rule based on access count |
+| LLD | Low-Level Design | Class and component-level design |
+| LRU | Least Recently Used | Cache eviction rule based on recency |
+| N+1 | N plus one query problem | Many extra database queries caused by lazy loading |
+| NoSQL | Not Only SQL | Non-relational database family |
+| OA | Online Assessment | Timed remote coding or aptitude assessment |
+| OAuth2 | Open Authorization 2.0 | Authorization framework for delegated access |
+| OOP | Object-Oriented Programming | Modeling behavior with classes and objects |
+| OS | Operating System | Software managing processes, memory, files, and devices |
+| PII | Personally Identifiable Information | Data that can identify a person |
+| POST | Hypertext Transfer Protocol POST method | HTTP method commonly used to submit or create data |
+| Qn. | Question number | Numbered question heading |
+| RAG | Retrieval-Augmented Generation | AI pattern that retrieves context before generating output |
+| REST | Representational State Transfer | Resource-oriented API style using HTTP |
+| SDE | Software Development Engineer | Engineering role title |
+| SOLID | Single responsibility, Open-closed, Liskov substitution, Interface segregation, Dependency inversion | Object-oriented design principles |
+| SQL | Structured Query Language | Relational database query language |
+| STAR | Situation, Task, Action, Result | Behavioral answer structure |
+| TCP | Transmission Control Protocol | Reliable transport protocol |
+| TLS | Transport Layer Security | Encryption protocol for network traffic |
+| UDP | User Datagram Protocol | Lightweight transport protocol without delivery guarantees |
+
+### Common beginner traps
+
+- Treating fintech as only coding while ignoring correctness, security, and auditability.
+- Treating India product-company loops as all identical machine-coding rounds.
+- Repeating public reports as promises instead of current signals to verify.
+- Listing Kafka, Redis, or authentication in an answer without being able to explain the trade-off.
+- Practicing LLD diagrams but not implementing edge cases and tests.
+- Ignoring behavioral stories for ownership, customer impact, and pressure handling.
+
+### How to study this file
+
+1. Read the short answer and write the top three practice priorities for each company.
+2. Convert detailed round tables into a weekly practice plan: coding, Java, SQL, LLD, HLD, and STAR.
+3. For every public-report claim, add a recruiter verification question before the real interview.
+4. Practice one domain design per company family, such as payments, cart, workflow, graph, or delivery.
+5. Use flashcards for quick recall, then do active mocks that force trade-off explanation.
+6. Update priorities when the job description or recruiter packet gives newer information.
+7. Apply one structure and one level rule to every Coach's note: answer with source signal, role level,
+   practice priority, and recruiter verification question; for Software Development Engineer level 1 (SDE-1),
+   protect coding and fundamentals; for SDE-2, add Low-Level Design (LLD) and High-Level Design (HLD) scope,
+   ownership stories, and trade-off depth without claiming any process is guaranteed.
+
 ## Salesforce
 
 ### Q12. How should Mohd prepare for Salesforce?
 `🟡 Intermediate` `🔥` `Must-know SDE-1/SDE-2`
 
 **Why they ask:** Salesforce backend loops often test enterprise Java, APIs, databases, and customer-oriented engineering rather than only DSA.
+
+**Coach's note:** Interviewers evaluate whether you can turn Salesforce public reports into a focused,
+verified practice plan. For this section, translate reports into enterprise Java, APIs, database transactions,
+multi-tenancy, workflow automation, and customer trust. Beginner mistake: calling it only a DSA company and
+ignoring enterprise reliability.
 
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter/OA, coding and Java/backend rounds, design/project deep dive for experienced roles, and manager/HR. Mohd should lean into Java/Spring, SQL tuning, transaction correctness, multi-tenant APIs, and workflow automation examples.
@@ -80,6 +201,11 @@ Commonly reported: recruiter/OA, coding and Java/backend rounds, design/project 
 
 **Why they ask:** Walmart Global Tech commonly maps backend interviews to retail-scale cart, inventory, pricing, and order workflows.
 
+**Coach's note:** Interviewers evaluate whether you can turn Walmart Global Tech public reports into a
+focused, verified practice plan. For this section, translate reports into retail workflows, cart or inventory
+correctness, DSA, machine coding, and production debugging. Beginner mistake: talking about scale without
+explaining concurrency or stock correctness.
+
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter/OA, DSA technical rounds, machine coding/LLD for many backend roles, system design for SDE2+, and managerial/HR. Mohd should practice retail LLDs and emphasize SQL performance, correctness under concurrency, and production debugging.
 
@@ -121,6 +247,11 @@ Commonly reported: recruiter/OA, DSA technical rounds, machine coding/LLD for ma
 `🟡 Intermediate` `🔥` `Must-know fintech`
 
 **Why they ask:** Fintech SDE interviews often reward correctness, Java fundamentals, SQL/security basics, and careful communication.
+
+**Coach's note:** Interviewers evaluate whether you can turn Mastercard public reports into a focused,
+verified practice plan. For this section, translate reports into payment correctness, Java fundamentals, SQL,
+security basics, and careful communication. Beginner mistake: using casual language around money movement or
+ignoring auditability.
 
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: OA, technical rounds with Java, DSA, DBMS, testing/security, project discussion, and HR. Public India experiences mention Java/JUnit, synchronization, REST, TLS, SQL relationships, indexing, and basic DSA.
@@ -164,6 +295,11 @@ Commonly reported: OA, technical rounds with Java, DSA, DBMS, testing/security, 
 
 **Why they ask:** Visa backend interviews often center on secure, reliable payment APIs and strong Java/SQL fundamentals.
 
+**Coach's note:** Interviewers evaluate whether you can turn Visa public reports into a focused, verified
+practice plan. For this section, translate reports into secure payment APIs, idempotency, Java and SQL depth,
+and reliability under failure. Beginner mistake: overclaiming payment internals instead of practicing general
+backend safeguards.
+
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter/OA, coding/Java rounds, DBMS/API/security discussion, design or project deep dive, and HR. Mohd should prepare payment idempotency, audit logging, transaction isolation, secure APIs, and SQL indexing.
 
@@ -205,6 +341,11 @@ Commonly reported: recruiter/OA, coding/Java rounds, DBMS/API/security discussio
 `🟡 Intermediate` `🔥` `Must-know fintech`
 
 **Why they ask:** Public Amex India experiences include HackerRank coding plus CV, networks, OS/DBMS, logic, and communication.
+
+**Coach's note:** Interviewers evaluate whether you can turn American Express public reports into a focused,
+verified practice plan. For this section, translate reports into coding practice, operating-system and
+database fundamentals, communication, and resume project clarity. Beginner mistake: assuming finance
+interviews are only puzzles and not professional communication.
 
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: resume shortlist/OA, technical round covering CV, DSA, networks/OS/DBMS, final HR+technical/puzzle. Mohd should be ready to explain projects simply and solve easy-medium coding accurately.
@@ -248,6 +389,11 @@ Commonly reported: resume shortlist/OA, technical round covering CV, DSA, networ
 
 **Why they ask:** LinkedIn blends coding with graph/search/relevance thinking and professional-network product judgment.
 
+**Coach's note:** Interviewers evaluate whether you can turn LinkedIn public reports into a focused, verified
+practice plan. For this section, translate reports into graph/search thinking, relevance, scale, DSA, and
+professional-network product judgment. Beginner mistake: claiming internal feed or ranking details that public
+reports cannot prove.
+
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter, coding screen, onsite coding rounds, design for experienced roles, and behavioral/culture. Public prep lists emphasize nested structures, trees, maps, graph/search, and product/backend scale.
 
@@ -289,6 +435,11 @@ Commonly reported: recruiter, coding screen, onsite coding rounds, design for ex
 `🔴 Advanced` `🔥` `Must-know India product-company`
 
 **Why they ask:** Flipkart-style preparation is a strong proxy for Indian product-company DSA + machine-coding loops.
+
+**Coach's note:** Interviewers evaluate whether you can turn Flipkart public reports into a focused, verified
+practice plan. For this section, translate reports into e-commerce domain modeling, machine coding, DSA,
+concurrency, and order correctness. Beginner mistake: memorizing a shopping-cart design without handling edge
+cases and tests.
 
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: OA, live DSA, machine coding/LLD, system design for SDE2+, and hiring manager/HR. Mohd should run 90-120 minute Java machine-coding drills around cart, coupon, inventory, order, and payments.
@@ -332,6 +483,11 @@ Commonly reported: OA, live DSA, machine coding/LLD, system design for SDE2+, an
 
 **Why they ask:** Swiggy-style backend interviews combine food-commerce domain logic, real-time logistics, DSA, and LLD.
 
+**Coach's note:** Interviewers evaluate whether you can turn Swiggy public reports into a focused, verified
+practice plan. For this section, translate reports into food-commerce workflows, delivery logistics, real-time
+availability, LLD, and reliability trade-offs. Beginner mistake: focusing on app features while ignoring
+backend state changes and failures.
+
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: recruiter/OA, DSA, machine coding/LLD, HLD for SDE2+, and managerial/HR. Mohd should prepare order, restaurant, coupon, delivery assignment, wallet/refund, and realtime tracking designs.
 
@@ -373,6 +529,11 @@ Commonly reported: recruiter/OA, DSA, machine coding/LLD, HLD for SDE2+, and man
 `🔴 Advanced` `🔥` `Must-know India product-company`
 
 **Why they ask:** Zomato loops often reward fast problem solving, backend depth, ownership, and product sense around restaurant discovery and ordering.
+
+**Coach's note:** Interviewers evaluate whether you can turn Zomato public reports into a focused, verified
+practice plan. For this section, translate reports into restaurant discovery, ordering, fast coding, ownership
+stories, and scalable backend trade-offs. Beginner mistake: making claims about internal systems instead of
+practicing observable product patterns.
 
 **Short answer (say this first, 20-40 sec):**
 Commonly reported: OA/referral screen, DSA, backend/machine coding, system design/project deep dive, and managerial/HR. Mohd should prepare restaurant search, order state, ratings, coupons, payments, and delivery-fee logic.

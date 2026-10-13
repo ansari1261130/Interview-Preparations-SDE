@@ -5,6 +5,7 @@ Part 2 contains P51-P100 of exactly 100 SQL coding problems, continuing the sche
 **Legend:** 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
 ## Table of Contents
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [Top-N, Nth Highest, and Duplicates](#top-n-nth-highest-and-duplicates)
 - [Running Totals, Moving Averages, Gaps and Islands](#running-totals-moving-averages-gaps-and-islands)
 - [Date and Time Analytics](#date-and-time-analytics)
@@ -12,12 +13,112 @@ Part 2 contains P51-P100 of exactly 100 SQL coding problems, continuing the sche
 - [Revision Cheat Sheet](#revision-cheat-sheet)
 - [Flashcards](#flashcards)
 
+## Beginner guide to this file
+
+### What this file teaches
+
+This file teaches the second half of the SQL practice set: ranking, duplicate cleanup, gaps and islands,
+date analytics, recursive Common Table Expressions (CTEs), pivots, funnels, retention, and revenue analytics.
+Interviewers use these problems to test whether you can reason about time, ties, dirty data, and multi-step
+analysis without losing the correct output grain. These patterns appear in backend reporting jobs, product
+analytics, fraud checks, data repair scripts, and customer lifecycle dashboards.
+
+### Mental model
+
+Think of this file as moving from "find rows" to "tell a story over rows": order events, compare neighbors,
+collapse repeated behavior into islands, and summarize user or revenue journeys.
+
+- Ranking: choose ROW_NUMBER, RANK, DENSE_RANK, CUME_DIST, or NTILE based on tie behavior.
+- Time windows: define whether the window means rows, calendar days, months, or inactivity gaps.
+- Islands: convert consecutive rows into stable group keys, then aggregate each island.
+- Recursive traversal: anchor the first level, then repeatedly join to the next level.
+- Pivoting: use conditional aggregation to turn row values into columns, or UNION ALL to unpivot columns.
+- Analytics grain: decide whether the result is per user, per session, per cohort, per date, or one summary row.
+
+### How to think through any question here
+
+1. Name the event or entity grain first: salary value, login day, session, customer-month, or hierarchy node.
+2. Decide whether ties should be kept, collapsed, ranked with gaps, or forced into exactly N rows.
+3. Put row-level restrictions such as paid status, weekend date, or event type in WHERE before aggregation.
+4. Use GROUP BY and HAVING when the condition depends on counts, sums, medians, or distinct categories.
+5. Use window functions when the query needs previous rows, running totals, rolling averages, or top-N per group.
+6. Use CTEs to separate stages: aggregate first, rank second, filter last.
+7. Check edge cases: nulls, duplicate dirty rows, missing dates, empty groups, ties, cycles, and boundary days.
+8. Explain how the query would change for production scale, such as indexes, calendar tables, and deduplication.
+
+### Pattern recognition cues
+
+| If the question mentions... | Think about... | Why it fits |
+| --- | --- | --- |
+| "Nth", "top N", or "latest two" | DENSE_RANK or ROW_NUMBER | The query orders rows inside a group and filters by rank. |
+| "duplicate" or "dirty import" | GROUP BY HAVING count or ROW_NUMBER delete | You must detect or keep one row per duplicate key. |
+| "consecutive" or "streak" | Gaps-and-islands | Consecutive dates or ids become island groups. |
+| "running", "rolling", or "previous" | Window frame or LAG | The output keeps row detail while looking around the row. |
+| "retention" or "cohort" | Date offsets and COUNT DISTINCT | Users are counted by signup or activity age. |
+| "hierarchy" or "manager chain" | Recursive CTE | Each result level depends on rows found in the previous level. |
+| "pivot" | Conditional aggregation | Values such as status or category become columns. |
+| "unpivot" | UNION ALL | Several columns are stacked into one row set. |
+| "funnel" or "attribution" | First event per user and order checks | Event order matters more than raw event count. |
+| "stored total differs" | Aggregate detail rows and HAVING | The header row is validated against child-row totals. |
+
+### Abbreviations and key terms
+
+| Short form | Expanded form | Plain meaning |
+| --- | --- | --- |
+| CTE | Common Table Expression | A named temporary result introduced with WITH for one query. |
+| D1 | Day 1 | The day after signup or first activity, often used in retention. |
+| D7 | Day 7 | Seven days after signup or first activity, often used in retention. |
+| DESC | Descending | Sort from high to low or newest to oldest. |
+| FAANG | Facebook, Apple, Amazon, Netflix, Google | Shorthand for large product-company interview style. |
+| ID | Identifier | A value that uniquely identifies an entity row or event row. |
+| MAU | Monthly Active Users | Distinct users active during a calendar month. |
+| MySQL | MySQL database system | A relational database that uses SQL with some syntax differences from PostgreSQL. |
+| N | Number parameter | A placeholder for how many ranks or rows the query should keep. |
+| NULL | Null marker | A missing or unknown value, not the same as zero or an empty string. |
+| P51-P100 | Practice problems 51 through 100 | The second half of this 100-problem SQL practice set. |
+| Q1-Q4 | Quarter 1 through Quarter 4 | Four three-month periods in a year, often stored as quarterly columns. |
+| SQL | Structured Query Language | The language used to query and change relational database data. |
+| UTM | Urchin Tracking Module | Marketing source tags used to attribute acquisition events. |
+| WAU | Weekly Active Users | Distinct users active during a seven-day window. |
+
+### Common beginner traps
+
+- Using ROW_NUMBER when the requirement says include ties, or DENSE_RANK when exactly N rows are required.
+- Treating a rolling row window as a rolling calendar-day window.
+- Forgetting to deduplicate dirty daily events before streak, retention, or funnel calculations.
+- Filtering a window-function alias in the same SELECT level instead of using a CTE or subquery.
+- Counting joined rows after multiple left joins and accidentally multiplying users.
+- Writing recursive CTEs without a clear anchor, stop condition, or cycle strategy.
+- Assuming SUM returns zero for missing groups; it usually returns null unless COALESCE is used.
+
+### How to study this file
+
+1. For each problem, state whether it is ranking, deduplication, islanding, date analytics, recursion, or pivoting.
+2. Before reading the SQL, choose the expected grain and the stage where filtering should happen.
+3. Use the short query to identify the core pattern, then read the notes for tie, null, and duplicate behavior.
+4. Turn each advanced query into a spoken walkthrough: CTE one does this, CTE two does that, final filter does this.
+5. Re-solve selected problems with a twist, such as including zero days, requiring exact top N, or handling ties.
+6. Keep flashcards for the function choice: LAG versus LEAD, ROW_NUMBER versus DENSE_RANK, GROUP BY versus window.
+
+### Scalability and production lens
+
+Advanced analytics queries often scan many rows, sort within partitions, and count distinct users. Production
+systems usually need indexes on join keys and event dates, pre-aggregated daily tables, calendar tables for
+missing dates, and clear deduplication rules before retention or funnel logic. Recursive CTEs need cycle guards,
+maximum depth expectations, and tests on malformed hierarchies. Cleanup queries should be reviewed in a
+transaction with backups or rollback plans.
+
 ## Top-N, Nth Highest, and Duplicates
 
 ### P51. Nth highest distinct salary
 `🟡 Intermediate` `🔥`
 
 **Statement:** Return the Nth highest distinct salary. Assume `:n` is a positive parameter.
+
+**How to think:** Grain is one salary value for the requested Nth distinct rank. The employees table is
+enough, and DISTINCT removes duplicate salaries before DENSE_RANK orders them descending. The outer WHERE
+filters the computed rank, so no GROUP BY is needed. If :n is larger than the number of distinct salaries,
+the query returns no row. Consider filtering null salaries if the interview expects only real salaries.
 
 ```sql
 SELECT salary
@@ -38,6 +139,11 @@ WHERE rnk = :n;
 
 **Statement:** Return one row with the second highest distinct salary, or NULL if it does not exist.
 
+**How to think:** Grain is exactly one output row containing the second highest distinct salary or null. The
+inner query keeps the top two distinct salaries, the next ORDER BY returns the smaller of those two, and the
+scalar subquery makes a missing result become NULL. No join or HAVING is involved. Duplicate salaries are
+removed. If nullable salaries exist, clarify whether they should be excluded before ordering.
+
 ```sql
 SELECT (
   SELECT salary
@@ -55,6 +161,11 @@ SELECT (
 `🔴 Advanced` `🔥`
 
 **Statement:** Return top `:n` products per category by paid revenue.
+
+**How to think:** Grain is one product per category and revenue rank that falls within top N. Paid orders,
+order_items, and products are all required because status, quantity, price, and category live in different
+tables. WHERE keeps paid rows before the revenue GROUP BY. DENSE_RANK in the second CTE includes ties, so a
+category can return more than N products. Unsold products are excluded.
 
 ```sql
 WITH revenue AS (
@@ -81,6 +192,11 @@ SELECT * FROM ranked WHERE rnk <= :n;
 
 **Statement:** Return each user's latest two login dates.
 
+**How to think:** Grain is one login row, up to two rows per user. The logins table has the needed user_id
+and login_date, and ROW_NUMBER partitions by user while ordering newest first. The outer WHERE keeps rn less
+than or equal to two. No aggregation is needed. Duplicate login dates would need a tie-breaker, but the
+sample schema's primary key prevents same-user duplicate days.
+
 ```sql
 WITH ranked AS (
   SELECT user_id, login_date,
@@ -102,6 +218,11 @@ ORDER BY user_id, login_date DESC;
 
 **Statement:** Return users who have exactly one login record.
 
+**How to think:** Grain is one user_id with exactly one login record. GROUP BY user_id creates the user
+grain, and HAVING COUNT star equals one filters groups after counting. The users table is not joined, so
+users with zero logins are omitted rather than returned. If a dirty table can contain duplicate same-day
+rows, this counts records, not distinct login days.
+
 ```sql
 SELECT user_id
 FROM logins
@@ -118,6 +239,11 @@ HAVING COUNT(*) = 1;
 
 **Statement:** If `logins` allowed duplicates, find `(user_id, login_date)` pairs appearing more than once.
 
+**How to think:** Grain is one duplicate user_id and login_date pair. The logins table is grouped by both
+columns, and HAVING COUNT star greater than one keeps pairs that appear multiple times. This is aggregate
+duplicate detection, not a row cleanup query. Null user or date values, if allowed in a dirty import, would
+group together. Add row ids when you need to inspect individual duplicates.
+
 ```sql
 SELECT user_id, login_date, COUNT(*) AS cnt
 FROM logins
@@ -133,6 +259,11 @@ HAVING COUNT(*) > 1;
 `🟡 Intermediate`
 
 **Statement:** Delete duplicate login rows, keeping one row per `(user_id, login_date)`. Assume a dirty table `logins_dirty(id, user_id, login_date)`.
+
+**How to think:** Grain is the dirty login rows to delete. The CTE assigns ROW_NUMBER within each user_id
+and login_date partition ordered by id, so rn equals one is the kept row and rn greater than one is
+duplicate. DELETE USING joins those ranked ids back to the table. Null keys partition together. In
+production, preview first and run in a transaction.
 
 ```sql
 WITH ranked AS (
@@ -154,6 +285,11 @@ WHERE d.id = r.id AND r.rn > 1;
 
 **Statement:** Find possible duplicate orders for same customer, order date, and total amount.
 
+**How to think:** Grain is one possible duplicate order signature: customer, date, and total amount. The
+orders table is grouped by those three values, and HAVING COUNT star greater than one reports repeated
+signatures. This flags suspicious duplicates but does not prove they are bad business records. Null
+customer, date, or amount values can be grouped together, so inspect order ids before cleanup.
+
 ```sql
 SELECT customer_id, order_date, total_amount, COUNT(*) AS cnt
 FROM orders
@@ -169,6 +305,11 @@ HAVING COUNT(*) > 1;
 `🟡 Intermediate`
 
 **Statement:** Show employee id ranges where an id is missing between existing adjacent ids.
+
+**How to think:** Grain is one missing employee_id range between two existing adjacent ids. LEAD looks at
+the next id in sorted order, and WHERE keeps pairs where the next id is more than one greater. No join or
+GROUP BY is required. This finds internal gaps only; it does not invent gaps before the first id or after
+the last id. Primary keys prevent duplicate ids.
 
 ```sql
 WITH x AS (
@@ -190,6 +331,11 @@ WHERE next_id > employee_id + 1;
 
 **Statement:** Return employees whose `manager_id` does not exist in employees.
 
+**How to think:** Grain is one employee whose non-null manager_id points nowhere. This is a self LEFT JOIN
+from employee to manager, then WHERE keeps rows where the manager id was provided but no manager row
+matched. That is an orphan-reference anti-join. Top-level employees with null manager_id are valid and
+excluded. This finds missing managers, not cycles or invalid hierarchy depth.
+
 ```sql
 SELECT e.employee_id, e.name, e.manager_id
 FROM employees e
@@ -208,6 +354,11 @@ WHERE e.manager_id IS NOT NULL
 `🔴 Advanced` `🔥`
 
 **Statement:** Return users who logged in on at least three consecutive days.
+
+**How to think:** Grain is one user who has at least one streak of three or more consecutive login days. The
+row_number date-island trick creates the same grp value for consecutive dates, then GROUP BY user_id and grp
+counts streak length. HAVING days greater than or equal to three filters islands. This assumes one login row
+per user per day; duplicate dirty rows can inflate or break streaks.
 
 ```sql
 WITH x AS (
@@ -233,6 +384,11 @@ WHERE days >= 3;
 
 **Statement:** From `numbers(id, num)`, return numbers that appear in at least three consecutive ids.
 
+**How to think:** Grain is one number value that appears across at least three consecutive ids. The numbers
+table self-joins three roles at id, id plus one, and id plus two with equal num values. DISTINCT removes
+repeated windows for longer runs. This checks id adjacency, not merely neighboring rows after sorting. Null
+num values will not match with equals, and missing ids break the chain.
+
 ```sql
 SELECT DISTINCT n1.num AS consecutive_num
 FROM numbers n1
@@ -248,6 +404,11 @@ JOIN numbers n3 ON n3.id = n1.id + 2 AND n3.num = n1.num;
 `🔴 Advanced` `🔥`
 
 **Statement:** Return stadium rows where people >= 100 for at least three consecutive ids.
+
+**How to think:** Grain is one stadium row that belongs to a high-traffic island of at least three
+consecutive ids. WHERE first filters rows with people at least 100, then id minus row_number groups
+consecutive retained ids. HAVING count at least three finds qualifying islands, and the join returns all
+rows in them. Missing ids break islands, and rows below 100 reset the streak.
 
 ```sql
 WITH high AS (
@@ -275,6 +436,11 @@ ORDER BY h.id;
 
 **Statement:** Return weather rows where temperature is higher than the previous calendar day.
 
+**How to think:** Grain is one weather row id where today's temperature is higher than the previous calendar
+day's. A self join connects each row w to row p whose record_date is one day earlier, and WHERE compares
+temperatures. The inner join means first days or gaps with no prior date are omitted. Equal temperatures do
+not qualify. Date arithmetic syntax differs across databases.
+
 ```sql
 SELECT w.id
 FROM weather w
@@ -290,6 +456,11 @@ WHERE w.temperature > p.temperature;
 `🔴 Advanced`
 
 **Statement:** Return all consecutive login streaks per user with start date, end date, and length.
+
+**How to think:** Grain is one login streak island per user with start, end, and length. The logins table is
+transformed by row_number into groups where consecutive dates share the same date-minus-row-number value.
+GROUP BY user_id and grp then produces island summaries. This needs daily grain; duplicate dates or
+timestamps should be deduplicated to one login day before applying the island logic.
 
 ```sql
 WITH x AS (
@@ -311,6 +482,11 @@ ORDER BY user_id, start_date;
 `🔴 Advanced`
 
 **Statement:** Return each user's longest consecutive login streak length.
+
+**How to think:** Grain is one user with the length of their longest consecutive login streak. The first CTE
+builds date islands per user, the second counts days per island, and the outer GROUP BY takes MAX
+streak_days per user. Users with no logins are absent. Because only the length is returned, ties between
+multiple longest streaks do not matter. Dirty duplicate dates can distort counts.
 
 ```sql
 WITH islands AS (
@@ -335,6 +511,11 @@ GROUP BY user_id;
 `🔴 Advanced`
 
 **Statement:** Return the first transaction where each account's running balance reaches at least 10000.
+
+**How to think:** Grain is one first transaction per account where running balance reaches at least 10000.
+The balances CTE uses a signed running SUM by account ordered by transaction date and id. The ranked CTE
+filters balances above the threshold, then ROW_NUMBER chooses the earliest crossing row. Accounts that never
+cross are absent. The CASE treats every non-DEPOSIT as negative, so unknown transaction types need care.
 
 ```sql
 WITH balances AS (
@@ -361,6 +542,11 @@ WHERE rn = 1;
 
 **Statement:** Compute average amount over current and previous two transactions per account.
 
+**How to think:** Grain is one transaction with the rolling average amount over that transaction and the
+previous two transactions for the same account. AVG is a window function with a ROWS frame, so it counts
+rows, not calendar days. No GROUP BY is used because detail rows remain. The first two transactions average
+fewer than three rows, and null amounts are ignored by AVG.
+
 ```sql
 SELECT account_id, txn_id, txn_date, amount,
        AVG(amount) OVER (PARTITION BY account_id ORDER BY txn_date, txn_id ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS avg_last_3
@@ -375,6 +561,11 @@ FROM transactions;
 `🟡 Intermediate` `🔥`
 
 **Statement:** For each login date, compute what percentage of users returned the next day.
+
+**How to think:** Grain is one login date with active users, retained users, and retention percentage. The
+daily CTE provides login user rows, retained joins each day to the next day's login for the same user, and
+the final LEFT JOIN keeps days with zero retention. GROUP BY is by login date. Duplicate login rows can
+overcount retained_users because retained uses COUNT star instead of COUNT DISTINCT.
 
 ```sql
 WITH daily AS (
@@ -404,6 +595,11 @@ ORDER BY d.login_date;
 
 **Statement:** Count active users by signup cohort month and months since signup.
 
+**How to think:** Grain is one signup cohort month and month_age pair. Users join logins because the output
+counts active users from each cohort at each age, and COUNT DISTINCT prevents multiple logins by the same
+user from inflating activity. GROUP BY the computed cohort and age. Never-active users are absent due to the
+inner join. Logins before signup would create negative ages unless filtered.
+
 ```sql
 SELECT date_trunc('month', u.signup_date)::date AS cohort_month,
        ((EXTRACT(YEAR FROM l.login_date) - EXTRACT(YEAR FROM u.signup_date)) * 12
@@ -426,6 +622,11 @@ ORDER BY 1, 2;
 
 **Statement:** Return paid revenue for current month and previous month.
 
+**How to think:** Grain is a single row with two revenue columns. The orders table is filtered to PAID rows
+in WHERE, and conditional SUM FILTER expressions split those rows into current-month and previous-month
+buckets. No GROUP BY is needed. If a month has no paid orders, the SUM returns null rather than zero.
+CURRENT_DATE and date_trunc follow the database session's calendar and timezone rules.
+
 ```sql
 SELECT
   SUM(total_amount) FILTER (WHERE order_date >= date_trunc('month', CURRENT_DATE)) AS this_month_revenue,
@@ -446,6 +647,11 @@ WHERE status = 'PAID';
 
 **Statement:** Return orders placed on Saturday or Sunday.
 
+**How to think:** Grain is one weekend order. The orders table has all requested columns, and WHERE uses
+EXTRACT ISODOW to keep Saturday and Sunday values. There is no join, aggregation, or window function. Null
+order_date values fail the filter. Be ready to translate the date function for MySQL or other systems,
+because weekday numbering is vendor-specific.
+
 ```sql
 SELECT order_id, customer_id, order_date
 FROM orders
@@ -460,6 +666,11 @@ WHERE EXTRACT(ISODOW FROM order_date) IN (6, 7);
 `🟡 Intermediate`
 
 **Statement:** Return users/customers whose first order happened within 7 days of customer creation.
+
+**How to think:** Grain is one customer whose first order is within seven days after account creation. The
+first_order CTE groups orders by customer_id to find MIN order_date, then joins customers and filters by
+created_at plus interval. Customers without orders are omitted. The query uses a strict less-than seven
+days, so an order exactly seven days later does not qualify unless the requirement says inclusive.
 
 ```sql
 WITH first_order AS (
@@ -482,6 +693,11 @@ WHERE f.first_order_date < c.created_at + INTERVAL '7 days';
 
 **Statement:** Count distinct login users per month.
 
+**How to think:** Grain is one month with a distinct count of active login users. The logins table is
+grouped by date_trunc month, and COUNT DISTINCT user_id prevents multiple login days from inflating monthly
+active users. Missing months are omitted, not shown as zero. If login_date is a timestamp, timezone and
+month boundary choices matter. HAVING would only be needed for a threshold on active users.
+
 ```sql
 SELECT date_trunc('month', login_date)::date AS month_start,
        COUNT(DISTINCT user_id) AS mau
@@ -498,6 +714,11 @@ ORDER BY 1;
 `🟢 Beginner`
 
 **Statement:** Return event count for each hour of day.
+
+**How to think:** Grain is one hour-of-day bucket with event count. The events table is grouped by EXTRACT
+hour from event_time, and COUNT star counts events in that bucket. No join is required. Hours with no events
+do not appear unless you join to a generated 0-through-23 table. Null event_time values can form a null hour
+group depending on database behavior.
 
 ```sql
 SELECT EXTRACT(HOUR FROM event_time)::int AS hour_of_day,
@@ -516,6 +737,11 @@ ORDER BY 1;
 
 **Statement:** Return users who signed up but never logged in.
 
+**How to think:** Grain is one user who signed up but has no login row. Start from users and LEFT JOIN
+logins, then keep rows where the login side is null. That null check in WHERE creates the anti-join.
+Duplicate login rows do not matter because any match removes the user. A login row with null login_date
+still counts as activity because the row exists.
+
 ```sql
 SELECT u.user_id, u.email
 FROM users u
@@ -531,6 +757,11 @@ WHERE l.user_id IS NULL;
 `🔴 Advanced`
 
 **Statement:** Return every date between min and max order date with paid revenue, using 0 for missing days.
+
+**How to think:** Grain is one calendar date between the minimum and maximum order dates. Bounds finds the
+range, generate_series creates all dates, daily aggregates paid order revenue, and the LEFT JOIN fills
+missing paid-revenue days with zero via COALESCE. The paid filter belongs in the daily CTE's WHERE. If the
+orders table is empty, min and max are null and no date rows are generated.
 
 ```sql
 WITH bounds AS (
@@ -559,6 +790,12 @@ ORDER BY d.order_date;
 
 **Statement:** For sessions with a view and purchase, return seconds from first view to first purchase.
 
+**How to think:** Grain is one session that has both a view and a purchase with purchase not before view.
+The CTE groups events by session_id and uses filtered MIN values to find first_view and first_purchase. The
+final WHERE removes sessions missing either event and enforces order. Multiple views or purchases are
+reduced to first occurrences, so clarify if the question wants the purchase after the first view or after
+any view.
+
 ```sql
 WITH session_events AS (
   SELECT session_id,
@@ -586,6 +823,11 @@ WHERE first_view IS NOT NULL
 
 **Statement:** Return every employee in `employee_tree` with hierarchy level starting from roots.
 
+**How to think:** Grain is one employee_tree row reachable from a root, with a hierarchy level. The
+recursive CTE anchor selects roots where manager_id is null, then repeatedly joins children whose manager_id
+equals the current id. UNION ALL preserves the traversal rows. No aggregation is needed. Orphan nodes are
+not reached, and real recursive queries should guard against cycles and excessive depth.
+
 ```sql
 WITH RECURSIVE org AS (
   SELECT id, name, manager_id, 1 AS level
@@ -608,6 +850,11 @@ SELECT * FROM org ORDER BY level, id;
 
 **Statement:** Return the chain from employee `:employee_id` up to the root manager.
 
+**How to think:** Grain is one node in the manager chain from the requested employee up to the root. The
+recursive CTE starts at :employee_id, then joins from the current row's manager_id to the manager row.
+distance counts hops upward. If the employee id is missing, no rows return; if a manager reference is
+broken, the chain stops early. Cycles require a visited-node guard.
+
 ```sql
 WITH RECURSIVE chain AS (
   SELECT id, name, manager_id, 0 AS distance
@@ -629,6 +876,12 @@ SELECT * FROM chain ORDER BY distance;
 `🔴 Advanced`
 
 **Statement:** Return every manager id and total number of direct plus indirect subordinates.
+
+**How to think:** Grain is one manager_id with the count of all direct and indirect subordinates. The
+recursive CTE starts with direct manager-subordinate edges, then repeatedly follows subordinates downward.
+GROUP BY the original manager_id and COUNT DISTINCT subordinate_id avoid double-counting if paths repeat.
+Managers with no subordinates are absent. Cycles in employee_tree can recurse indefinitely unless the
+production query prevents revisits.
 
 ```sql
 WITH RECURSIVE subordinates AS (
@@ -655,6 +908,11 @@ ORDER BY total_subordinates DESC;
 
 **Statement:** Return monthly revenue columns for PAID, REFUNDED, and PENDING orders.
 
+**How to think:** Grain is one month with separate revenue columns for selected order statuses. The orders
+table is grouped by month, and FILTER inside SUM performs the pivot without changing row grain. There is no
+join. Months with no rows for a status produce null for that column, not zero. Status values outside PAID,
+REFUNDED, and PENDING are intentionally ignored.
+
 ```sql
 SELECT date_trunc('month', order_date)::date AS month_start,
        SUM(total_amount) FILTER (WHERE status = 'PAID') AS paid_revenue,
@@ -673,6 +931,12 @@ ORDER BY 1;
 `🟡 Intermediate`
 
 **Statement:** Return each order with counts of books, electronics, and clothing items.
+
+**How to think:** Grain is one order_id with category-specific quantity columns. order_items joins products
+because category lives on products while quantities live on items. GROUP BY order_id defines the grain, and
+conditional SUM FILTER expressions pivot categories into columns. Orders with no items are absent.
+Categories outside Books, Electronics, and Clothing are ignored; missing selected categories return null
+quantities.
 
 ```sql
 SELECT oi.order_id,
@@ -693,6 +957,11 @@ GROUP BY oi.order_id;
 
 **Statement:** Given a wide table `quarterly_sales(product_id, q1, q2, q3, q4)`, return rows `(product_id, quarter, revenue)`.
 
+**How to think:** Grain is one product_id and quarter row from a wide quarterly_sales record. UNION ALL
+stacks q1, q2, q3, and q4 columns into rows without de-duplicating equal revenues. No join, WHERE, or GROUP
+BY is needed. Null quarter values are still returned unless filtered. This is unpivoting: making columns
+into rows so later grouping and filtering are easier.
+
 ```sql
 SELECT product_id, 'Q1' AS quarter, q1 AS revenue FROM quarterly_sales
 UNION ALL
@@ -712,6 +981,11 @@ SELECT product_id, 'Q4', q4 FROM quarterly_sales;
 
 **Statement:** Return the median employee salary.
 
+**How to think:** Grain is a single median salary value. percentile_cont is an ordered-set aggregate over
+employees ordered by salary, so no GROUP BY or join is needed. The continuous median interpolates for an
+even number of salaries, often averaging the two middle values. Null salaries are ignored by the aggregate.
+Some databases need a window-function workaround instead of percentile_cont.
+
 ```sql
 SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY salary) AS median_salary
 FROM employees;
@@ -725,6 +999,11 @@ FROM employees;
 `🔴 Advanced`
 
 **Statement:** Return median salary for each department.
+
+**How to think:** Grain is one department_id with its median salary. GROUP BY department_id creates the
+department grain, and percentile_cont computes the median within each group. No join is needed because
+department names are not requested. Null department_id becomes its own group, and null salaries are ignored.
+Departments with no employees are absent because the query starts from employees.
 
 ```sql
 SELECT department_id,
@@ -741,6 +1020,12 @@ GROUP BY department_id;
 `🔴 Advanced` `🔥`
 
 **Statement:** Count users who performed view, add_to_cart, and purchase events in that order.
+
+**How to think:** Grain is a single funnel summary row across users. The per_user CTE reduces events to each
+user's first view, add_to_cart, and purchase timestamps, then the outer SELECT conditionally counts users at
+each step. The ordering checks are row-level comparisons after aggregation. Same-timestamp events fail
+strict greater-than, users without earlier steps are excluded from later counts, and duplicate events
+collapse to first timestamps.
 
 ```sql
 WITH per_user AS (
@@ -766,6 +1051,11 @@ FROM per_user;
 
 **Statement:** Given `events.event_type = 'utm:<source>'` for acquisition events, return first source per user.
 
+**How to think:** Grain is one user with their first acquisition source. Filter events to event_type values
+beginning with utm:, strip the prefix, then ROW_NUMBER by event_time and event_id chooses the first source
+per user. WHERE rn equals one filters after the window. Users with no UTM event are absent. event_id is
+important because simultaneous events need deterministic tie-breaking.
+
 ```sql
 WITH sources AS (
   SELECT user_id, REPLACE(event_type, 'utm:', '') AS source, event_time,
@@ -786,6 +1076,11 @@ WHERE rn = 1;
 `🔴 Advanced` `🔥`
 
 **Statement:** For each signup date, compute users who logged in exactly day 1 and day 7 after signup.
+
+**How to think:** Grain is one signup_date cohort with D1 and D7 retained counts. Users are left joined to
+logins exactly one and seven days after signup, preserving users who did not return. GROUP BY signup_date
+counts cohort size and retained subsets. Duplicate login rows can multiply joined rows and inflate counts,
+so dirty data should use COUNT DISTINCT user_id or pre-deduplicate logins.
 
 ```sql
 SELECT u.signup_date,
@@ -808,6 +1103,11 @@ ORDER BY u.signup_date;
 
 **Statement:** Return customers whose latest order is older than 90 days.
 
+**How to think:** Grain is one customer whose latest order is older than 90 days. Customers inner join
+orders, GROUP BY customer, and HAVING MAX order_date before the threshold filters after aggregation.
+Customers with no orders are omitted; decide separately whether they count as churned. Null order_date
+values are ignored by MAX, and CURRENT_DATE makes the result change over time.
+
 ```sql
 SELECT c.customer_id, c.name, MAX(o.order_date) AS last_order_date
 FROM customers c
@@ -824,6 +1124,11 @@ HAVING MAX(o.order_date) < CURRENT_DATE - INTERVAL '90 days';
 `🔴 Advanced`
 
 **Statement:** Return customers in the top 10 percent by paid spend.
+
+**How to think:** Grain is one spending customer in the top ten percent by paid spend. The spend CTE groups
+paid orders by customer, then CUME_DIST orders those spend rows descending and measures relative position
+including ties. The outer WHERE keeps cd up to 0.10. Non-spenders are excluded. Boundary behavior with ties
+can include more or fewer rows than a simple LIMIT.
 
 ```sql
 WITH spend AS (
@@ -849,6 +1154,11 @@ WHERE cd <= 0.10;
 
 **Statement:** Show each customer's cumulative share of paid revenue ordered by spend descending.
 
+**How to think:** Grain is one spending customer with their cumulative share of paid revenue. The CTE
+aggregates paid spend per customer, then window SUM over descending spend creates the running numerator and
+SUM over all rows creates the denominator. No join is needed. Ties should use a deterministic tiebreaker if
+ordering matters. If total revenue is zero, protect against division by zero.
+
 ```sql
 WITH spend AS (
   SELECT customer_id, SUM(total_amount) AS total_spend
@@ -871,6 +1181,11 @@ ORDER BY total_spend DESC;
 `⚫ FAANG` `Stretch`
 
 **Statement:** Assign a session number per user whenever the gap from previous event exceeds 30 minutes.
+
+**How to think:** Grain is one event with an assigned session number for that user. The marked CTE uses LAG
+to compare each event_time to the previous event and flags a new session after a 30-minute gap or at the
+first event. The numbered CTE uses a running SUM of flags. event_time and event_id provide deterministic
+order; null timestamps or clock skew need production rules.
 
 ```sql
 WITH marked AS (
@@ -896,6 +1211,11 @@ FROM numbered;
 
 **Statement:** Return sessions where a `purchase` event occurred after a `search` event.
 
+**How to think:** Grain is one session_id where a purchase happened after a search. The CTE groups events by
+session and finds first_search and first_purchase via filtered MIN. The final WHERE requires a search and a
+purchase time greater than it. Sessions with purchase before search, no search, or no purchase are excluded.
+Multiple searches or purchases are simplified to first occurrences.
+
 ```sql
 WITH s AS (
   SELECT session_id,
@@ -919,6 +1239,11 @@ WHERE first_search IS NOT NULL
 
 **Statement:** Return average number of days between consecutive orders per customer.
 
+**How to think:** Grain is one customer with their average day gap between consecutive orders. LAG finds the
+previous order date per customer ordered by date and order_id, WHERE removes each customer's first order,
+and GROUP BY customer averages the date differences. Customers with one order are absent. Same-day orders
+contribute zero days, and order_id makes same-date ordering deterministic.
+
 ```sql
 WITH x AS (
   SELECT customer_id, order_date,
@@ -939,6 +1264,12 @@ GROUP BY customer_id;
 `🔴 Advanced` `🔥`
 
 **Statement:** Return product pairs bought together in the same order and their co-purchase count.
+
+**How to think:** Grain is one unordered product pair with the count of orders containing both products.
+order_items self-joins within the same order, and product_id less-than removes self-pairs and reverse
+duplicates. GROUP BY the pair counts co-purchases. Quantities are ignored, which is correct for basket
+co-occurrence. Dirty duplicate item rows can inflate together_count unless order-product pairs are
+deduplicated first.
 
 ```sql
 SELECT oi1.product_id AS product_a,
@@ -961,6 +1292,11 @@ ORDER BY together_count DESC;
 
 **Statement:** For each login date, count distinct users who logged in during that date and previous 6 days.
 
+**How to think:** Grain is one login date with distinct users active in that date's trailing seven-day
+window. The dates CTE provides anchor dates from observed logins, then the join includes login rows between
+anchor minus six days and anchor. COUNT DISTINCT handles repeated users. Missing calendar dates are omitted.
+On large tables, this range join can be expensive without date indexes or pre-aggregated daily activity.
+
 ```sql
 WITH dates AS (SELECT DISTINCT login_date FROM logins)
 SELECT d.login_date,
@@ -981,6 +1317,11 @@ ORDER BY d.login_date;
 
 **Statement:** Return orders where `orders.total_amount` does not equal the sum of line items.
 
+**How to think:** Grain is one order whose stored total differs from its item total. Orders join
+order_items, GROUP BY order, and HAVING compares orders.total_amount to SUM quantity times unit_price. The
+aggregate comparison belongs in HAVING. Orders with no items are omitted by the inner join. Real money
+systems need rounding tolerance and careful handling of null quantities or prices.
+
 ```sql
 SELECT o.order_id, o.total_amount, SUM(oi.quantity * oi.unit_price) AS item_total
 FROM orders o
@@ -998,6 +1339,11 @@ HAVING o.total_amount <> SUM(oi.quantity * oi.unit_price);
 
 **Statement:** Return customers with at least one order and no non-PAID orders.
 
+**How to think:** Grain is one customer_id whose existing orders are all paid and who has at least one
+order. Group orders by customer_id, then HAVING verifies there is at least one row and zero rows with status
+not PAID or null. The null check matters because SQL status not equal PAID would otherwise ignore null.
+Customers with no orders are absent because the query starts from orders.
+
 ```sql
 SELECT customer_id
 FROM orders
@@ -1014,6 +1360,12 @@ HAVING COUNT(*) > 0
 `🔴 Advanced`
 
 **Statement:** Return customers and months where they bought products from at least three distinct categories.
+
+**How to think:** Grain is one customer and month where paid purchases span at least three distinct product
+categories. Orders join order_items and products because customer/month, item product, and category live in
+different places. WHERE keeps paid orders before grouping. HAVING COUNT DISTINCT category at least three
+applies after aggregation. Duplicate items in the same category do not inflate the count; null categories
+are ignored by COUNT DISTINCT.
 
 ```sql
 SELECT o.customer_id,

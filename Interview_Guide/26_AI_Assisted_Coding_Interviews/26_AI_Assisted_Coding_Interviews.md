@@ -5,6 +5,7 @@ Study guide for interviews where AI tools are explicitly allowed and the intervi
 **Legend:** 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
 ## Table of Contents
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [Format, Rubric, and Workflow](#format-rubric-and-workflow)
 - [Prompting and Reviewing AI Code](#prompting-and-reviewing-ai-code)
 - [Practice Rounds](#practice-rounds)
@@ -13,12 +14,127 @@ Study guide for interviews where AI tools are explicitly allowed and the intervi
 - [Revision Cheat Sheet](#revision-cheat-sheet)
 - [Flashcards](#flashcards)
 
+## Beginner guide to this file
+
+### What this file teaches
+
+This file teaches how to succeed when artificial intelligence (AI) tools are allowed in coding interviews.
+The interview is not just checking whether generated code compiles; it evaluates whether a Software
+Development Engineer (SDE) candidate can understand requirements, direct the tool with precise prompts,
+verify every change, test edge cases, debug with evidence, and communicate ownership. In real backend work,
+the same habits protect services when assistants suggest Java, Spring Boot, Structured Query Language (SQL),
+or test changes.
+
+### Mental model
+
+Treat the AI assistant like a very fast junior pair programmer: useful for drafts and hypotheses, but not
+responsible for correctness. You own the problem, the tests, the final code, and the explanation.
+- Requirements define the target; the assistant should not invent scope or change public behavior.
+- Small prompts create reviewable diffs; giant prompts create hidden risk.
+- Generated code is a proposal until it compiles, passes tests, and survives human review.
+- Failures are evidence; stack traces and failing tests should guide the next prompt or manual fix.
+- Communication matters because interviewers grade judgment, ownership, and trade-offs, not copy-paste
+speed.
+
+### How to think through any question here
+
+1. First confirm whether AI is allowed, which tools are allowed, and what you must do without assistance.
+2. Read the prompt, existing code, tests, and build files before asking for code.
+3. Restate requirements, edge cases, constraints, and expected complexity in your own words.
+4. Plan the approach, then ask the assistant for one narrow change, test, explanation, or hypothesis.
+5. Review the output line by line for invented APIs, wrong versions, missed edge cases, security issues, and
+complexity lies.
+6. Run focused tests, add regression tests, and debug concrete failures instead of re-prompting blindly.
+7. Refactor only after correctness is proven, then summarize what AI suggested, what you accepted, what you
+rejected, and why.
+
+### Pattern recognition cues
+
+| If the question mentions... | Think about... | Why it fits |
+|---|---|---|
+| AI-assisted round or scoring | Workflow, judgment, tests, and ownership | The interviewer grades how you use AI, not whether AI can type. |
+| Prompt examples | Context, constraints, expected output, and what not to change | Good prompts make generated code easier to verify. |
+| Hidden bug, failing test, or unfamiliar repo | Evidence-first debugging and codebase navigation | Random re-prompting hides whether you understand the system. |
+| Spring Boot endpoint or validation | API contract, status codes, validation style, and tests | AI often misses project conventions or framework versions. |
+| Race condition or shared HashMap | Shared mutable state, thread safety, and concurrent requests | Backend services handle multiple requests at once. |
+| O(n^2) or complexity claim | Brute force, optimal data structure, and proof | Generated complexity claims must be checked manually. |
+| SQL, Java Persistence API, or repository query | Injection, N+1 queries, joins, indexes, and result grain | Data access bugs can be correct on samples but fail in production. |
+| Refactor or legacy class | Characterization tests and behavior preservation | Refactoring should change shape, not observable behavior. |
+| Retrieval-Augmented Generation bug | Inputs, retrieved documents, filters, ranking, and evaluation | AI features still need deterministic tests around data flow. |
+| Secrets, licensing, or policy | Permission, protected data, and company rules | Integrity failures can matter more than the code solution. |
+| End-of-round summary | Accepted/rejected AI suggestions, tests, trade-offs, and next steps | The summary proves human ownership of the final answer. |
+
+### Abbreviations and key terms
+
+| Short form | Expanded form | Plain meaning |
+|---|---|---|
+| AI | Artificial Intelligence | Assistant software that can generate, explain, or suggest code. |
+| API | Application Programming Interface | Contract exposed by code, often a backend endpoint. |
+| DSA | Data Structures and Algorithms | Core problem-solving topic still needed without AI help. |
+| DTO | Data Transfer Object | Object used to carry request or response data across layers. |
+| FAANG | Facebook, Amazon, Apple, Netflix, Google | Shorthand for large product-company interview style. |
+| GET | HTTP GET method | Request method usually used to read data. |
+| HIT | Human-in-the-loop ownership principle | Reminder that the human owns correctness, not the tool. |
+| IDE | Integrated Development Environment | Editor with build, navigation, and diagnostics support. |
+| JDBC | Java Database Connectivity | Java API for relational database access. |
+| JPA | Java Persistence API | Java standard for object-relational persistence. |
+| JPQL | Java Persistence Query Language | JPA query language over entity objects. |
+| LLM | Large Language Model | Model type behind many coding assistants. |
+| LRU | Least Recently Used | Cache policy that evicts the item unused for the longest time. |
+| POST | HTTP POST method | Request method commonly used to create or submit data. |
+| RAG | Retrieval-Augmented Generation | Pattern that retrieves relevant documents before generating an answer. |
+| README | Read Me file | Project document that explains setup, usage, or architecture. |
+| SDE | Software Development Engineer | Engineering role level used in interviews and career ladders. |
+| SQL | Structured Query Language | Language for querying relational databases. |
+| TTL | Time To Live | Expiration duration for cached or stored data. |
+| MockMvc | Spring MVC test helper | Tool for testing Spring web endpoints without a real server. |
+| Prompt | Instruction to the AI assistant | The context, goal, constraints, and expected result you give the tool. |
+| Regression test | Test that prevents a fixed bug from returning | Evidence that the same failure is now covered. |
+| Race condition | Timing-dependent concurrency bug | Bug caused by multiple threads touching shared state unsafely. |
+
+### Common beginner traps
+
+- Prompting before reading the task, existing code, tests, and allowed-tool rules.
+- Accepting generated code because it looks professional, without compiling, testing, or checking APIs.
+- Letting AI silently expand scope, change public behavior, or rewrite unrelated files.
+- Using vague prompts such as fix this instead of giving constraints, versions, expected behavior, and edge
+cases.
+- Re-prompting after a failure without reading the stack trace or isolating the root cause.
+- Forgetting to explain which AI suggestions were rejected and why the final code is yours.
+
+### How to study this file
+
+1. Memorize the short answers as interview openings, then expand with the detailed answer only after the
+interviewer engages.
+2. Turn each prompt example into a two-minute drill: bad prompt, improved prompt, likely AI mistake, and
+verification step.
+3. Use practice rounds actively: first solve or plan unaided, then ask AI for a narrow piece, then review
+and test.
+4. Convert flashcards into spoken checkpoints, especially around allowed use, security, testing, and
+ownership.
+5. After every practice session, write down one accepted AI suggestion, one rejected suggestion, and the
+evidence used.
+
+### Scalability and production lens
+
+In a toy exercise, a generated solution may pass one sample. In production, AI-assisted code must fit the
+repository architecture, dependency versions, concurrency model, security policy, observability, and
+rollback path. Interviewers like candidates who say how they would add unit and integration tests, protect
+secrets, review generated database queries, watch latency and errors, and avoid shipping code they cannot
+explain.
+
 ## Format, Rubric, and Workflow
 
 ### Q1. What is an AI-assisted coding interview and how is it scored?
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** You must know the game before practicing it.
+
+**Beginner lens:** An AI-assisted interview is like pair programming with a fast assistant while the
+interviewer watches your judgment. The tool may draft code, but you own requirements, review, tests, and
+explanation. Recognize that scoring focuses on process: reading first, prompting narrowly, catching
+mistakes, and verifying behavior. A strong answer says when AI is allowed and how you prove the final code
+is correct.
 
 **Short answer (say this first, 20-40 sec):**
 It is a coding round where AI use is allowed and evaluated. Interviewers judge whether I understand the problem, prompt in small steps, review every line, test thoroughly, debug failures, and explain trade-offs instead of blindly accepting output.
@@ -50,6 +166,11 @@ Typical tasks include multi-file codebase changes, bug fixes, staged requirement
 
 **Why they ask:** A repeatable workflow prevents chaos.
 
+**Beginner lens:** The workflow is a safety rail. Read and clarify before prompting, plan before editing,
+review before trusting, and test before summarizing. The interviewer is testing whether AI makes you more
+disciplined or more chaotic. Use failures as feedback: inspect the exact failing test or compiler error,
+then either fix manually or ask a narrower question with evidence.
+
 **Short answer (say this first, 20-40 sec):**
 Read first, clarify, plan, prompt narrowly, review AI output, test, debug, refactor, and summarize. The AI is an assistant, not the owner of correctness.
 
@@ -77,10 +198,17 @@ Say out loud: "I will first inspect the existing code and tests so I do not ask 
 - *When do you stop prompting?* → When code is correct, tested, and explainable.
 - *What if AI output is wrong?* → Debug the concrete failure, then ask a narrower follow-up.
 
+## Prompting and Reviewing AI Code
+
 ### Q3. Give 10 bad-to-good prompt examples.
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Prompt quality is now part of coding skill.
+
+**Beginner lens:** A good prompt is a mini engineering ticket: context, goal, constraints, versions,
+expected behavior, and what not to change. The interviewer is testing communication as much as code. Bad
+prompts create broad, unreviewable output; good prompts create small diffs you can inspect. Always plan how
+you will verify the answer before asking AI to generate it.
 
 **Short answer (say this first, 20-40 sec):**
 A good prompt includes context, goal, constraints, version, existing behavior, expected output, tests, and what not to change. It asks for a small result, not a magic full solution.
@@ -112,6 +240,11 @@ A good prompt includes context, goal, constraints, version, existing behavior, e
 
 **Why they ask:** Fast review prevents obvious AI mistakes.
 
+**Beginner lens:** The checklist is a quick code review lens for generated output. Think of it as checking
+the doors before driving: requirements, boundaries, nulls, complexity, APIs, security, concurrency, tests,
+and readability. It applies whenever AI returns code that looks plausible. The key distinction is appearance
+versus proof; compiling and testing are required, not optional.
+
 **Short answer (say this first, 20-40 sec):**
 Check requirements, boundaries, nulls, complexity, APIs, concurrency, security, existing behavior, tests, and readability before accepting AI code.
 
@@ -139,6 +272,11 @@ Check requirements, boundaries, nulls, complexity, APIs, concurrency, security, 
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** AI-generated Java often has subtle bugs.
+
+**Beginner lens:** AI-generated Java often fails in boring, realistic ways: wrong imports, invented methods,
+unsafe shared state, SQL injection, null handling, or fake complexity claims. Recognize this when code looks
+polished but unverified. The interviewer wants you to compile, inspect project versions such as Spring Boot
+3, check edge cases, and explain why each fix preserves existing behavior.
 
 **Short answer (say this first, 20-40 sec):**
 Common issues are off-by-one errors, invented APIs, `javax` vs `jakarta`, bad complexity, HashMap races, SQL injection, missing null checks, and silently broken tests.
@@ -177,6 +315,11 @@ jdbcTemplate.query(
 
 **Why they ask:** Many rounds use existing projects.
 
+**Beginner lens:** An unfamiliar codebase is a map-reading task before it is a coding task. Find entry
+points, tests, build files, data models, and conventions before asking AI for changes. The interviewer is
+testing whether you can avoid breaking hidden contracts. Use AI for summaries or navigation hints, but
+verify by reading files, running tests, and tracing actual calls.
+
 **Short answer (say this first, 20-40 sec):**
 Find entry points, tests, package structure, data models, and failing behavior first. Ask AI to summarize small files or call paths, then verify by reading code and running tests.
 
@@ -201,6 +344,11 @@ Find entry points, tests, package structure, data models, and failing behavior f
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** It tests review of AI-generated DSA code.
+
+**Beginner lens:** An LRU cache is a tiny system with strict invariants: the map finds entries, the ordering
+structure tracks recency, and capacity evicts the least recently used item. Hidden bugs usually break one
+invariant after get, put, update, or eviction. The interviewer tests whether you write targeted tests and
+inspect state transitions instead of accepting a generated cache implementation.
 
 **Short answer (say this first, 20-40 sec):**
 I would inspect invariants: capacity, get updates recency, put updates existing keys, and eviction removes the least recently used key from both list and map.
@@ -238,6 +386,11 @@ What to say: "I am checking both data structures stay consistent."
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Backend rounds often modify APIs.
+
+**Beginner lens:** A Spring Boot endpoint question tests API contract discipline: request shape, validation,
+status codes, exception style, service call, and tests. AI may invent annotations, ignore project
+conventions, or skip negative cases. Recognize it when the task mentions path, payload, or validation.
+Verify with MockMvc or integration tests and check that generated code matches Spring Boot 3 imports.
 
 **Short answer (say this first, 20-40 sec):**
 I would follow existing controller/service/repository patterns, validate input, return correct status codes, and add MockMvc tests.
@@ -277,6 +430,11 @@ What to say: "I matched Spring Boot 3 Jakarta validation and existing exception 
 
 **Why they ask:** AI often misses concurrency.
 
+**Beginner lens:** A race condition happens when shared mutable state is touched by concurrent requests,
+like two cashiers editing the same notebook page. A HashMap may work in one test and fail under parallel
+access. The interviewer is testing the distinction between local variables and shared fields. Use
+thread-safe structures, immutability, or synchronization, then test the behavior under concurrency.
+
 **Short answer (say this first, 20-40 sec):**
 A shared `HashMap` is unsafe under concurrent writes. Use `ConcurrentHashMap`, synchronization, or make state request-scoped.
 
@@ -309,6 +467,11 @@ What to say: "The original has lost updates and possible internal map corruption
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** You must catch complexity lies.
+
+**Beginner lens:** When AI gives O(n^2), first identify the repeated work: nested loops, repeated searches,
+or repeated sorting. The usual improvement is to store what you need in a map, set, heap, or sorted
+structure. The interviewer is testing whether you can challenge AI approach and prove complexity yourself.
+Edge cases still matter after optimization.
 
 **Short answer (say this first, 20-40 sec):**
 I would identify nested loops, state the actual complexity, and ask for or implement a map/set-based O(n) solution.
@@ -346,6 +509,11 @@ What to say: "This trades O(n) space for O(n) time."
 
 **Why they ask:** Backend AI output can create performance and security bugs.
 
+**Beginner lens:** Reviewing SQL or JPA code means checking both correctness and data-access behavior. Look
+for injection, wrong joins, N+1 queries, missing indexes, null handling, pagination, and result grain. The
+interviewer is testing whether you understand that generated queries can pass a sample and still be unsafe
+or slow. Verify with tests, parameters, and realistic data shapes.
+
 **Short answer (say this first, 20-40 sec):**
 I check injection, N+1 queries, missing indexes, pagination, and transaction boundaries.
 
@@ -374,6 +542,11 @@ For N+1, use fetch join or entity graph where appropriate. Add an index on frequ
 `🔴 Advanced` `🔥` `Stretch`
 
 **Why they ask:** Progressive requirements test maintainability.
+
+**Beginner lens:** A progressive key-value store is about controlled requirement growth. Start with a simple
+contract, then add features such as TTL, compare-and-set, history, or transactions only when requested. AI
+may overbuild or miss invariants. The interviewer is testing whether you keep the interface clear, preserve
+old behavior, and add tests for each new stage before moving on.
 
 **Short answer (say this first, 20-40 sec):**
 I would design simple interfaces first, then add TTL, transactions, and persistence without rewriting everything.
@@ -409,6 +582,11 @@ What to say: "I inject `Clock` so TTL tests are deterministic."
 
 **Why they ask:** AI code can be verbose and coupled.
 
+**Beginner lens:** Refactoring messy AI-generated code should be behavior-preserving, like reorganizing a
+room without losing any items. First characterize current behavior with tests, then make small extractions,
+rename confusing pieces, and remove duplication. The interviewer is testing restraint: do not rewrite the
+whole class, change public APIs, or hide logic changes inside a cleanup.
+
 **Short answer (say this first, 20-40 sec):**
 I refactor only after tests pass, extract responsibilities, keep public behavior unchanged, and explain the new design.
 
@@ -440,6 +618,11 @@ Move validation annotations to DTO, business rules to service, persistence to re
 
 **Why they ask:** AI is useful but misses edge cases.
 
+**Beginner lens:** Legacy tests begin with characterization: capture what the class currently does,
+including awkward edge cases, before improving it. AI can suggest scenarios, but you choose which are
+meaningful and compile them against real APIs. The interviewer is testing whether you use tests as a safety
+net, not as decoration. Keep generated tests deterministic and tied to requirements.
+
 **Short answer (say this first, 20-40 sec):**
 Ask AI for test cases, then review gaps against requirements, boundaries, and current behavior before implementing.
 
@@ -470,6 +653,11 @@ What to say: "I am adding characterization tests before changing legacy behavior
 
 **Why they ask:** Debugging beats reprompting.
 
+**Beginner lens:** A failing test suite is a trail of evidence. Read the first meaningful failure, reproduce
+it, inspect the changed code path, and form a hypothesis before prompting again. The interviewer is testing
+debugging discipline. Randomly asking AI to fix all failures often creates more changes. Prefer one failing
+test, one root cause, one fix, then rerun.
+
 **Short answer (say this first, 20-40 sec):**
 I read the failing assertion and stack trace, identify the smallest failing unit, reproduce locally, inspect recent changes, then fix root cause and run targeted tests.
 
@@ -496,6 +684,11 @@ What to say: "I will not update tests until I confirm the requirement changed."
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Connects to Lafz and Python.
+
+**Beginner lens:** A RAG retrieval bug is still a data-flow bug: user query, filters, retrieved documents,
+ranking, prompt, and generated answer. AI may guess the model problem when the real issue is a filter,
+metadata field, or empty result. The interviewer tests whether you isolate retrieval before generation.
+Build small deterministic cases and verify expected documents are returned.
 
 **Short answer (say this first, 20-40 sec):**
 I would check whether query embedding, filter metadata, distance metric, and top-k ordering match ingestion. Then add a regression test.
@@ -532,6 +725,11 @@ What to say: "The retrieval bug was metadata normalization, not the LLM."
 
 **Why they ask:** They want responsible usage.
 
+**Beginner lens:** Daily AI use should sound like responsible engineering, not dependency. Use it for
+drafts, explanations, test ideas, refactoring suggestions, and debugging hypotheses, then verify everything
+locally. The interviewer is testing judgment and honesty. Mention policy compliance, code review, tests, and
+when you prefer manual work because the context is sensitive or the risk is high.
+
 **Short answer (say this first, 20-40 sec):**
 I use AI to speed up navigation, draft boilerplate, generate test ideas, explain unfamiliar code, and compare approaches. I still own correctness, security, and final review.
 
@@ -550,6 +748,11 @@ For Java/Spring tasks, I first read the existing code and tests, then ask target
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Verification is the core skill.
+
+**Beginner lens:** Correct and secure generated code needs a verification pipeline: read the diff, compile,
+run focused and regression tests, check edge cases, inspect dependencies, and review security risks such as
+injection or secrets. The interviewer is testing ownership. Do not say AI made it safe; say which evidence
+proves it is safe enough to submit.
 
 **Short answer (say this first, 20-40 sec):**
 I review every line, compile, run targeted tests, add edge-case tests, check complexity, validate dependencies/APIs, and scan for security issues like injection, secrets, and unsafe concurrency.
@@ -570,6 +773,11 @@ Use the 60-second checklist, then deeper review for high-risk code. For Spring B
 
 **Why they ask:** They want a concrete behavior story.
 
+**Beginner lens:** A story about AI being wrong should be a verified STAR example, not a fictional warning.
+Describe the task, the incorrect suggestion, the signal that exposed it, the fix, and the lesson. The
+interviewer is testing humility and review habits. If you do not have a real example, use a placeholder and
+practice with one from your own work.
+
 **Short answer (say this first, 20-40 sec):**
 Template: "AI suggested `[wrong code]`. I caught it by `[test/compile/review]`, identified `[root cause]`, and fixed it by `[correct approach]`."
 
@@ -588,6 +796,11 @@ Example: "For a Spring Boot 3 endpoint, AI used `javax.validation.Valid`. The bu
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Production risk awareness matters.
+
+**Beginner lens:** Production risk comes from plausible code that no one truly understands. AI can introduce
+security bugs, dependency mismatches, performance problems, licensing issues, missing observability, or
+unmaintainable abstractions. The interviewer is testing risk management. Mitigate with policy, review,
+tests, staged rollout, monitoring, and the discipline to reject generated code you cannot explain.
 
 **Short answer (say this first, 20-40 sec):**
 Risks include subtle bugs, outdated APIs, security vulnerabilities, licensing/policy issues, performance regressions, broken existing behavior, and overconfidence from plausible-looking code.
@@ -608,6 +821,11 @@ Mitigations: code review, tests, dependency checks, static analysis, secret scan
 
 **Why they ask:** Judgment and integrity matter.
 
+**Beginner lens:** Not using AI can be the correct engineering decision. Avoid it when policy forbids it,
+secrets or private code cannot be shared, the round is unassisted, the task needs personal judgment, or the
+generated answer would be impossible to verify. The interviewer is testing ethics and boundaries.
+Responsible restraint is a strength, not a weakness.
+
 **Short answer (say this first, 20-40 sec):**
 I would not use AI where it is not allowed, with secrets or restricted data, for tasks I cannot review, for final security decisions, or when direct reasoning is faster and safer.
 
@@ -626,6 +844,11 @@ In interviews, I ask the recruiter or interviewer whether AI is allowed. In prod
 `🔴 Advanced` `🔥` `Stretch`
 
 **Why they ask:** Compliance matters.
+
+**Beginner lens:** Licensing, secrets, and policy questions are integrity checks. Treat code, credentials,
+customer data, and internal designs as protected unless rules explicitly allow sharing. AI assistance must
+fit company policy and interview rules. The interviewer is testing whether you understand that a clever
+solution can still fail if it leaks data, violates licenses, or ignores instructions.
 
 **Short answer (say this first, 20-40 sec):**
 Use only approved tools, never paste secrets, avoid copying unknown licensed code, keep attribution/policy requirements, run secret scanning, and review generated code for originality and dependency licenses.
@@ -648,6 +871,11 @@ Use only approved tools, never paste secrets, avoid copying unknown licensed cod
 
 **Why they ask:** They want balanced maturity.
 
+**Beginner lens:** AI changes debugging, testing, and review by making hypotheses faster, not by replacing
+evidence. It can suggest test cases, explain traces, or propose fixes, but tests, logs, profilers, and code
+review decide truth. The interviewer is testing balance. Say how AI speeds exploration while you still own
+reproduction, verification, and final judgment.
+
 **Short answer (say this first, 20-40 sec):**
 AI speeds up hypothesis generation, test-case brainstorming, and unfamiliar-code explanation. It does not replace reproducing bugs, reading stack traces, running tests, or understanding root cause.
 
@@ -666,6 +894,11 @@ Good use: "Here is a stack trace and method; list likely causes." Bad use: "Fix 
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** They assess judgment, not prediction hype.
+
+**Beginner lens:** The replacement question tests perspective. AI can automate pieces of coding, but
+engineers still define ambiguous problems, choose trade-offs, protect users, coordinate systems, and accept
+accountability. The interviewer wants a calm answer, not hype or fear. Tie your view back to stronger
+fundamentals: requirements, design, testing, review, communication, and ownership.
 
 **Short answer (say this first, 20-40 sec):**
 AI will automate parts of coding, but engineers are still needed to define problems, make trade-offs, ensure correctness, handle security, understand users, and operate systems. The role shifts toward higher leverage and stronger review skills.
@@ -687,6 +920,11 @@ Balanced answer: "AI is like a powerful junior pair programmer: fast, useful, an
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Consistency beats cramming.
+
+**Beginner lens:** A weekly practice plan is deliberate training, not random prompting. Mix unaided DSA,
+AI-assisted codebase changes, review drills, debugging, and explanation practice. The interviewer is testing
+whether you can improve the exact skills the format scores. Track one mistake per session, such as weak
+prompts, missing edge cases, or poor summaries, then fix it next week.
 
 **Short answer (say this first, 20-40 sec):**
 Practice both AI-assisted and unassisted coding. Use AI rounds for prompting/review/debugging, and keep DSA/System Design sharp without AI.
@@ -715,6 +953,11 @@ Practice both AI-assisted and unassisted coding. Use AI rounds for prompting/rev
 
 **Why they ask:** Misuse can disqualify you.
 
+**Beginner lens:** The integrity note is the rulebook: use AI only when allowed, follow the allowed-tool
+boundaries, and be transparent about assistance when asked. The mental model is an open-book exam with
+strict book rules. The interviewer is testing trust. If a round is not AI-assisted, do not use AI; if it is
+allowed, still own every line.
+
 **Short answer (say this first, 20-40 sec):**
 Use AI only where explicitly allowed. If unclear, ask the recruiter or interviewer. In AI-free rounds, do not use AI; keep unassisted coding skills strong.
 
@@ -733,6 +976,11 @@ Say: "Before the round, I will confirm whether AI tools are allowed, which tools
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Closing summary affects interviewer confidence.
+
+**Beginner lens:** The final summary is your ownership receipt. Restate the requirement, approach, tests,
+complexity, AI suggestions accepted or rejected, and remaining improvements. The interviewer is checking
+whether you understand the final code rather than merely produced it. A strong close also names evidence:
+passing tests, reviewed edge cases, known trade-offs, and any follow-up you would do.
 
 **Short answer (say this first, 20-40 sec):**
 Summarize the requirement, approach, tests run, complexity, AI suggestions accepted/rejected, and what you would improve with more time.

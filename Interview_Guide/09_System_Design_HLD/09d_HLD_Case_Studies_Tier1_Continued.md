@@ -5,16 +5,125 @@ This file completes the Tier-1 HLD set with notification, chat, feed, autocomple
 **Legend:** 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
 ## Table of Contents
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [6. Design Notification Service](#6-design-notification-service)
-- [7. Design Chat App](#7-design-chat-app)
+- [7. Design Chat App](#7-design-chat-app-whatsapp)
 - [8. Design News Feed](#8-design-news-feed)
 - [9. Design Search Autocomplete](#9-design-search-autocomplete)
-- [10. Design Ticket Booking](#10-design-ticket-booking)
+- [10. Design Ticket Booking](#10-design-ticket-booking-bookmyshow)
 - [Revision Cheat Sheet](#revision-cheat-sheet)
 - [Flashcards](#flashcards)
 
+## Beginner guide to this file
+
+### What this file teaches
+This file teaches user-facing high-level design (HLD) systems where latency, reliability, and correctness meet:
+notifications, chat, feeds, autocomplete, and ticket booking. Interviewers like these cases because they reveal
+whether you can separate the fast read path from the durable write path and explain user experience during
+failure.
+
+### Mental model
+Think of these systems as live event operations: some work must happen immediately for the user, while other work
+can be scheduled, fanned out, retried, or repaired.
+
+- Queues absorb provider calls, fan-out, delivery, and expiry work so APIs stay responsive.
+- Redis stores ephemeral state such as presence, rate limits, seat holds, and hot pages.
+- Durable stores keep messages, bookings, posts, templates, and user preferences.
+- Idempotency prevents duplicate emails, messages, holds, payments, or bookings.
+- The read path is often cached; the write path usually owns correctness.
+
+### How to think through any question here
+1. Identify the user-visible action: send, receive, post, suggest, hold, or confirm.
+2. Ask what must be durable before acknowledging success.
+3. Decide what can be stale, such as feed freshness or autocomplete ranking.
+4. Model the main state machine: notification status, message cursor, post fan-out, or seat state.
+5. Estimate peak traffic and call out bursty moments such as flash sales or push storms.
+6. Add queues, retries, and dedupe where external systems or fan-out are involved.
+7. Explain how the user recovers when a gateway, provider, cache, or database fails.
+
+### Pattern recognition cues
+| If the question mentions... | Think about... | Why it fits |
+|---|---|---|
+| Email, SMS, push, or provider failure | Async queue and provider adapters | External providers are slow and unreliable. |
+| Online users or typing indicators | WebSocket gateways plus Redis presence | Presence is temporary and connection-oriented. |
+| Offline message history | Append-first durable message store | Delivery can be retried only if the message is stored. |
+| Feed from followers | Fan-out-on-write and celebrity fan-out-on-read | Normal users need fast reads; celebrities avoid huge writes. |
+| Prefix suggestions per keystroke | Precomputed top prefixes | Per-keystroke database queries are too slow. |
+| Reserved seats or no double booking | Redis hold plus SQL transaction | Temporary user experience needs final durable correctness. |
+| Duplicate retry after timeout | Idempotency key | Retrying should return the previous result, not repeat work. |
+| Flash sale traffic | Waiting room, rate limit, and cached metadata | The hot write endpoint needs protection before the database. |
+
+### Abbreviations and key terms
+| Short form | Expanded form | Plain meaning |
+|---|---|---|
+| API | Application programming interface | Contract used by clients and services. |
+| CDN | Content delivery network | Edge cache for pages, media, or public assets. |
+| DAU | Daily active users | Count of unique users active in one day. |
+| DB | Database | Durable storage for important state. |
+| DLQ | Dead-letter queue | Queue for jobs that exceeded retry limits. |
+| DR | Disaster recovery | Plan for restoring service after a major outage. |
+| E2E | End to end | Protection or behavior that spans sender to receiver, often encryption. |
+| FAANG | Facebook, Amazon, Apple, Netflix, Google | Shorthand for large product-company interview style. |
+| Fan-out | Not an abbreviation | Copying one event to many recipients or feed inboxes. |
+| FST | Finite state transducer | Compact trie-like structure used for suggestions. |
+| GB | Gigabyte | Roughly one billion bytes. |
+| HLD | High-level design | Component-level system design discussion. |
+| ID | Identifier | Unique value for a user, message, post, booking, or request. |
+| Idempotency | Not an abbreviation | Safe retry pattern where the same request key returns the same result. |
+| KB | Kilobyte | Roughly one thousand bytes. |
+| KV | Key-value | Data model that reads by exact key. |
+| MB | Megabyte | Roughly one million bytes. |
+| ML | Machine learning | Model-based ranking, filtering, or prediction. |
+| ms | Millisecond | One thousandth of a second. |
+| P99 | 99th percentile | Tail-latency measure for most-but-not-all requests. |
+| PK | Primary key | Unique row identifier in a relational table. |
+| QPS | Queries per second | Request throughput. |
+| REST | Representational state transfer | Common HTTP API style using resources and verbs. |
+| SDE-1 | Software Development Engineer level 1 | Entry-level engineering interview bar in this guide. |
+| SMS | Short Message Service | Text-message notification channel. |
+| SQL | Structured Query Language | Relational query language and shorthand for relational databases. |
+| TB | Terabyte | Roughly one trillion bytes. |
+| TTL | Time to live | Expiration duration for cache, presence, or holds. |
+| UX | User experience | How responsive and understandable the system feels to users. |
+| WebSocket | WebSocket protocol | Long-lived two-way connection for real-time updates. |
+
+### Common beginner traps
+- Acknowledging chat messages before durable storage, then losing messages on crash.
+- Treating a push provider, SMS provider, or payment provider as always available.
+- Recomputing a news feed or autocomplete result from raw data on every read.
+- Using Redis-only seat locks without a final SQL constraint or transaction.
+- Forgetting idempotency for notification requests, message sends, and booking confirmation.
+- Ignoring celebrity users, flash sales, or per-keystroke request multiplication.
+
+### How to study this file
+1. Start with the revision cheat sheet and name the core pattern for each system.
+2. For each case, trace the write path until the point where success is acknowledged.
+3. Trace the read path and mark which data can be stale without harming correctness.
+4. Use flashcards to practice the one-sentence answer, then add a failure scenario.
+5. Rehearse one SDE-1 answer and one Senior stretch point for every design.
+
+### Scalability and production lens
+In production, these systems fail at the edges: mobile clients disconnect, providers throttle, queues lag, and
+hot events overload one partition. A strong answer keeps durable state separate from ephemeral state, makes retry
+safe with idempotency, and gives a degraded but honest user experience when real-time delivery or ranking is
+behind.
+
 ## 6. Design Notification Service
 Tier 1 · SDE-1 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Accept a request to notify a user and deliver it through email, SMS, push, or in-app without
+blocking the caller on provider delays. **Mental model:** It is a postal dispatch center: the API accepts an
+envelope, workers choose the carrier, and status tracking records what happened. **Thought process:** Start with
+transactional versus marketing traffic, delivery urgency, preferences, and provider limits. Writes dominate the
+pipeline because every notification becomes status plus queued work; reads are mainly status and preferences.
+Core data is request ID, user, channel, template, provider response, and status. The bottleneck is provider
+throughput, while consistency needs focus on avoiding duplicate sends. **Request flow:** Write path validates
+idempotency and preferences, persists status, enqueues a channel job, and returns queued. Read path fetches status
+or preference data from SQL/cache. **Key trade-offs and alternatives:** Synchronous provider calls are simpler
+but fragile; at-least-once delivery plus dedupe is realistic. **How it scales:** Partition queues by channel and
+tenant, rate-limit with Redis, fail over providers, and use dead-letter queues for manual repair.
 
 ### 1. Clarifying questions to ask
 - Channels: email, SMS, push, in-app?
@@ -128,6 +237,20 @@ Notification service is an async delivery pipeline. Persist requests, enqueue jo
 ## 7. Design Chat App (WhatsApp)
 Tier 1 · SDE-1 must-know
 
+### 0. Beginner primer
+
+**Simple problem:** Send messages quickly to online users while keeping history safe for offline users. **Mental
+model:** A chat app is a notebook plus a live messenger: the notebook is durable storage, and WebSocket delivery
+is only the fast courier. **Thought process:** Clarify one-to-one versus groups, media, receipts, retention, and
+encryption. Writes are message sends and receipt updates; reads are history sync and live delivery. Core data is
+conversation, message ID, sender, sequence, cursor, and connection mapping. The bottleneck is concurrent
+connections and fan-out, while consistency is per-conversation ordering rather than global ordering. **Request
+flow:** Write path accepts a client message ID, validates membership, appends to the message store, returns an
+acknowledgement, then pushes to online devices or queues push notification. Read path fetches messages after a
+cursor and uses presence to route live updates. **Key trade-offs and alternatives:** Global ordering is wasteful;
+per-conversation ordering is enough. **How it scales:** Shard conversations, scale WebSocket gateways, keep
+presence in Redis with time-to-live, and let clients reconnect and resume from cursor.
+
 ### 1. Clarifying questions to ask
 - One-to-one only or groups too?
 - Text only or media, read receipts, typing indicators?
@@ -239,6 +362,20 @@ Chat design centers on durable append-first messaging and real-time delivery as 
 
 ## 8. Design News Feed
 Tier 1 · SDE-1 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Show each user a timeline of posts from people they follow with low read latency. **Mental
+model:** Each user has an inbox of post pointers; normal authors drop copies into follower inboxes, while
+celebrity posts are pulled in later. **Thought process:** Ask whether the feed is chronological or ranked, how
+large follower counts can be, and how fresh the feed must be. Reads are much heavier than writes, so precompute
+for normal users. Core data is post, follow edge, feed item, score, and cursor. The bottleneck is fan-out for
+high-follower authors; consistency can be eventual because a slightly stale feed is acceptable. **Request flow:**
+Write path persists the post, enqueues fan-out, workers read followers and insert feed item pointers. Read path
+loads a cached feed page or feed store entries, merges celebrity posts, and hydrates post details. **Key
+trade-offs and alternatives:** Fan-out-on-write gives fast reads but write amplification; fan-out-on-read avoids
+celebrity explosions but costs read latency. **How it scales:** Shard by user, partition fan-out queues, cache the
+first page, and monitor fan-out lag.
 
 ### 1. Clarifying questions to ask
 - Follow graph or friends graph?
@@ -352,6 +489,20 @@ News feed is read-heavy, so precompute feed inboxes for normal users and use hyb
 ## 9. Design Search Autocomplete
 Tier 1 · SDE-1 must-know
 
+### 0. Beginner primer
+
+**Simple problem:** Return likely search suggestions after each typed prefix, usually within a few milliseconds.
+**Mental model:** It is a prepared dictionary, not a live database scan: query logs build the dictionary, and the
+online API only looks up prefixes. **Thought process:** Clarify data sources, personalization, typo tolerance,
+locale, freshness, and per-keystroke traffic. Reads dominate because one search creates many suggestion calls;
+writes are query events and ranking updates. Core data is prefix, suggestion, score, locale, and safety filter.
+The bottleneck is latency at high query rate, and consistency is eventual because suggestions can lag. **Request
+flow:** Write path logs query events, ranking jobs aggregate popularity, and versioned snapshots update the trie
+or prefix table. Read path checks hot prefix cache, falls back to trie or finite state transducer, filters unsafe
+terms, and returns top K. **Key trade-offs and alternatives:** Precomputed prefix tables are simple and fast;
+tries compress shared prefixes; full personalization fragments cache. **How it scales:** Shard by prefix or
+locale, cache hot prefixes, serve stale data if ranking updates lag, and stream trend deltas.
+
 ### 1. Clarifying questions to ask
 - Suggestions from historical queries, products, users, or documents?
 - Personalized or global?
@@ -453,6 +604,20 @@ Autocomplete is an ultra-read-heavy prefix lookup system. Precompute ranked sugg
 
 ## 10. Design Ticket Booking (BookMyShow)
 Tier 1 · SDE-1 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Let users browse events and reserve exact seats without ever selling the same seat twice.
+**Mental model:** Browsing is a public catalog, but seat booking is a bank vault: a temporary hold helps the user,
+and SQL is the final lock. **Thought process:** Ask about reserved seats, hold duration, payment, and flash-sale
+traffic. Reads are event pages and seat maps; writes are holds, payments, confirmations, and expiry. Core data is
+show, seat, hold, booking, payment status, and expiration. The bottleneck is contention on popular seats, and
+consistency must be strong for final booking. **Request flow:** Write path creates Redis hold keys, conditionally
+updates available seats to held in SQL, returns expiry, then confirms booking after idempotent payment. Read path
+serves event metadata and seat map snapshots from cache while checking authoritative seat state when needed.
+**Key trade-offs and alternatives:** Redis-only locks are unsafe; SQL-only locks are safer but slower. **How it
+scales:** Shard by show, add waiting rooms and rate limits, keep short holds, reconcile payment success versus
+booking failure, and fail closed when the booking database is unavailable.
 
 ### 1. Clarifying questions to ask
 - Movies/events only or all venues?

@@ -5,12 +5,92 @@ Use this as the tracking sheet for SDE-1/SDE-2 DSA prep in Java. Company tags be
 **Legend:** 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
 **Table of Contents**
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [How to Choose the Pattern](#how-to-choose-the-pattern)
 - [Pattern Recognition Cheat Sheet](#pattern-recognition-cheat-sheet)
 - [Top 200 Problems](#top-200-problems)
 - [30-Day Problem Schedule](#30-day-problem-schedule)
 - [Revision Cheat Sheet](#revision-cheat-sheet)
 - [Flashcards](#flashcards)
+
+## Beginner guide to this file
+
+### What this file teaches
+
+This file is a study map for Data Structures and Algorithms (DSA) practice. It groups problems by pattern so you
+can recognize the shape, choose a template, and explain why it fits in Java interviews for Software Development
+Engineer (SDE) roles.
+
+### Mental model
+
+Think of the list as a gym plan: each category trains one problem-solving muscle.
+
+- Arrays and hashing train counting, indexing, and one-pass state.
+- Windows, pointers, stacks, heaps, and binary search train invariants over ordered data.
+- Trees and graphs train traversal, reachability, and node-edge modeling.
+- Dynamic Programming (DP), backtracking, greedy, and bits train choice compression and proof.
+- The schedule turns recognition into repetition, and flashcards test whether the trigger stuck.
+
+### How to think through any question here
+
+1. Read the output requirement: one value, all answers, a path, an order, or a structure change.
+2. Match the strongest signal to a category before opening a solution.
+3. Say the brute-force method and why constraints make it too slow.
+4. Name the invariant: window validity, sorted order, queue level, stack monotonicity, DP state, or proof.
+5. Check edge cases such as empty input, duplicates, ties, overflow, or disconnected nodes.
+6. Mark whether the pattern was recognized quickly or needs review.
+
+### Pattern recognition cues
+
+| If the question mentions... | Think about... | Why it fits |
+|---|---|---|
+| Counts, duplicates, pair sums | HashMap or HashSet | Membership or frequency gives constant-time lookup. |
+| Contiguous subarray or substring | Sliding window or prefix sum | A maintained range or prefix difference captures the answer. |
+| Sorted input or monotonic answer | Two pointers or binary search | Movement can discard impossible choices safely. |
+| Next greater or nested delimiters | Stack | The most recent unresolved item must be handled first. |
+| Current best among many candidates | Heap | You repeatedly need the smallest, largest, or top k item. |
+| Tree or graph reachability | DFS, BFS, or Union-Find | The problem is about visiting connected structure. |
+| Dependencies | Topological sort | Directed edges must be ordered without cycles. |
+| Repeated optimal choices | DP | Subproblems overlap and have optimal substructure. |
+| All combinations or arrangements | Backtracking | The output requires exploring a choice tree. |
+| Local choice with proof | Greedy | A maintained invariant makes the local decision safe. |
+| Pair cancellation or binary masks | Bit manipulation | Binary operations solve the problem without extra collections. |
+
+### Abbreviations and key terms
+
+| Short form | Expanded form | Plain meaning |
+|---|---|---|
+| 1D | One-dimensional | A single-array DP state. |
+| 2D | Two-dimensional | A table indexed by two variables. |
+| BFS | Breadth-First Search | Queue traversal by layers. |
+| BST | Binary Search Tree | Ordered tree with smaller left and larger right values. |
+| DFS | Depth-First Search | Explore deeply before backtracking. |
+| DP | Dynamic Programming | Store answers to repeated subproblems. |
+| DSA | Data Structures and Algorithms | Core coding-interview problem solving. |
+| FAANG | Facebook, Apple, Amazon, Netflix, and Google | Shorthand for large product-company interviews. |
+| LFU | Least Frequently Used | Cache eviction based on access count. |
+| LRU | Least Recently Used | Cache eviction based on recency. |
+| MST | Minimum Spanning Tree | Cheapest edge set connecting all nodes. |
+| O(...) | Big O notation | Time or space growth description. |
+| SDE | Software Development Engineer | Interview role level used in this guide. |
+| XOR | Exclusive OR | Bit operation where equal values cancel. |
+| Invariant | Invariant | A fact kept true after every step. |
+
+### Common beginner traps
+
+- Solving rows in order without first naming the pattern signal.
+- Treating company tags as guaranteed facts instead of verifying recent sources.
+- Jumping to DP for every hard problem when a greedy or stack invariant is enough.
+- Ignoring duplicates, ties, disconnected nodes, or overflow.
+- Practicing only code and not the two-minute explanation.
+
+### How to study this file
+
+1. Start with Tier 1 problems in each category.
+2. Say the pattern and invariant before opening a solution.
+3. Use the detailed topic files for short answers, dry runs, and edge cases.
+4. Revisit missed rows after 24 hours.
+5. Use the 30-day schedule for volume and flashcards for recognition speed.
 
 ## How to Choose the Pattern
 
@@ -53,6 +133,11 @@ flowchart TD
 
 ### Arrays, Hashing, Prefix Sum, and Matrix
 
+**Pattern cue:** Use this category for frequencies, duplicates, pair sums, prefix totals, intervals, or
+matrix markers. Brute force scans nested pairs or subarrays; the invariant is a map, set, prefix value,
+marker, or running best. Variants include top k, majority vote, cyclic placement, and matrix boundaries.
+Watch duplicates, negatives, overflow, empty input, and in-place constraints.
+
 | # | Problem | LeetCode # | Pattern | Difficulty | Commonly reported at (hedged) | Tier |
 |---:|---|---:|---|---|---|---:|
 | 1 | Two Sum | 1 | HashMap | Easy | Amazon, Google, Microsoft; verify | 1 |
@@ -83,6 +168,11 @@ flowchart TD
 
 ### Two Pointers
 
+**Pattern cue:** Use this category when input is sorted, can be sorted, or asks for pairs, palindromes,
+merging, or in-place removal. Brute force tries all pairs or extra arrays; the invariant is that one pointer
+move discards choices that cannot improve the answer. Variants include slow-fast writes, reverse merge,
+Dutch flag, and one-skip palindrome. Watch pointer crossing, duplicates, and stability.
+
 | # | Problem | LeetCode # | Pattern | Difficulty | Commonly reported at (hedged) | Tier |
 |---:|---|---:|---|---|---|---:|
 | 26 | Valid Palindrome | 125 | Two pointers | Easy | Meta, Amazon; verify | 1 |
@@ -102,6 +192,11 @@ flowchart TD
 | 40 | 4Sum | 18 | Sort plus k-sum | Medium | Amazon, Microsoft; verify | 2 |
 
 ### Sliding Window
+
+**Pattern cue:** Use this category for longest, shortest, or count over a contiguous substring or subarray.
+Brute force restarts every window; the invariant is a valid window maintained by counts, cost, product, or
+distinct types. Variants include fixed size, at most k, exact k by subtraction, monotonic deque, and
+target-subarray transforms. Watch zeros, repeats, and positive-only assumptions.
 
 | # | Problem | LeetCode # | Pattern | Difficulty | Commonly reported at (hedged) | Tier |
 |---:|---|---:|---|---|---|---:|
@@ -123,6 +218,11 @@ flowchart TD
 
 ### Binary Search
 
+**Pattern cue:** Use this category when data is sorted or the answer has a monotonic yes/no predicate. Brute
+force scans values or tries every answer; the invariant is that one half of data or answer space can be
+discarded safely. Variants include lower bound, rotated arrays, matrix search, peak slope, and answer
+search. Watch infinite loops, duplicates, and inclusive bounds.
+
 | # | Problem | LeetCode # | Pattern | Difficulty | Commonly reported at (hedged) | Tier |
 |---:|---|---:|---|---|---|---:|
 | 56 | Binary Search | 704 | Binary search | Easy | Many companies; verify | 1 |
@@ -143,6 +243,11 @@ flowchart TD
 
 ### Linked List
 
+**Pattern cue:** Use this category when only next pointers are available and the prompt asks to reverse,
+merge, detect cycles, remove from end, or copy random links. Brute force stores nodes elsewhere; the
+invariant is careful pointer ownership with dummy nodes, fast-slow pointers, or reversed halves. Variants
+include heap merge, weaving copies, and k-group reversal. Watch null heads and lost next pointers.
+
 | # | Problem | LeetCode # | Pattern | Difficulty | Commonly reported at (hedged) | Tier |
 |---:|---|---:|---|---|---|---:|
 | 71 | Reverse Linked List | 206 | Pointer reversal | Easy | Amazon, Microsoft; verify | 1 |
@@ -159,6 +264,12 @@ flowchart TD
 | 82 | Palindrome Linked List | 234 | Reverse second half | Easy | Amazon, Meta; verify | 2 |
 
 ### Stack and Monotonic Stack
+
+**Pattern cue:** Use this category when the most recent unresolved item matters: parentheses, path
+components, temperatures, histograms, encoded strings, or next greater values. Brute force searches backward
+or forward for each item; the invariant is a stack of candidates, often monotonic by value or index.
+Variants include circular scans, greedy digit removal, and evaluation stacks. Watch equal values and cleanup
+passes.
 
 | # | Problem | LeetCode # | Pattern | Difficulty | Commonly reported at (hedged) | Tier |
 |---:|---|---:|---|---|---|---:|
@@ -178,6 +289,11 @@ flowchart TD
 | 96 | Remove K Digits | 402 | Monotonic stack greedy | Medium | Google, Amazon; verify | 2 |
 
 ### Trees, BST, and Trie
+
+**Pattern cue:** Use this category for parent-child structure, levels, ancestors, sorted tree order,
+serialization, or prefixes. Brute force stores full traversals or scans every word; the invariant is what
+each node returns, the BFS level, BST bounds, or a Trie path. Variants include path backtracking, wildcard
+branching, and board search. Watch null roots, skewed trees, duplicates, and recursion depth.
 
 | # | Problem | LeetCode # | Pattern | Difficulty | Commonly reported at (hedged) | Tier |
 |---:|---|---:|---|---|---|---:|
@@ -209,6 +325,12 @@ flowchart TD
 
 ### Graphs, BFS, DFS, Topological Sort, Union-Find, Shortest Path
 
+**Pattern cue:** Use this category when entities are connected by edges, grid neighbors, prerequisites,
+transformations, or weighted routes. Brute force rescans states or paths; the invariant is visited state,
+queue layer, indegree count, parent root, or shortest distance. Variants include multi-source BFS, reverse
+traversal, Dijkstra, Bellman-Ford rounds, and minimum spanning tree. Watch disconnected nodes, cycles,
+indexing, and mutation limits.
+
 | # | Problem | LeetCode # | Pattern | Difficulty | Commonly reported at (hedged) | Tier |
 |---:|---|---:|---|---|---|---:|
 | 122 | Number of Islands | 200 | Grid DFS/BFS | Medium | Amazon, Microsoft; verify | 1 |
@@ -238,6 +360,11 @@ flowchart TD
 | 146 | Critical Connections in a Network | 1192 | Tarjan bridges | Hard | Amazon, Google; verify | 3 |
 
 ### Dynamic Programming
+
+**Pattern cue:** Use this category when brute-force choices repeat subproblems and the prompt asks for
+count, min, max, or feasibility. The invariant is a state such as index, amount, capacity, prefix pair,
+interval, or stock status. Variants include 1D compression, 2D strings, interval DP, knapsack, grid paths,
+and ordered counts. Watch base cases, loop direction, zeros, impossible states, and overflow.
 
 | # | Problem | LeetCode # | Pattern | Difficulty | Commonly reported at (hedged) | Tier |
 |---:|---|---:|---|---|---|---:|
@@ -274,6 +401,12 @@ flowchart TD
 
 ### Backtracking
 
+**Pattern cue:** Use this category when output requires all subsets, permutations, combinations, cuts,
+boards, or paths. Brute force is unavoidable in size, but the template prunes invalid branches early. The
+invariant is a path plus remaining choices, with every mutation undone before returning. Variants include
+duplicate skipping, reusable candidates, palindrome cuts, grid visited cells, and constraint sets. Watch
+empty input and restoring state.
+
 | # | Problem | LeetCode # | Pattern | Difficulty | Commonly reported at (hedged) | Tier |
 |---:|---|---:|---|---|---|---:|
 | 177 | Subsets | 78 | Backtracking | Medium | Amazon, Meta; verify | 1 |
@@ -289,6 +422,12 @@ flowchart TD
 
 ### Greedy
 
+**Pattern cue:** Use this category when a local choice can be proved safe: farthest reach, earliest ending
+interval, tank reset, or segment closing at last occurrence. Brute force tries all paths, starts, or
+subsets. The invariant is the proof that discarded choices cannot beat the kept one. Variants include sweep
+line, heap scheduling, sorting by custom keys, and BFS-window greedy. Watch ties, boundary equality, and
+unreachable cases.
+
 | # | Problem | LeetCode # | Pattern | Difficulty | Commonly reported at (hedged) | Tier |
 |---:|---|---:|---|---|---|---:|
 | 187 | Jump Game | 55 | Greedy reach | Medium | Amazon, Google; verify | 1 |
@@ -301,6 +440,11 @@ flowchart TD
 | 194 | Task Scheduler | 621 | Greedy counting | Medium | Amazon, Facebook; verify | 2 |
 
 ### Bit Manipulation and Math
+
+**Pattern cue:** Use this category when pairs cancel, bits are counted, a value is missing, addition must
+avoid plus, or bits are reversed. Brute force uses arrays, maps, or strings; the invariant is a binary
+identity such as XOR cancellation, masking, shifting, or carry propagation. Variants include modulo bit
+counts, range math, and fixed-width reversal. Watch negatives, 32-bit width, overflow, and missing zero.
 
 | # | Problem | LeetCode # | Pattern | Difficulty | Commonly reported at (hedged) | Tier |
 |---:|---|---:|---|---|---|---:|

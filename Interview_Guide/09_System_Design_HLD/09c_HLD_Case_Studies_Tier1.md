@@ -5,6 +5,7 @@ This file covers the first five Tier-1 HLD case studies with interview-ready str
 **Legend:** 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
 ## Table of Contents
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [1. Design URL Shortener](#1-design-url-shortener)
 - [2. Design Pastebin](#2-design-pastebin)
 - [3. Design Distributed Rate Limiter](#3-design-distributed-rate-limiter)
@@ -13,8 +14,120 @@ This file covers the first five Tier-1 HLD case studies with interview-ready str
 - [Revision Cheat Sheet](#revision-cheat-sheet)
 - [Flashcards](#flashcards)
 
+## Beginner guide to this file
+
+### What this file teaches
+This file teaches foundational high-level design (HLD) patterns: short-code lookup, blob storage,
+shared counters, unique identifier generation, and distributed caching. Interviewers ask these because
+small-looking systems expose the same backend choices used in production Java services: where to keep
+durable truth, what to cache, what to process asynchronously, and how to survive common failures.
+
+### Mental model
+Think of each design as a busy service desk: some questions need the official ledger, some can be
+answered from a sticky note, and some should be placed in a side queue.
+
+- Durable stores keep facts that must not disappear, such as URL mappings, paste metadata, and aliases.
+- Redis-like caches keep hot answers close to the caller but are not the final source of truth.
+- Queues remove slow work, such as analytics, scans, and cleanup, from the user-facing path.
+- Identifiers, keys, and time-to-live rules decide how data is found and when it can expire.
+- Scaling usually starts by splitting reads, then sharding writes, then planning failover behavior.
+
+### How to think through any question here
+1. State the core object: link mapping, paste content, quota key, generated identifier, or cache entry.
+2. Separate read-heavy paths from correctness-heavy write paths before naming technologies.
+3. Decide the source of truth, then decide which cache can safely speed it up.
+4. Estimate queries per second (QPS), data size, and hot-key risk using simple round numbers.
+5. Walk the write path and read path, including exactly when a response is returned to the user.
+6. Add asynchronous work only after the critical path is clear.
+7. Name the failure behavior for Redis, database, queue, and a single service instance.
+
+### Pattern recognition cues
+| If the question mentions... | Think about... | Why it fits |
+|---|---|---|
+| Short links, aliases, or redirects | SQL mapping plus Redis cache | The mapping must be durable, but redirects are read-heavy. |
+| Large text bodies or pasted content | Metadata database plus object storage | The database should not carry large blobs when cheap blob storage can. |
+| Per-user or per-API limits | Token bucket in Redis | Each request atomically consumes shared quota with low latency. |
+| Globally unique, sortable IDs | Snowflake-style timestamp, worker, and sequence | It avoids a central database sequence bottleneck. |
+| In-memory key-value data | Consistent hashing and replicas | Keys must spread across nodes while surviving node loss. |
+| Click stats, scans, or cleanup | Queue and background workers | Slow side effects should not delay redirects or writes. |
+| Expiry or temporary state | Time-to-live plus cleanup worker | Expired links, holds, and cache entries need predictable removal. |
+| One hot key or viral object | Local cache, replication, and request coalescing | One shard can overload even when average QPS looks safe. |
+
+### Abbreviations and key terms
+| Short form | Expanded form | Plain meaning |
+|---|---|---|
+| AOF | Append-only file | Persistence log used by cache systems to replay writes after restart. |
+| API | Application programming interface | Contract that callers use to create, read, update, or delete data. |
+| Base62 | Not an abbreviation | Encoding using digits plus uppercase and lowercase letters for compact IDs. |
+| CDN | Content delivery network | Edge cache that serves static or public content near users. |
+| DB | Database | Durable store for data that must survive process or cache loss. |
+| DLQ | Dead-letter queue | Queue for messages that failed too many retries and need inspection. |
+| DNS | Domain Name System | Internet naming layer that maps domains to network addresses. |
+| FAANG | Facebook, Amazon, Apple, Netflix, Google | Shorthand for large product-company interview style. |
+| GB | Gigabyte | Roughly one billion bytes of storage. |
+| GDPR | General Data Protection Regulation | Privacy regulation that affects deletion and data retention choices. |
+| HA | High availability | Design goal of staying usable during partial failures. |
+| HLD | High-level design | System design discussion focused on components, data, scale, and trade-offs. |
+| ID | Identifier | Value used to uniquely name an object, row, worker, or request. |
+| IP | Internet Protocol | Network address family often used for client or abuse signals. |
+| JSON | JavaScript Object Notation | Lightweight request and response format. |
+| KB | Kilobyte | Roughly one thousand bytes. |
+| KV | Key-value | Data model that retrieves a value by an exact key. |
+| LB | Load balancer | Component that spreads traffic across service instances. |
+| LFU | Least frequently used | Eviction policy that keeps often-used cache entries. |
+| LLM | Large language model | Expensive model call that may need stricter rate limiting. |
+| LRU | Least recently used | Eviction policy that removes the least recently touched entries. |
+| ms | Millisecond | One thousandth of a second, used for latency targets. |
+| P99 | 99th percentile | Latency value under which 99 percent of requests complete. |
+| PK | Primary key | Column or field that uniquely identifies a database row. |
+| QPS | Queries per second | Throughput measure for incoming requests. |
+| Redis | Not an abbreviation | In-memory data store commonly used for cache, counters, and locks. |
+| SDE-1 | Software Development Engineer level 1 | Entry-level engineering interview bar in this guide. |
+| SEO | Search engine optimization | Search ranking concern affected by permanent redirects. |
+| Snowflake | Not an abbreviation | Timestamp-based distributed ID generation pattern. |
+| SQL | Structured Query Language | Relational database query language and shorthand for relational storage. |
+| TB | Terabyte | Roughly one trillion bytes of storage. |
+| TTL | Time to live | Expiration duration after which cached or temporary data is invalid. |
+| URL | Uniform Resource Locator | Web address that points to a resource. |
+| UUID | Universally Unique Identifier | 128-bit identifier format, often random and non-sortable. |
+
+### Common beginner traps
+- Choosing Redis as the only store for mappings or bookings, then losing data on cache failure.
+- Putting analytics, scans, or syntax highlighting in the synchronous user path.
+- Saying shard the database before estimating whether the first version actually needs sharding.
+- Forgetting collision handling for custom aliases, random short codes, or worker identifiers.
+- Treating average traffic as enough and ignoring viral links, hot keys, and cache miss storms.
+- Promising exact global behavior when a simpler regional or eventual answer is acceptable.
+
+### How to study this file
+1. Read the short revision summary of each case to learn the main pattern first.
+2. Rebuild the detailed answer aloud in this order: requirements, math, API, data, flow, failures.
+3. Use the diagrams to trace one write path and one read path without looking at the prose.
+4. Turn every flashcard into a two-minute answer, then add one trade-off and one failure case.
+5. Practice changing one assumption, such as 100 times more reads or Redis unavailable, and adapt the design.
+
+### Scalability and production lens
+A toy design can run as one Spring Boot service with one database. Production designs add read replicas,
+Redis clusters, queues, monitoring, idempotency, circuit breakers, and runbooks. The key shift is that every
+component can be slow, down, or overloaded, so each answer should explain the degraded behavior, not just the
+happy path.
+
 ## 1. Design URL Shortener
 Tier 1 · SDE-1 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Convert a long web address into a short code and send users back to the original address
+fast. **Mental model:** It is a durable phone book with a small front-desk memory: SQL owns the mapping, Redis
+remembers popular codes, and the queue records clicks later. **Thought process:** Start with redirect versus
+creation traffic; redirects dominate, so keep the read path tiny. Core data is code, long URL, owner, expiry,
+and click event. The bottleneck is hot redirects and cache misses, while consistency is strict only for alias
+creation and expiry decisions. **Request flow:** Write path creates or validates a code, inserts the mapping,
+warms cache if useful, and returns the short URL. Read path checks cache, falls back to SQL, refreshes cache,
+emits analytics asynchronously, and returns a redirect. **Key trade-offs and alternatives:** Base62 sequence is
+simple and collision-free; random codes need retry; synchronous analytics improves freshness but hurts latency.
+**How it scales:** Add Redis cluster, read replicas, database sharding by code hash, multi-region read caches,
+and abuse scanning without blocking redirects.
 
 ### 1. Clarifying questions to ask
 - Should short links be custom aliases or generated only?
@@ -128,6 +241,20 @@ URL shortener is read-heavy: generate collision-free Base62 codes, store canonic
 ## 2. Design Pastebin
 Tier 1 · SDE-1 must-know
 
+### 0. Beginner primer
+
+**Simple problem:** Let users save text or code and share it through a short paste link. **Mental model:** The
+paste body is a file in a warehouse, while the database card says who owns it, whether it expires, and where the
+file lives. **Thought process:** First ask size, privacy, retention, and read/write ratio. Reads are higher than
+writes, but writes must durably connect metadata to content. Core data is paste ID, visibility, object key,
+language, owner, and expiry. The bottleneck is serving hot public pastes and storing large bodies; consistency is
+mainly metadata plus permission correctness. **Request flow:** Write path validates size, stores content in
+object storage, inserts metadata in SQL, queues moderation or highlighting, and returns the paste URL. Read path
+checks metadata/cache, verifies visibility, fetches content from cache or object storage, and records stats
+asynchronously. **Key trade-offs and alternatives:** SQL blobs are simple but bloat backups; object storage is
+cheap but separates metadata and content. **How it scales:** Use content delivery network caching for public raw
+reads, shard metadata by paste ID, and clean expired or orphaned objects in workers.
+
 ### 1. Clarifying questions to ask
 - Max paste size and retention period?
 - Public, unlisted, or private pastes?
@@ -231,6 +358,19 @@ Pastebin is mostly metadata plus blob storage. Keep DB for searchable metadata a
 
 ## 3. Design Distributed Rate Limiter
 Tier 1 · SDE-1 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Decide whether a caller may make one more request right now. **Mental model:** Each user or
+API key has a bucket of tokens; every request spends a token, and time slowly refills the bucket. **Thought
+process:** Clarify the subject being limited, strictness, burst allowance, and failure mode. Traffic is all
+write-like because each check updates quota state. Core data is rule, key, current tokens, last refill time, and
+audit sample. The bottleneck is atomic counter updates, and consistency needs are bounded by policy rather than
+business transactions. **Request flow:** Write path loads the cached rule, sends one atomic Redis script to
+refill and consume, then allows the backend call or returns retry-after. Read path for configuration reads rules
+from SQL into gateway caches. **Key trade-offs and alternatives:** Token bucket allows bursts; sliding log is
+stricter but memory-heavy; local-only limiting is fast but bypassed across servers. **How it scales:** Shard
+Redis by key, keep local fallback buckets, split hot tenant limits, and choose fail-open or fail-closed by risk.
 
 ### 1. Clarifying questions to ask
 - Limit by user, IP, API key, tenant, endpoint, or all?
@@ -342,6 +482,20 @@ A distributed rate limiter sits at the gateway, uses Redis for atomic shared cou
 ## 4. Design Unique ID Generator
 Tier 1 · SDE-1 must-know
 
+### 0. Beginner primer
+
+**Simple problem:** Generate IDs that are unique across many machines without asking one central database for
+every value. **Mental model:** Each ID is a packed ticket containing time, worker number, and a per-millisecond
+counter. **Thought process:** Ask whether IDs must be sortable, compact, public, and multi-region. Writes are
+ID requests; reads are mostly monitoring worker leases. Core data is epoch, worker ID, sequence, last timestamp,
+and namespace. The bottleneck is a central sequence if you choose one; consistency depends on never reusing a
+worker ID and never moving time backward silently. **Request flow:** Write path usually calls a local library,
+reads the current clock, combines timestamp plus worker plus sequence, and returns immediately. Read path checks
+lease/config state and generator health. **Key trade-offs and alternatives:** Database sequences are simple but
+centralized; UUIDs are easy but large and not time ordered; Snowflake-style IDs are fast but clock-sensitive.
+**How it scales:** Allocate worker ranges per region, use lease fencing, pause on clock rollback, and monitor
+sequence exhaustion.
+
 ### 1. Clarifying questions to ask
 - Required throughput and number of regions?
 - Should IDs be sortable by time?
@@ -441,6 +595,20 @@ Use Snowflake-style IDs when you need compact, high-throughput, roughly sortable
 
 ## 5. Design Distributed Cache / Key-Value Store
 Tier 1 · SDE-1 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Store and fetch values by key with very low latency across several machines. **Mental
+model:** Imagine many labeled drawers arranged in a ring; consistent hashing tells the client which drawer owns
+a key, and replicas keep spare copies. **Thought process:** Clarify cache versus durable store, key size, value
+size, query rate, time-to-live, eviction, and acceptable data loss. Reads and writes are both hot, and memory is
+the scarce resource. Core data is key, value, expiry, version, owner node, and replica set. The bottleneck is hot
+keys and rebalancing; consistency can be eventual for cache but may require quorum for durable key-value use.
+**Request flow:** Write path routes to the primary, stores memory state, optionally appends persistence, and
+replicates. Read path routes by hash, returns from primary or replica, and treats expired entries as misses.
+**Key trade-offs and alternatives:** Client-side routing is fast but needs membership updates; perfect least
+recently used eviction is costly. **How it scales:** Add virtual nodes, replicas, failover, hot-key replication,
+request coalescing, and background repair.
 
 ### 1. Clarifying questions to ask
 - Cache only or durable KV store?

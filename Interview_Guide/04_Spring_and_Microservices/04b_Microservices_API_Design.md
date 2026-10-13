@@ -5,6 +5,7 @@ This part covers microservices, resilience, distributed data patterns, observabi
 **Legend:** 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
 ## Table of Contents
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [Microservices Fundamentals](#microservices-fundamentals)
 - [Resilience, Consistency & Observability](#resilience-consistency--observability)
 - [API Design](#api-design)
@@ -13,12 +14,161 @@ This part covers microservices, resilience, distributed data patterns, observabi
 - [Revision Cheat Sheet](#revision-cheat-sheet)
 - [Flashcards](#flashcards)
 
+## Beginner guide to this file
+
+### What this file teaches
+
+This file teaches how to split backend systems, define Application Programming Interface (API) contracts, and
+keep distributed services reliable when requests cross process and network boundaries. Interviewers ask these
+questions because real product backends must choose microservice boundaries, protect users from duplicate work,
+handle partial failure, and explain consistency trade-offs without hiding behind buzzwords.
+
+### Mental model
+
+Think of a microservice system as a city: each department owns a clear responsibility, publishes a public
+counter, keeps its own records, and coordinates with other departments by forms or messages.
+
+- Service boundaries group business capabilities and data ownership, not just controller classes.
+- API contracts are promises about paths, methods, fields, errors, status codes, and compatibility.
+- Resilience patterns assume remote calls fail, so they add timeouts, retries, circuit breakers, and bulkheads.
+- Idempotency makes safe retries possible by turning duplicate requests into one logical operation.
+- Consistency choices decide when users need immediate truth and when eventual agreement is acceptable.
+- Observability connects logs, metrics, and traces so a request can be followed across services.
+
+### How to think through any question here
+
+1. Start with the business operation and name the user-visible contract, such as create reply, list history,
+   or stream generated text.
+2. Decide the boundary by ownership: which service owns the rule, the data, and the failure budget.
+3. Walk the concrete request flow. For a write: client -> gateway -> service -> database -> event/outbox ->
+   response. For a read: client -> gateway -> cache or read model -> service -> response.
+4. Identify the failure point: network timeout, duplicate retry, stale cache, partial workflow, slow consumer,
+   or incompatible contract change.
+5. Pick the pattern that matches the failure: idempotency key, retry with jitter, circuit breaker, saga, outbox,
+   cursor pagination, versioning, or Problem Details error body.
+6. State the consistency model and user impact: immediate confirmation, eventual update, compensation, or
+   manual repair.
+7. Add production proof: metrics, tracing, rate limits, authentication, authorization, backward compatibility,
+   and load behavior.
+
+### Pattern recognition cues
+
+| If the question mentions... | Think about... | Why it fits |
+| --- | --- | --- |
+| Split a monolith or choose services | Domain boundaries | Services should follow business ownership and data ownership. |
+| Gateway, routing, or edge security | API gateway | Cross-cutting policies belong at the edge, not in every client. |
+| Duplicate create after retry | Idempotency key | The server must recognize the same logical request. |
+| Slow or failing dependency | Resilience patterns | Timeouts, breakers, bulkheads, and retries prevent failure spread. |
+| Multi-step distributed write | Saga or outbox | Local transactions plus messages replace one global transaction. |
+| Data appears stale | Consistency model | Distributed systems often trade freshness for availability or latency. |
+| API consumers break | Compatibility and versioning | Contracts must evolve without surprising existing clients. |
+| Large list endpoint | Pagination, filtering, sorting | The API needs predictable result size and stable ordering. |
+| Need flexible frontend query | REST, GraphQL, or gRPC choice | Each style optimizes a different client and coupling shape. |
+| Debugging one slow user request | Tracing and metrics | A trace links spans across services and shows where time was spent. |
+
+### Abbreviations and key terms
+
+| Short form | Expanded form | Plain meaning |
+| --- | --- | --- |
+| ACID | Atomicity, Consistency, Isolation, Durability | Database transaction guarantees inside one data store. |
+| AI | Artificial Intelligence | Software behavior that uses learned models or generated output. |
+| API | Application Programming Interface | Contract used by clients and services to communicate. |
+| CAP | Consistency, Availability, Partition tolerance | Distributed-systems trade-off during network partitions. |
+| CDC | Change Data Capture | Capturing database changes and publishing them downstream. |
+| CI | Continuous Integration | Automatically building and testing changes. |
+| COMPENSATING | Compensating workflow state | State showing the system is undoing or correcting a prior step. |
+| CONFIRMED | Confirmed workflow state | State showing a distributed operation has completed successfully. |
+| CPU | Central Processing Unit | Processor resource consumed by code. |
+| CRUD | Create, Read, Update, Delete | Basic data operations exposed by many services. |
+| DB | Database | Persistent store such as PostgreSQL or MySQL. |
+| DELETE | HTTP DELETE method | Request method for deleting a resource. |
+| DNS | Domain Name System | System that maps names to network addresses. |
+| ETL | Extract, Transform, Load | Moving and reshaping data between systems. |
+| FAANG | Meta, Amazon, Apple, Netflix, Google style companies | Shorthand for large product-company interviews. |
+| FAILED | Failed workflow state | State showing an operation ended unsuccessfully. |
+| GENERATING | Generating workflow state | State showing the reply is currently being produced. |
+| GET | HTTP GET method | Request method for reading a resource. |
+| gRPC | Google Remote Procedure Call | Efficient remote-call framework often used inside service fleets. |
+| GraphQL | GraphQL query language | API query language where clients ask for specific fields. |
+| HATEOAS | Hypermedia as the Engine of Application State | REST idea where responses include links for next actions. |
+| HEAD | HTTP HEAD method | Like GET but returns headers without a body. |
+| HTTP | Hypertext Transfer Protocol | Request and response protocol used by web APIs. |
+| HTTPS | Hypertext Transfer Protocol Secure | HTTP protected by Transport Layer Security. |
+| ID | Identifier | Value that uniquely names an object or record. |
+| IP | Internet Protocol | Network addressing protocol. |
+| JPA | Java Persistence API | Java standard abstraction for object-relational persistence. |
+| JSON | JavaScript Object Notation | Text format commonly used for API bodies. |
+| JWT | JSON Web Token | Signed token that carries authentication claims. |
+| LIMIT | Structured Query Language LIMIT clause | Caps how many rows a query returns. |
+| NAT | Network Address Translation | Network function that rewrites addresses between networks. |
+| OFFSET | Structured Query Language OFFSET clause | Skips rows before returning a page. |
+| OK | Okay response status | Short label for a successful response such as 200 OK. |
+| OIDC | OpenID Connect | Identity layer built on OAuth 2.0. |
+| PACELC | Partition, Availability, Consistency, Else, Latency, Consistency | Extension of CAP for normal and partitioned operation. |
+| PATCH | HTTP PATCH method | Request method for partial updates. |
+| POST | HTTP POST method | Request method for create or command-style operations. |
+| PUT | HTTP PUT method | Request method for full replacement and idempotent writes. |
+| QUOTA_RESERVED | Quota reserved workflow state | State showing quota was reserved before generation completes. |
+| RED | Rate, Errors, Duration | Service metrics for request traffic health. |
+| REST | Representational State Transfer | Resource-oriented API style using HTTP semantics. |
+| RPC | Remote Procedure Call | Calling a remote function as if it were local. |
+| SAVED | Saved workflow state | State showing the reply has been persisted. |
+| SDE-1 | Software Development Engineer level 1 | Entry-level engineering interview scope. |
+| SLA | Service Level Agreement | Promise or target for availability or latency. |
+| SQL | Structured Query Language | Query language for relational databases. |
+| SSE | Server-Sent Events | One-way stream from server to browser over HTTP. |
+| TLS | Transport Layer Security | Encryption protocol used by HTTPS. |
+| UI | User Interface | Screen or client surface users interact with. |
+| URI | Uniform Resource Identifier | Identifier for a resource, often used in API paths. |
+| URL | Uniform Resource Locator | Full web address for a resource. |
+| USE | Utilization, Saturation, Errors | Resource metrics for infrastructure health. |
+| API contract | Not an abbreviation | Promise about request, response, errors, and compatibility. |
+| Boundary | Not an abbreviation | Line showing which service owns a capability and data. |
+| Idempotency | Not an abbreviation | Repeating the same request has the same logical effect. |
+| Saga | Not an abbreviation | Distributed workflow made of local transactions and compensations. |
+
+### Common beginner traps
+
+- Splitting services by technical layers such as controller, service, and repository instead of business
+  capability.
+- Saying microservices are always better than monoliths without mentioning operational cost.
+- Retrying every failed call without timeouts, jitter, idempotency, or a maximum retry budget.
+- Treating eventual consistency as wrong instead of explaining the user-visible trade-off.
+- Designing API paths around verbs only, such as generateNow, instead of resources and commands.
+- Adding a new response field without checking strict clients, generated clients, and documentation.
+- Forgetting that observability is part of the design, not something added after incidents.
+
+### How to study this file
+
+1. Read the short answer and identify the pattern name before reading the detailed answer.
+2. Draw one request flow for every design topic: gateway, service, database, cache, event, and response.
+3. Use the beginner lens to practice recognizing the trigger words that point to a pattern.
+4. Convert flashcards into active practice by explaining one production failure and its mitigation.
+5. For API questions, speak the contract aloud: method, path, body, response, error, auth, and compatibility.
+6. Revisit the cheat sheet after solving scenarios so each compact bullet maps to a concrete flow.
+
+### Scalability and production lens
+
+A toy answer can say one service calls another and returns a response. A production answer explains what
+happens when traffic, latency, and failures grow: the gateway authenticates and rate-limits, services own their
+data, writes use idempotency keys, slow work can return 202 Accepted and continue asynchronously, outbox events
+keep messages aligned with database commits, caches and read models improve reads, and traces reveal which span
+or downstream call caused latency. The goal is not maximum distribution; it is clear ownership, safe retries,
+observable failure, and a consistency model the user experience can tolerate.
+
 ## Microservices Fundamentals
 
 ### Q45. Monolith vs microservices: how do you decide?
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** They want architectural judgment, not hype.
+
+**Beginner lens:** Choosing monolith or microservices is a trade-off between simplicity and independent
+ownership. A monolith is one building with shared utilities; microservices are separate shops with contracts
+and delivery routes. Interviewers test whether you resist hype. Recognize this when the prompt mentions team
+size, deployment independence, scale differences, or operational maturity. A strong flow starts with
+requirements and change rate, then data ownership, failure isolation, deployment needs, and the cost of
+networking and observability.
 
 **Short answer (say this first, 20-40 sec):**
 A monolith is one deployable application; microservices split a system into independently deployable services around business capabilities. Start with a modular monolith when the team/domain is small. Use microservices when independent scaling, deployment, ownership, and fault isolation outweigh distributed complexity.
@@ -44,6 +194,12 @@ For Email Reply Assistant, begin as modular monolith; split later if auth, gener
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Bad boundaries create distributed monoliths.
+
+**Beginner lens:** A microservice boundary is the line around a business capability and its data, not a line
+around controller or repository classes. Think of it as one team owning both the rule book and the records
+for a department. Interviewers test domain thinking. Recognize boundary questions when capabilities,
+ownership, transactions, or frequent changes appear. A good request flow stays inside one service for most
+rules and communicates through APIs or events when another capability is truly needed.
 
 **Short answer (say this first, 20-40 sec):**
 Boundaries should follow business capabilities and data ownership, not technical layers. Each service should own its data and expose behavior through APIs/events. Avoid splitting controller, service, and repository layers into separate services.
@@ -76,6 +232,12 @@ flowchart LR
 
 **Why they ask:** Gateways are common in microservice architectures.
 
+**Beginner lens:** An API gateway is the front door for clients, not the place to hide business logic. It
+routes requests, applies edge concerns like authentication checks, rate limits, request size limits, and
+sometimes response shaping. Interviewers test separation of concerns. Flow: client -> gateway -> route based
+on path or host -> service -> response. Keep domain decisions in services because putting too much in the
+gateway creates a new monolith at the edge.
+
 **Short answer (say this first, 20-40 sec):**
 An API gateway is the single external entry point that routes requests to internal services. It can handle authentication, rate limiting, TLS termination, routing, and correlation IDs, but business logic should remain in services.
 
@@ -102,6 +264,12 @@ Gateway concerns: route `/api/replies`, validate token, apply quotas, add `X-Cor
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Service locations change dynamically in cloud systems.
+
+**Beginner lens:** Service discovery solves the problem that service instances move, scale, and restart, so
+clients should not hard-code addresses. It is like looking up which checkout counters are currently open.
+Interviewers test dynamic infrastructure awareness. Flow: service instance registers or is discovered by the
+platform -> client or load balancer resolves a healthy endpoint -> request is sent. In Kubernetes this often
+happens through service names and DNS rather than custom registry code.
 
 **Short answer (say this first, 20-40 sec):**
 Service discovery lets callers find healthy service instances without hardcoded hostnames/ports. It can be client-side, server-side, or platform-native through Kubernetes Services and DNS.
@@ -132,6 +300,12 @@ Examples: Eureka, Consul, Kubernetes DNS/Service, cloud load balancers.
 
 **Why they ask:** Distributed config must be consistent and secure.
 
+**Beginner lens:** A config server centralizes environment-specific settings so services do not each carry
+hidden copies. Think of it as a shared instruction board with access control and versioning. Interviewers
+test operational consistency and secret handling. Recognize it when many services need the same flags,
+endpoints, or limits. Production flow: service starts -> fetches config securely -> validates required
+settings -> exposes effective behavior. Secrets still need a proper secret store and rotation plan.
+
 **Short answer (say this first, 20-40 sec):**
 A config server centralizes external config for many services and environments. It helps with versioning, audit, dynamic refresh, and consistency, but secrets should integrate with a secure secret store. For small apps, environment variables may be enough.
 
@@ -153,6 +327,12 @@ A config server centralizes external config for many services and environments. 
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Communication style affects coupling and resilience.
+
+**Beginner lens:** Synchronous communication waits for an answer now, while asynchronous communication sends
+work and continues. A phone call is sync; leaving a tracked message is async. Interviewers test latency and
+coupling judgment. Use sync when the user needs an immediate answer and failure should be visible. Use async
+for slow or retryable work, such as generating a reply after returning 202 Accepted. The request flow
+changes from direct response to status polling, callback, or event.
 
 **Short answer (say this first, 20-40 sec):**
 Synchronous communication waits for a response, such as REST or gRPC. Asynchronous communication uses messages/events, decouples services, and absorbs spikes but introduces eventual consistency and duplicate handling.
@@ -177,6 +357,12 @@ For AI replies: synchronous for short generation; async job for long Gemini call
 
 **Why they ask:** Data ownership distinguishes real microservices from distributed monoliths.
 
+**Beginner lens:** Service data ownership means each service controls its own database tables and rules.
+Other services ask through an API or subscribe to events instead of joining across databases. Interviewers
+test whether your microservice design is truly independent. Recognize it when the prompt suggests shared
+database joins. Flow: Reply service owns replies, Quota service owns quota, and coordination happens through
+calls or messages. This avoids hidden coupling but introduces consistency and duplication decisions.
+
 **Short answer (say this first, 20-40 sec):**
 Each service should own its data and expose it through APIs or events. Other services should not directly read/write its tables. This preserves independent deployment and domain ownership.
 
@@ -200,10 +386,18 @@ flowchart TD
 - *Can same DB server host multiple schemas?* → Physically yes, but ownership/access must be separate.
 - *How build analytics?* → Events/ETL into read or warehouse models.
 
+## Resilience, Consistency & Observability
+
 ### Q52. Explain Resilience4j circuit breaker states.
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Circuit breakers prevent cascading failures.
+
+**Beginner lens:** A circuit breaker is like an electrical breaker for remote calls. Closed means calls
+flow, open means stop calling a failing dependency, and half-open means test a few calls to see whether it
+recovered. Interviewers test resilience thinking. Recognize it with repeated failures, slow dependencies, or
+cascading outages. Flow: call succeeds -> record healthy; failures exceed threshold -> open -> fail fast or
+fallback -> after wait, try limited calls -> close if healthy.
 
 **Short answer (say this first, 20-40 sec):**
 Circuit breaker is closed when calls are allowed. If failures exceed threshold, it opens and fails fast. After a wait duration it becomes half-open, allows trial calls, then closes on success or reopens on failure.
@@ -236,6 +430,12 @@ Reply fallback(ReplyRequest req, Throwable ex) { return Reply.unavailable(); }
 
 **Why they ask:** Bad retries can amplify outages.
 
+**Beginner lens:** Retry with backoff and jitter means try again after increasing delays plus randomness,
+like people rejoining a queue at different times instead of stampeding the counter. Interviewers test safe
+retry design. Recognize transient network errors, 429, or 5xx responses. The key is retry only operations
+that are safe or idempotent, cap attempts, and honor timeouts. Flow: first call fails -> wait -> retry ->
+stop on success, non-retryable error, or budget exhaustion.
+
 **Short answer (say this first, 20-40 sec):**
 Retries repeat transient failures. Exponential backoff increases wait after each failure, and jitter randomizes waits to avoid retry storms. Retry only safe operations and only for retryable errors.
 
@@ -261,6 +461,12 @@ RetryConfig cfg = RetryConfig.custom().maxAttempts(3).intervalFunction(f)
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** They show whether you can isolate failures.
+
+**Beginner lens:** Timeouts decide how long you wait; bulkheads decide how much capacity one dependency can
+consume. Think of bulkheads as watertight compartments in a ship. Interviewers test failure isolation.
+Recognize this when one slow downstream service blocks unrelated requests. Flow: route call through a
+limited pool or semaphore -> apply timeout -> release capacity -> return fallback or error. Without these
+limits, slow calls consume all threads and make healthy parts look broken.
 
 **Short answer (say this first, 20-40 sec):**
 A timeout bounds waiting time. A bulkhead limits concurrent calls or threads for a dependency. Together they prevent a slow Gemini API from consuming every servlet thread.
@@ -294,6 +500,12 @@ resilience4j:
 
 **Why they ask:** Retries can create duplicate writes.
 
+**Beginner lens:** An idempotency key is a client-supplied or generated request identifier that turns
+duplicate creates into one logical operation. It is like a receipt number: showing it twice should not buy
+two items. Interviewers test retry safety. Flow: client sends POST with key -> server checks stored key and
+request fingerprint -> returns existing result if seen -> otherwise processes and stores the result. It
+matters whenever clients retry after timeouts or network drops.
+
 **Short answer (say this first, 20-40 sec):**
 An idempotency key is a unique client-provided key for a write operation. The server stores the key with request hash and result, then returns the same result for duplicate retries. It is useful for costly or chargeable AI generation.
 
@@ -326,6 +538,13 @@ CREATE TABLE idempotency_keys (
 `🔴 Advanced` `🔥` `Stretch`
 
 **Why they ask:** Distributed transactions need business-level handling.
+
+**Beginner lens:** A saga coordinates a multi-service workflow through local transactions instead of one
+global database transaction. Choreography lets services react to events like dancers following cues;
+orchestration uses a conductor service to call each step. Interviewers test distributed consistency.
+Recognize it when quota, payment, inventory, or reply generation spans services. Flow: reserve -> generate
+-> save -> confirm, with compensation if a later step fails. Choose based on visibility, coupling, and
+workflow complexity.
 
 **Short answer (say this first, 20-40 sec):**
 A saga splits a distributed business process into local transactions with compensating actions. Choreography uses events between services. Orchestration uses a central coordinator to command steps and handle compensation.
@@ -366,6 +585,12 @@ sequenceDiagram
 
 **Why they ask:** It solves reliable event publishing.
 
+**Beginner lens:** The outbox pattern solves the gap between saving data and publishing a message. Without
+it, a service can commit the database row and crash before sending the event. Think of the outbox as a
+mailbox table written in the same transaction. Interviewers test reliability. Flow: service updates business
+table plus outbox row -> commit -> relay reads outbox -> publishes event -> marks sent. This keeps events
+aligned with database state.
+
 **Short answer (say this first, 20-40 sec):**
 Outbox writes business data and an event record in the same database transaction. A publisher later reads the outbox and sends events to the broker. This avoids losing events when DB commit succeeds but message publish fails.
 
@@ -400,6 +625,13 @@ CREATE TABLE outbox_events (
 
 **Why they ask:** They compare classic distributed transactions with sagas.
 
+**Beginner lens:** Two-phase commit tries to make multiple resources agree on one atomic transaction, like
+asking every department to prepare and then commit together. Microservices often avoid it because it is
+slow, blocks on failures, and couples services tightly. Interviewers test practical distributed-systems
+judgment. Recognize it when someone wants one transaction across databases. The usual alternative is local
+transactions plus saga, outbox, idempotent consumers, and repair workflows with clear consistency
+expectations.
+
 **Short answer (say this first, 20-40 sec):**
 Two-phase commit coordinates multiple resources using prepare and commit phases. It gives atomicity but can block, reduce availability, and tightly couple services. Microservices often prefer local transactions plus saga/outbox patterns.
 
@@ -421,6 +653,12 @@ Two-phase commit coordinates multiple resources using prepare and commit phases.
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Microservice debugging needs request-level visibility.
+
+**Beginner lens:** Distributed tracing follows one user request across services using a trace identifier and
+spans, like a package tracking number with checkpoints. Interviewers test production debugging. Recognize it
+when latency or errors cross service boundaries. Flow: gateway receives request and creates or forwards
+trace context -> each service records a span for work and downstream calls -> tracing backend shows the
+path. Logs and metrics tell what happened; traces show where time went.
 
 **Short answer (say this first, 20-40 sec):**
 Distributed tracing follows one request across services using trace IDs and span IDs. Each service creates spans for operations and propagates context downstream. Tools include Zipkin, Jaeger, Grafana Tempo, and cloud tracing systems.
@@ -454,6 +692,12 @@ sequenceDiagram
 
 **Why they ask:** It is practical monolith-to-microservices migration.
 
+**Beginner lens:** Strangler Fig migration means replacing a monolith gradually by routing selected features
+to new services while the old system keeps running. Think of a new plant growing around an old tree.
+Interviewers test low-risk migration strategy. Flow: put a gateway or facade in front -> move one capability
+-> sync or migrate data carefully -> monitor -> repeat. It avoids a big-bang rewrite but needs
+compatibility, rollback, and clear ownership during the transition.
+
 **Short answer (say this first, 20-40 sec):**
 Strangler Fig gradually replaces parts of a monolith by routing selected features to new services through a gateway/facade. It avoids big-bang rewrites and allows rollback.
 
@@ -480,6 +724,12 @@ Steps: add facade, extract low-risk feature, route traffic, migrate data ownersh
 
 **Why they ask:** Distributed system tradeoffs matter at top companies.
 
+**Beginner lens:** CAP says that during a network partition you must choose between consistent answers and
+available responses. PACELC adds that even when no partition exists, you trade latency against consistency.
+Interviewers test whether you can explain trade-offs in plain terms. Recognize it when distributed data,
+stale reads, or regional failure appears. A practical answer ties the model to user impact: can this feature
+show slightly old data, or must it block until confirmed?
+
 **Short answer (say this first, 20-40 sec):**
 CAP says during a network partition, a distributed system must choose between consistency and availability. PACELC adds that else, during normal operation, systems still trade latency and consistency.
 
@@ -501,6 +751,12 @@ CAP says during a network partition, a distributed system must choose between co
 `⚫ FAANG` `Medium` `Stretch`
 
 **Why they ask:** They want applied tradeoff reasoning.
+
+**Beginner lens:** Consistency for the Email Reply Assistant should match user expectations for each action.
+Creating a reply or reserving quota may need strong local consistency, while analytics, history refresh, or
+email status can often be eventually consistent. Interviewers test product judgment. Flow: user submits
+prompt -> service saves request and idempotency record -> generation completes later -> history updates. Say
+which state the user sees while work is pending and how failures are corrected.
 
 **Short answer (say this first, 20-40 sec):**
 Reply generation response needs immediate consistency for the user. History/search can be eventually consistent. Quota, billing, and idempotency records need strong consistency to avoid overuse, duplicate charges, or duplicate generation.
@@ -528,6 +784,12 @@ Reply generation response needs immediate consistency for the user. History/sear
 
 **Why they ask:** REST is a backend interview baseline.
 
+**Beginner lens:** REST is an API style where resources are named with nouns and manipulated with HTTP
+methods. Think of resources as documents in a filing cabinet: GET reads, POST creates or commands, PUT
+replaces, PATCH changes part, DELETE removes. Interviewers test contract thinking. Recognize it when
+designing endpoints. A strong answer includes stateless requests, meaningful status codes, cacheability
+where safe, and stable representations rather than action-heavy URLs for every operation.
+
 **Short answer (say this first, 20-40 sec):**
 REST models APIs as resources identified by URLs and manipulated using standard HTTP methods. It should be stateless, use proper status codes, expose representations like JSON, and respect HTTP semantics such as caching and idempotency.
 
@@ -549,6 +811,12 @@ REST models APIs as resources identified by URLs and manipulated using standard 
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Good naming reveals API maturity.
+
+**Beginner lens:** REST resource naming should make the domain visible and predictable. Use plural nouns for
+collections, nested paths only when ownership is real, and query parameters for filtering rather than
+inventing many verbs. Interviewers test whether clients can understand your API without reading code. Flow:
+client POSTs to a collection to create, GETs a resource by identifier, and lists with filters or cursors.
+Good names become part of the long-lived contract.
 
 **Short answer (say this first, 20-40 sec):**
 Use plural nouns for collections, path parameters for identity, and query parameters for filtering/sorting. Keep paths lowercase and stable; nest only when ownership is real.
@@ -575,6 +843,12 @@ Avoid:
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Status code choices affect clients.
+
+**Beginner lens:** HTTP status codes are a compact contract about what happened before the body is read.
+Think of them as traffic signals for clients. Interviewers test whether you distinguish client errors,
+server errors, creation, async acceptance, and missing resources. Flow: validate request -> choose 400 for
+bad input, 401 or 403 for security, 404 for missing resource, 409 for conflict, 201 for created, 202 for
+accepted async work, and 5xx for server failure.
 
 **Short answer (say this first, 20-40 sec):**
 Use 2xx for success, 4xx for client errors, and 5xx for server/upstream failures. Be consistent and specific enough for clients to react.
@@ -609,6 +883,12 @@ Use 2xx for success, 4xx for client errors, and 5xx for server/upstream failures
 
 **Why they ask:** Idempotency is core API design.
 
+**Beginner lens:** PUT, PATCH, and POST differ by intent and idempotency. PUT replaces a known resource and
+should be repeat-safe; PATCH partially updates; POST usually creates a new resource or triggers an action
+unless an idempotency key makes retries safe. Interviewers test retry and contract design. Flow: if the
+client knows the final resource URI, PUT can fit; if the server creates an identifier, POST plus idempotency
+is safer for unreliable networks.
+
 **Short answer (say this first, 20-40 sec):**
 POST usually creates/processes and is not idempotent by default. PUT replaces or creates a resource at a known URI and is idempotent. PATCH partially updates; it can be idempotent depending on patch semantics.
 
@@ -634,6 +914,12 @@ Example: `PATCH` setting tone is idempotent; incrementing usage is not.
 
 **Why they ask:** APIs evolve while clients remain deployed.
 
+**Beginner lens:** API versioning is how you evolve a contract without surprising existing clients. It is
+like publishing a new form while still accepting the old one for a while. Interviewers test compatibility
+judgment. Recognize it when fields, validation, paths, or behavior change. Options include URL version,
+header version, media type version, and additive evolution. The safer flow is add optional fields ->
+document -> support both -> deprecate with notice -> remove only after migration.
+
 **Short answer (say this first, 20-40 sec):**
 Strategies include URI versioning, header versioning, media type versioning, and query parameter versioning. URI versioning is simple and visible; header/media type versioning is cleaner but less obvious. Prefer backward-compatible changes first.
 
@@ -658,6 +944,12 @@ Breaking changes: remove/rename fields, change type, make optional field require
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Pagination affects performance and correctness.
+
+**Beginner lens:** Offset pagination says skip N rows, while cursor pagination says continue after this
+stable position. Offset is simple but can get slow and inconsistent as rows are inserted or deleted. Cursor
+is better for large changing lists. Interviewers test scaling and correctness. Flow: client requests first
+page with limit -> server returns items plus next cursor -> client sends cursor for the next page. Stable
+ordering and tie-breakers prevent duplicates or missed records.
 
 **Short answer (say this first, 20-40 sec):**
 Offset pagination uses `LIMIT/OFFSET`, simple but slow and unstable for deep pages. Cursor pagination uses the last seen sort key, is stable and efficient for feeds/history, but cannot jump to arbitrary pages easily.
@@ -690,6 +982,12 @@ Use deterministic order and opaque cursor tokens.
 
 **Why they ask:** Listing APIs almost always need filters and sort.
 
+**Beginner lens:** Filtering and sorting define which rows qualify and in what order they appear. Treat them
+as part of the API contract, not string concatenation. Interviewers test safety and predictability.
+Recognize it when endpoints list resources. Flow: parse allowed filter fields -> validate operators -> use
+indexes where possible -> apply stable sort -> paginate. Avoid exposing arbitrary database fields or unsafe
+dynamic SQL; document defaults and behavior for nulls and ties.
+
 **Short answer (say this first, 20-40 sec):**
 Use query parameters for filters and sorting, validate allowed fields, and map them safely to repository or SQL queries. Never concatenate raw client input into SQL.
 
@@ -711,6 +1009,12 @@ Example: `GET /api/v1/replies?tone=formal&status=completed&sort=-createdAt&limit
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Public APIs need quotas and client feedback.
+
+**Beginner lens:** Rate limiting headers tell a client how much request budget remains and when to slow
+down. Think of them as a speedometer and fuel gauge. Interviewers test fairness and client behavior. Flow:
+gateway or service identifies the caller -> checks a token bucket or quota -> allows or rejects -> returns
+headers such as limit, remaining, reset, and maybe Retry-After. Limits should protect expensive endpoints
+like reply generation more strictly than cheap reads.
 
 **Short answer (say this first, 20-40 sec):**
 Rate limiting restricts requests per user, token, tenant, or IP. When exceeded, return 429 and headers that show limit, remaining quota, reset time, and retry guidance.
@@ -737,6 +1041,12 @@ Algorithms: fixed window, sliding window, token bucket, leaky bucket. Redis is c
 
 **Why they ask:** API style should fit the use case.
 
+**Beginner lens:** REST, GraphQL, and gRPC are different contract shapes. REST is resource-oriented and
+broadly compatible, GraphQL lets clients ask for specific fields, and gRPC is efficient remote procedure
+calls for internal systems. Interviewers test choosing by client needs and coupling. Flow: public product
+API often starts with REST; frontend aggregation may use GraphQL; high-throughput service-to-service calls
+may use gRPC. Each choice affects tooling, caching, versioning, and debugging.
+
 **Short answer (say this first, 20-40 sec):**
 REST is resource-oriented and simple for public CRUD APIs. GraphQL lets clients request exact fields and aggregate data flexibly. gRPC is schema-first, binary, and efficient for internal service-to-service calls.
 
@@ -760,6 +1070,12 @@ Email Reply Assistant public frontend fits REST; internal quota/generation calls
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Realtime updates need the right transport.
+
+**Beginner lens:** WebSocket is a two-way persistent channel; Server-Sent Events is a one-way
+server-to-client stream over HTTP. Think of WebSocket as a phone call and Server-Sent Events as a live
+scoreboard. Interviewers test fit, not novelty. For AI text streaming, Server-Sent Events often fits because
+the server pushes tokens while the client listens. Use WebSocket when the client also needs to send frequent
+real-time messages on the same connection.
 
 **Short answer (say this first, 20-40 sec):**
 WebSockets are bidirectional long-lived connections. Server-Sent Events are one-way server-to-client streams over HTTP. Use SSE for AI generation progress if the client only receives updates; use WebSockets for interactive bidirectional sessions.
@@ -785,6 +1101,12 @@ WebSockets are bidirectional long-lived connections. Server-Sent Events are one-
 
 **Why they ask:** APIs must evolve without breaking deployed clients.
 
+**Beginner lens:** Backward compatibility means old clients keep working after the API changes. It is like
+changing a form without making old apps unable to submit it. Interviewers test product safety. Recognize it
+when adding fields, tightening validation, renaming values, or changing errors. Flow: add optional response
+fields, keep old fields, avoid changing meaning, version breaking changes, update OpenAPI, run contract
+tests, and monitor client errors before deprecating anything.
+
 **Short answer (say this first, 20-40 sec):**
 Prefer additive changes, preserve old fields/semantics, deprecate before removal, and use contract tests. Create a new version for breaking changes. Monitor client usage before sunsetting old versions.
 
@@ -809,6 +1131,12 @@ Sunset: Wed, 31 Dec 2026 23:59:59 GMT
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Good errors reduce support and client bugs.
+
+**Beginner lens:** A good API error response helps clients decide what to do next. It should include a
+stable type or code, human-readable title, status, detail, trace identifier, and field errors when
+validation fails. Interviewers test client empathy and observability. Flow: request fails validation or
+business rule -> server maps it to a consistent Problem Details shape -> client displays or handles it.
+Avoid leaking stack traces, SQL, secrets, or internal class names.
 
 **Short answer (say this first, 20-40 sec):**
 Include status, stable error type/code, message/detail, correlation ID, and field errors when relevant. Never expose stack traces, secrets, or internal class names.
@@ -839,6 +1167,12 @@ Use one error shape across endpoints, ideally ProblemDetail-compatible.
 
 **Why they ask:** API security is broader than adding JWT.
 
+**Beginner lens:** API authentication proves the caller identity, and authorization checks what that caller
+may do. Treat them as separate gates. Interviewers test security flow. Flow: client sends token -> gateway
+or service validates issuer, signature, expiry, and audience -> service maps claims to roles or scopes ->
+endpoint and method rules check permissions -> request proceeds or returns 401/403. Rate limits, audit logs,
+and least privilege complete the production answer.
+
 **Short answer (say this first, 20-40 sec):**
 Use HTTPS, OAuth2/OIDC for user login, JWT resource server for stateless APIs, API keys for simple server integrations, and mTLS for high-trust service-to-service. Authorization should use scopes/roles plus resource ownership checks.
 
@@ -863,6 +1197,12 @@ Controls:
 `⚫ FAANG` `Medium` `Stretch`
 
 **Why they ask:** It checks deeper REST theory and pragmatic judgment.
+
+**Beginner lens:** HATEOAS means responses include links that tell clients possible next actions. It is like
+a form that includes the next counters you can visit. Interviewers test REST depth and pragmatism. Recognize
+it when discoverability or hypermedia comes up. Many product APIs do not fully use it because clients and
+documentation already know workflows. A balanced answer says links can help state-driven workflows but add
+complexity and are not mandatory for every REST API.
 
 **Short answer (say this first, 20-40 sec):**
 HATEOAS means responses include links to valid next actions. It improves discoverability but many practical JSON APIs do not fully implement it. Use it when workflow navigation matters; otherwise documented endpoints may be enough.
@@ -892,6 +1232,12 @@ HATEOAS means responses include links to valid next actions. It improves discove
 
 **Why they ask:** API docs are part of production delivery.
 
+**Beginner lens:** OpenAPI is the written contract for REST APIs: paths, methods, schemas, parameters,
+responses, errors, and security. Think of it as a blueprint clients and servers can both test against.
+Interviewers test whether documentation stays executable. Flow: design or generate spec -> review
+compatibility -> generate clients or server stubs if useful -> run contract tests -> publish docs. Keep
+examples, error models, and versioning accurate, not just happy-path fields.
+
 **Short answer (say this first, 20-40 sec):**
 OpenAPI documents endpoints, schemas, auth, status codes, errors, pagination, rate limits, and examples. Keep it generated or validated in CI so docs do not drift from implementation.
 
@@ -917,6 +1263,12 @@ Springdoc can generate Swagger UI, but secure/disable it in production if needed
 
 **Why they ask:** Caching improves performance but can create stale/unsafe data.
 
+**Beginner lens:** API caching stores safe responses so clients or servers do not recompute or reload them
+every time. Think of it as keeping a recent menu at the counter. Interviewers test correctness and
+invalidation. Recognize it with repeated reads, expensive generation, or list endpoints. Flow: determine if
+data is user-specific and safe to cache -> set cache keys and headers -> invalidate or expire after writes.
+Never cache private authenticated data without strict controls.
+
 **Short answer (say this first, 20-40 sec):**
 Cache safe, repeatable reads; avoid caching user-private or rapidly changing data unless keys and invalidation are correct. Use HTTP cache headers for clients/CDNs and server caches like Redis for expensive backend reads.
 
@@ -939,6 +1291,12 @@ Cache safe, repeatable reads; avoid caching user-private or rapidly changing dat
 
 **Why they ask:** Aggregating APIs often have partial dependency failures.
 
+**Beginner lens:** Partial failure means part of a composed API response failed while other parts succeeded.
+It is like receiving two packages and one is delayed. Interviewers test honest contracts. Recognize it with
+aggregator endpoints or downstream calls. Flow: call independent dependencies with timeouts -> return
+available data plus per-section errors or a 207-style/modeled partial response if the contract allows ->
+emit metrics and traces. Do not hide missing critical data as success.
+
 **Short answer (say this first, 20-40 sec):**
 Define whether the endpoint is all-or-nothing or can return partial data. If partial is allowed, include clear status per component and avoid hiding critical failures. For writes, prefer clear failure over partial success unless workflow state is persisted.
 
@@ -960,6 +1318,12 @@ Example aggregation: reply details plus analytics.
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Production APIs need measurable behavior.
+
+**Beginner lens:** API observability means designing signals before incidents: logs for facts, metrics for
+trends, and traces for request paths. Interviewers test production ownership. Flow: gateway receives request
+and correlation identifier -> service logs key events without secrets -> metrics count rate, errors, and
+duration -> spans wrap database, cache, and downstream calls -> dashboards and alerts detect abnormal
+latency or failures. Good observability explains both what users saw and where time was spent.
 
 **Short answer (say this first, 20-40 sec):**
 Add structured logs, metrics, traces, correlation IDs, and meaningful dashboards. Track request rate, error rate, latency percentiles, dependency latency, saturation, and business metrics like generated replies and Gemini failures.
@@ -986,6 +1350,12 @@ Golden signals:
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** This ties API design to your resume project.
+
+**Beginner lens:** Designing the Email Reply Assistant REST API starts with the user action, not the
+database table. The core contract is submit a prompt and get a reply or job status. Interviewers test
+resource modeling, validation, and production concerns. Flow: client POSTs to /api/v1/replies with tone and
+prompt -> service validates and authorizes -> generation runs or queues -> response returns reply, status,
+or job link -> history endpoint lists prior replies with pagination.
 
 **Short answer (say this first, 20-40 sec):**
 Expose versioned endpoints for generating replies, checking reply status/history, managing templates, and submitting feedback. Validate request length and tone, use idempotency for generation, and return consistent ProblemDetail errors.
@@ -1015,6 +1385,13 @@ Request:
 `🔴 Advanced` `🔥` `Must-know SDE-1`
 
 **Why they ask:** It tests latency-aware API design.
+
+**Beginner lens:** Async generation handles slow Gemini responses by decoupling request acceptance from
+completion. Think of it as taking an order number instead of making the customer block the counter.
+Interviewers test latency and reliability. Flow: client POSTs request -> server validates, stores job,
+returns 202 Accepted with status URI -> worker generates reply -> job state updates -> client polls,
+subscribes to Server-Sent Events, or receives callback. Idempotency keeps retries from creating duplicate
+jobs.
 
 **Short answer (say this first, 20-40 sec):**
 Return `202 Accepted` with a job/reply ID and `Location` header, enqueue work, process it in a worker, and let the client poll `GET /replies/{id}` or subscribe through SSE. This avoids holding HTTP threads for long AI calls.
@@ -1050,6 +1427,12 @@ Statuses: `queued`, `processing`, `completed`, `failed`, `expired`.
 
 **Why they ask:** AI generation can be retried and may cost money.
 
+**Beginner lens:** Adding idempotency to POST /api/v1/replies protects the create path when the browser
+retries after a timeout. The server must remember the key and the request meaning. Flow: client sends
+Idempotency-Key -> service checks existing record for that user and endpoint -> if completed, return same
+result; if in progress, return current status; if new, reserve key and process. Store request fingerprint,
+expiry, and final response or resource identifier.
+
 **Short answer (say this first, 20-40 sec):**
 Accept `Idempotency-Key` per user intent. Store user ID, key, request hash, status, and response/job ID with a unique constraint. Duplicate same request returns same result; same key with different body returns 409.
 
@@ -1077,6 +1460,12 @@ Behavior:
 
 **Why they ask:** The API uses a paid external AI dependency.
 
+**Beginner lens:** Securing and rate-limiting this API means protecting both user data and expensive Gemini
+calls. Interviewers test layered defense. Flow: gateway or service validates token -> authorizes user to
+access only their replies -> validates input size and content -> applies per-user and per-IP limits -> calls
+Gemini with bounded timeout -> logs audit and metrics. Strong answers mention least privilege, secret
+storage, CORS, abuse prevention, and safe error messages.
+
 **Short answer (say this first, 20-40 sec):**
 Use HTTPS, JWT/OAuth2 for users, server-side Gemini secrets, scope-based authorization, and rate limits by user/tenant. Generation endpoints should have stricter quotas than read endpoints. Return 429 with retry headers.
 
@@ -1102,6 +1491,12 @@ Use HTTPS, JWT/OAuth2 for users, server-side Gemini secrets, scope-based authori
 
 **Why they ask:** This tests idempotency and transaction thinking.
 
+**Beginner lens:** Duplicate replies after frontend retries are the classic idempotency failure. The client
+did not know whether the first POST succeeded, so it tried again and the server treated it as new work.
+Interviewers test whether you fix the contract, not just the UI. Flow: require an idempotency key -> create
+a unique record per user/key -> process once -> return the original reply or job state for later retries.
+Database uniqueness is the final guard.
+
 **Short answer (say this first, 20-40 sec):**
 Add idempotency keys, store them with a unique constraint, and return the previous result for duplicate retries. Fix frontend retry logic so one user action reuses one key.
 
@@ -1120,6 +1515,12 @@ Investigation: compare timestamps, request bodies, user ID, frontend timeout, an
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Gateway failures require layered debugging.
+
+**Beginner lens:** Gateway 502 and 504 usually mean the edge could not get a healthy response from the
+upstream service. A 502 is a bad upstream response; a 504 is a timeout waiting. Interviewers test layered
+debugging. Flow: check gateway logs and target health -> trace to service -> inspect timeouts, connection
+pools, DNS, and deployment readiness -> compare error timing with service metrics. Fix may be health probes,
+timeout alignment, capacity, or downstream resilience.
 
 **Short answer (say this first, 20-40 sec):**
 502 means bad upstream response or connection failure; 504 means upstream timeout. Check route config, service health, discovery/DNS, readiness, TLS, gateway timeout, and traces from gateway to service.
@@ -1142,6 +1543,12 @@ Investigation: compare timestamps, request bodies, user ID, frontend timeout, an
 `🔴 Advanced` `🔥` `Stretch`
 
 **Why they ask:** They test saga and compensation design.
+
+**Beginner lens:** Failing after quota is reserved but before reply is saved is a distributed consistency
+problem. One local transaction succeeded and the next step did not. Interviewers test saga thinking. Flow:
+reserve quota -> mark workflow QUOTA_RESERVED -> generate -> save reply -> confirm quota. If generation or
+save fails, compensation releases or adjusts quota, and a retry or repair job uses idempotent state
+transitions. Do not pretend one database transaction can cover every service.
 
 **Short answer (say this first, 20-40 sec):**
 Model it as a saga with persisted state. Reserve quota, generate reply, save reply, then confirm usage. If generation or save fails, run compensation to release quota. Make every step idempotent and retryable.
@@ -1170,6 +1577,12 @@ States: `QUOTA_RESERVED`, `GENERATING`, `SAVED`, `CONFIRMED`, `COMPENSATING`, `F
 
 **Why they ask:** Latency often comes from waiting, not CPU.
 
+**Beginner lens:** High latency with low CPU means the service may be waiting, not computing. It could be
+blocked on Gemini, database locks, connection pools, DNS, network, or queue saturation. Interviewers test
+observability interpretation. Flow: inspect trace spans to find the slow hop -> compare service duration,
+downstream duration, and pool metrics -> check p95 or p99 latency and error rates -> add timeout, bulkhead,
+cache, or capacity where the wait occurs.
+
 **Short answer (say this first, 20-40 sec):**
 Low CPU with high latency usually means waiting on network, database locks, connection pools, thread pools, queues, or downstream APIs. Use traces to find slow spans and metrics to check saturation.
 
@@ -1188,6 +1601,12 @@ Check p95/p99, Gemini span duration, Hikari pool pending threads, Tomcat busy th
 `🔴 Advanced` `Medium` `Stretch`
 
 **Why they ask:** At-least-once delivery is common.
+
+**Beginner lens:** Duplicate event processing is normal in distributed messaging because brokers and
+consumers often provide at-least-once delivery. The consumer must be idempotent. Interviewers test whether
+you design for reality. Flow: consumer receives event -> checks event identifier or business key in a
+processed table -> applies change in a transaction -> records processed marker -> acknowledges message. If
+it crashes before ack, replay happens, but the marker prevents duplicate side effects.
 
 **Short answer (say this first, 20-40 sec):**
 Assume duplicate events happen. Make consumers idempotent by storing processed event IDs, using unique constraints, and making business updates safe to repeat.
@@ -1214,6 +1633,12 @@ Consumer transaction: insert event ID; if conflict, skip; apply update; commit; 
 
 **Why they ask:** Even additive changes can break strict clients.
 
+**Beginner lens:** Additive response fields can still break strict clients, generated models, or tests that
+reject unknown properties. Interviewers test contract evolution beyond the happy path. Flow: check OpenAPI
+and client settings -> add fields as optional -> keep old fields stable -> run contract tests -> communicate
+change -> monitor client errors. If clients are strict, use versioning or feature flags rather than assuming
+JSON additions are always harmless.
+
 **Short answer (say this first, 20-40 sec):**
 Adding a field is compatible only if clients ignore unknown fields. Some generated or strict clients fail. Communicate schema evolution rules, add consumer contract tests, and version if the contract forbids extra fields.
 
@@ -1235,6 +1660,12 @@ Adding a field is compatible only if clients ignore unknown fields. Some generat
 `⚫ FAANG` `🔥` `Stretch`
 
 **Why they ask:** Migration requires strategy, not big-bang rewriting.
+
+**Beginner lens:** Migrating the Email Reply Assistant from monolith to microservices should be gradual.
+Interviewers test strategy and risk control. Flow: identify bounded capabilities such as generation, reply
+history, quota, and notification -> put a gateway or facade in front -> extract one capability with its data
+ownership -> sync events or migrate data -> run in parallel -> cut traffic gradually -> monitor and roll
+back. Avoid splitting everything before the domain and operations are ready.
 
 **Short answer (say this first, 20-40 sec):**
 First modularize the monolith, add tests and observability, identify bounded contexts, then use Strangler Fig through a gateway. Extract low-risk capabilities like templates/history before high-risk generation/quota.
@@ -1262,6 +1693,12 @@ Success metrics: independent deployment, stable latency/error rate, clear data o
 `🔴 Advanced` `Medium` `Stretch`
 
 **Why they ask:** Streaming changes resource and cost profiles.
+
+**Beginner lens:** AI streaming changes resource usage because each open stream holds memory, connection
+capacity, and sometimes model or token budget longer than a normal request. Interviewers test scalability
+and cost awareness. Flow: client opens stream -> server calls Gemini -> tokens are forwarded -> disconnect
+or timeout must close resources -> metrics track active streams, duration, tokens, and errors. Use limits,
+backpressure, timeouts, and cheaper async modes when real-time streaming is not required.
 
 **Short answer (say this first, 20-40 sec):**
 Limit concurrent streams, enforce per-user quotas, use backpressure, timeouts, and cancellation when clients disconnect. Track token usage/cost and ensure streaming responses do not buffer entire outputs in memory.

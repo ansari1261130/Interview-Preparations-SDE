@@ -5,6 +5,7 @@ Tier-2 SDE-2 case studies in interview order. For each design, move from require
 **Legend:** 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
 ## Table of Contents
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [1. Design YouTube or Netflix Video Streaming](#1-design-youtube-or-netflix-video-streaming)
 - [2. Design Uber or Ola Ride Hailing](#2-design-uber-or-ola-ride-hailing)
 - [3. Design Swiggy or Zomato Food Delivery](#3-design-swiggy-or-zomato-food-delivery)
@@ -15,8 +16,130 @@ Tier-2 SDE-2 case studies in interview order. For each design, move from require
 - [Revision Cheat Sheet](#revision-cheat-sheet)
 - [Flashcards](#flashcards)
 
+## Beginner guide to this file
+
+### What this file teaches
+This file teaches larger product-system high-level design (HLD) patterns: media streaming, real-time matching,
+marketplace ordering, commerce checkout, payments, file synchronization, and crawling. These appear in interviews
+because they force you to combine data modeling, asynchronous workflows, hot reads, strong writes, and practical
+failure recovery.
+
+### Mental model
+Think of these systems as factories with different production lines: browsing and playback are fast showroom
+paths, while payments, bookings, uploads, and crawling are controlled assembly lines.
+
+- Read-heavy paths use caches, content delivery networks, search indexes, and precomputed views.
+- Correctness-heavy paths use transactions, reservations, ledgers, state machines, and reconciliation.
+- Queues connect slow work such as transcoding, assignment, refunds, indexing, and parsing.
+- Ephemeral state belongs in Redis-like stores; durable facts belong in databases or object storage.
+- Scale usually requires partitioning by user, city, SKU, listing, chunk hash, or host.
+
+### How to think through any question here
+1. Name the user journey and split it into browse/read, write/commit, and background-processing paths.
+2. Ask the scale driver: bandwidth, location updates, orders, money movement, files, or pages crawled.
+3. Identify the data that must be strongly consistent versus eventually consistent.
+4. Draw the state machine or pipeline before naming storage technology.
+5. Estimate peak load, storage growth, and the single hottest key or partition.
+6. Add idempotency, retries, and reconciliation anywhere money, orders, or external callbacks appear.
+7. Explain degraded behavior when a provider, cache, queue, database, or regional component fails.
+
+### Pattern recognition cues
+| If the question mentions... | Think about... | Why it fits |
+|---|---|---|
+| Video playback or large media | Object storage plus content delivery network | Media bytes are huge and should bypass app servers. |
+| Drivers, couriers, or nearby matching | Geo index with ephemeral location state | Current location changes quickly and is queried by area. |
+| Multi-step order lifecycle | State machine and event queue | Payment, restaurant, delivery, and refunds happen asynchronously. |
+| Flash sale or limited inventory | Admission control plus atomic reservation | The hot item must be protected before inventory writes. |
+| Wallet, gateway, or UPI | Append-only double-entry ledger | Money movement requires audit and idempotency. |
+| Multi-device files | Chunking, checksums, and change log | Sync needs resumability and conflict handling. |
+| Web crawling | Frontier, politeness, and dedup | The challenge is scheduling safely, not just fetching pages. |
+| Stale search results | Authoritative final service | Search can be stale if checkout or booking revalidates. |
+
+### Abbreviations and key terms
+| Short form | Expanded form | Plain meaning |
+|---|---|---|
+| ACID | Atomicity, Consistency, Isolation, Durability | Transaction properties needed for money and inventory correctness. |
+| ACL | Access control list | Permission list that says who can access a file or document. |
+| API | Application programming interface | Contract used by clients and services. |
+| AZ | Availability zone | Independent data-center zone within a cloud region. |
+| CAS | Compare and set | Atomic update that succeeds only if the current value matches. |
+| CDN | Content delivery network | Edge network that serves video, images, and static content near users. |
+| DAG | Directed acyclic graph | Version or workflow graph with arrows that do not cycle. |
+| DASH | Dynamic Adaptive Streaming over HTTP | Video streaming format that switches quality by network condition. |
+| DAU | Daily active users | Count of unique users active in one day. |
+| DB | Database | Durable store for structured data. |
+| DLQ | Dead-letter queue | Queue for messages that failed repeated processing. |
+| DRM | Digital rights management | Controls that restrict unauthorized media playback. |
+| ETA | Estimated time of arrival | Predicted arrival or delivery time. |
+| FAANG | Facebook, Amazon, Apple, Netflix, Google | Shorthand for large product-company interview style. |
+| GB | Gigabyte | Roughly one billion bytes. |
+| H3 | Hexagonal hierarchical geospatial index | Grid system for nearby-location lookup. |
+| HA | High availability | Ability to keep serving during partial failures. |
+| HLD | High-level design | System design at component and data-flow level. |
+| HLS | HTTP Live Streaming | Common adaptive video streaming format. |
+| HTML | HyperText Markup Language | Markup fetched and parsed by web crawlers. |
+| ID | Identifier | Unique value for a user, object, order, trip, or chunk. |
+| IP | Internet Protocol | Network address family often used for routing or abuse signals. |
+| KB | Kilobyte | Roughly one thousand bytes. |
+| KV | Key-value | Data model that retrieves a value by exact key. |
+| MB | Megabyte | Roughly one million bytes. |
+| P2P | Peer to peer | Payment or communication directly between two parties. |
+| PB | Petabyte | Roughly one quadrillion bytes. |
+| PCI | Payment Card Industry | Security standards and isolation concerns around card payments. |
+| POS | Point of sale | Restaurant or store system that accepts orders. |
+| QPS | Queries per second | Request throughput. |
+| S2 | Spherical geometry cell library | Cell-based geo-indexing approach. |
+| SDE-1 | Software Development Engineer level 1 | Entry-level engineering interview bar. |
+| SDE-2 | Software Development Engineer level 2 | Mid-level engineering interview bar. |
+| SKU | Stock keeping unit | Unique product inventory identifier. |
+| SQL | Structured Query Language | Relational query language and shorthand for relational databases. |
+| SSE | Server-sent events | One-way streaming protocol from server to browser or client. |
+| TB | Terabyte | Roughly one trillion bytes. |
+| TTL | Time to live | Expiration duration for cache, hold, or temporary state. |
+| TV | Television | Large-screen playback device category. |
+| UPI | Unified Payments Interface | Indian real-time payment network. |
+| URL | Uniform Resource Locator | Web address used by crawlers, media, and APIs. |
+| UX | User experience | How smooth and understandable the product feels. |
+| VOD | Video on demand | Pre-recorded video playback rather than live streaming. |
+
+### Common beginner traps
+- Designing only the happy-path API and forgetting asynchronous workers or reconciliation.
+- Using the same consistency level for search, browse, payment, and inventory decisions.
+- Sending large media or files through app servers instead of direct object-storage flows.
+- Treating location, cart, or upload-session state as durable truth when it is temporary.
+- Ignoring one hot city, product, listing, video, file, or host partition.
+- Promising exactly-once external effects instead of idempotency plus repair.
+- Skipping price, availability, ledger, or conflict snapshots before the final commit.
+
+### How to study this file
+1. For each case, state whether the hardest part is bandwidth, geo, orchestration, money, sync, or scheduling.
+2. Read the short answer first, then rebuild the detailed flow from data model and diagrams.
+3. Practice the capacity math until you can explain which number drives the architecture.
+4. Use flashcards to recall the invariant, such as no oversell, no duplicate payment, or no host overload.
+5. Add one production follow-up: provider timeout, queue backlog, stale index, or regional failover.
+
+### Scalability and production lens
+At Tier 2, production design is less about naming more tools and more about protecting invariants under scale.
+Playback can degrade quality, search can be stale, and crawler freshness can lag, but payments, inventory,
+booking, and file metadata need careful state transitions, idempotent retries, audits, and reconciliation jobs.
+
 ## 1. Design YouTube or Netflix Video Streaming
 Tier 2 · SDE-2 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Upload videos, process them into playable formats, and stream them to many viewers with low
+startup delay. **Mental model:** It is a media factory plus a delivery highway: raw video enters the factory,
+renditions leave to object storage, and the content delivery network carries bytes to users. **Thought process:**
+Clarify video on demand versus live, quality levels, upload volume, and playback traffic. Reads dominate by
+bandwidth, while writes trigger heavy asynchronous processing. Core data is video metadata, segment paths,
+transcode job state, watch history, and search document. The bottleneck is origin bandwidth and transcoding;
+consistency can be eventual for search and processing status. **Request flow:** Write path creates upload URLs,
+stores chunks, enqueues transcode, writes renditions, and marks video ready. Read path fetches manifest metadata,
+uses signed URLs, and streams segments from the content delivery network. **Key trade-offs and alternatives:**
+Asynchronous transcode delays publish but keeps uploads responsive; HLS is broadly supported, while DASH can add
+control. **How it scales:** Multi-CDN, origin shielding, queue backpressure, regional caches, and idempotent
+transcode outputs protect viral videos.
 
 ### 1. Clarifying questions to ask
 - VOD only or live streaming too? Include upload, transcoding, search, comments, DRM, ads?
@@ -103,6 +226,20 @@ Video streaming is object storage plus CDN plus asynchronous processing. The har
 ## 2. Design Uber or Ola Ride Hailing
 Tier 2 · SDE-2 must-know
 
+### 0. Beginner primer
+
+**Simple problem:** Match riders with nearby available drivers and track the trip in near real time. **Mental
+model:** It is an air-traffic control board for a city: driver dots move constantly, and a dispatcher reserves one
+dot for one rider. **Thought process:** Ask city versus global scope, vehicle types, update frequency, match
+latency, and double-assignment tolerance. Location writes are extremely frequent; ride requests are lower but
+correctness-critical. Core data is driver location, driver state, ride, assignment, and payment. The bottleneck is
+geo lookup and hot city partitions, while consistency must be strong for driver reservation. **Request flow:**
+Write path receives driver pings into Redis geo or cell state, then a rider request queries nearby candidates,
+atomically reserves one driver, creates a trip, and notifies both sides. Read path serves tracking from recent
+location events and trip state. **Key trade-offs and alternatives:** Redis geo is easy; S2 or H3 gives more
+control over sharding. **How it scales:** Partition by city and cell, rebuild ephemeral state from fresh pings,
+use reservation time-to-live, and degrade ranking before losing assignment correctness.
+
 ### 1. Clarifying questions to ask
 - Design city-level or global? Cars only or autos, bikes, pooling?
 - Need pricing, payments, cancellation, driver incentives, ETA?
@@ -183,6 +320,21 @@ Ride hailing is a real-time geo and marketplace problem. Store hot locations eph
 
 ## 3. Design Swiggy or Zomato Food Delivery
 Tier 2 · SDE-2 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Let customers browse restaurants, place food orders, pay, and track delivery across several
+independent parties. **Mental model:** It is a relay race: customer, payment, restaurant, and delivery partner
+each receive the baton in a controlled state machine. **Thought process:** Clarify marketplace scope, menu
+freshness, payment timing, delivery assignment, and peak meal traffic. Browsing reads are high, but order writes
+must be reliable. Core data is restaurant, menu item, cart, order, payment, assignment, and order event. The
+bottleneck is dinner-time spikes and partner assignment; consistency is strict for payment and order state but
+eventual for menu/search caches. **Request flow:** Write path snapshots cart prices, authorizes payment, creates
+or updates the order state, asks restaurant to accept, and emits assignment events. Read path serves restaurant
+search/menu from cache and order tracking from the state timeline. **Key trade-offs and alternatives:** Payment
+before acceptance creates refunds; authorization then capture reduces refund churn. **How it scales:** Partition
+by city and restaurant, cache menus, use outbox events, reassign partners on cancellation, and reconcile payment
+callbacks idempotently.
 
 ### 1. Clarifying questions to ask
 - Marketplace only or include restaurant POS and delivery fleet?
@@ -265,6 +417,21 @@ Food delivery is reliable orchestration across customer, restaurant, delivery, a
 
 ## 4. Design E-commerce Flipkart
 Tier 2 · SDE-2 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Serve a huge catalog quickly while making checkout correct for inventory, payment, and order
+creation. **Mental model:** The storefront is a fast showroom, but checkout is a controlled warehouse counter
+where stock is reserved before money is captured. **Thought process:** Ask marketplace scope, flash-sale needs,
+oversell tolerance, catalog search, and shipment flow. Reads dominate product browsing; writes spike during
+checkout and flash sales. Core data is product, inventory, cart, reservation, payment, order, and order event. The
+bottleneck is a hot stock keeping unit during sale; consistency is strong for inventory reservation and eventual
+for search index updates. **Request flow:** Write path reserves inventory with a token, authorizes payment,
+creates order, confirms reservation, and emits fulfillment events. Read path serves product pages from cache and
+search index, falling back to catalog truth. **Key trade-offs and alternatives:** Strong inventory avoids oversell
+but can reduce availability; waiting rooms add latency but protect the database. **How it scales:** Use content
+delivery network caching, Redis sale tokens, per-user limits, queue admission, SKU sharding, and reconciliation
+for payment success with order failure.
 
 ### 1. Clarifying questions to ask
 - Marketplace or first-party inventory? Include cart, checkout, payment, shipment?
@@ -349,6 +516,21 @@ E-commerce is read-heavy catalog plus correctness-heavy checkout. Flash sales re
 ## 5. Design Payment Gateway Wallet or UPI
 Tier 2 · SDE-2 must-know
 
+### 0. Beginner primer
+
+**Simple problem:** Move money safely, expose payment status, and recover from retries, bank timeouts, and
+settlement mismatches. **Mental model:** It is an accounting ledger, not just an API call: every debit must have
+a matching credit, and every external message must be auditable. **Thought process:** Clarify gateway versus
+wallet versus Unified Payments Interface, consistency, refunds, reconciliation, and external bank reliability.
+Writes are payment attempts, ledger entries, callbacks, and refunds; reads are status and balances. Core data is
+payment, idempotency key, ledger entry, account balance, bank message, and reconciliation file. The bottleneck is
+external network latency and ledger throughput; consistency favors correctness over availability. **Request
+flow:** Write path reserves idempotency, creates pending ledger entries, calls the bank, posts final entries or
+keeps pending, and records events. Read path returns authoritative payment state from durable storage. **Key
+trade-offs and alternatives:** Synchronous bank calls give immediate feedback but are brittle; pending async state
+is more resilient. **How it scales:** Partition ledger by account or tenant, use append-only audit, process
+webhooks idempotently, encrypt sensitive data, and reconcile internal records with bank files.
+
 ### 1. Clarifying questions to ask
 - Gateway, wallet, or UPI switch? P2P, merchant payments, refunds, settlements?
 - Required consistency, compliance, reconciliation frequency, fraud checks?
@@ -431,6 +613,21 @@ Payment design prioritizes correctness, idempotency, audit, and reconciliation. 
 ## 6. Design Dropbox or Google Drive File Sync
 Tier 2 · SDE-2 must-know
 
+### 0. Beginner primer
+
+**Simple problem:** Keep files synchronized across devices with resumable upload, deduplication, sharing, and
+version history. **Mental model:** The file bytes are warehouse boxes, while metadata is a directory card and the
+change log is a delivery receipt stream. **Thought process:** Clarify backup versus sync, max file size,
+offline behavior, conflict rules, and permissions. Writes are chunk uploads, commits, deletes, and share changes;
+reads are downloads and sync changes. Core data is file metadata, chunk hash, object path, version, access
+control list, and cursor. The bottleneck is bandwidth and metadata operations; consistency must be strong for
+folder state and permissions but eventual for thumbnails/search. **Request flow:** Write path starts an upload
+session, checks chunk hashes, uploads missing chunks, commits a new version, and appends a change event. Read
+path asks for changes after a cursor, downloads missing chunks, and applies tombstones or versions. **Key
+trade-offs and alternatives:** Fixed chunks are simple; content-defined chunks improve delta sync but cost more.
+**How it scales:** Shard metadata by user, chunks by hash prefix, use object lifecycle cleanup, long polling, and
+conflict-copy rules.
+
 ### 1. Clarifying questions to ask
 - Backup only or multi-device sync with sharing and versioning?
 - Max file size, chunk size, conflict behavior, offline support?
@@ -510,6 +707,21 @@ File sync separates metadata correctness from blob durability. Chunking, dedup, 
 
 ## 7. Design Web Crawler
 Tier 2 · SDE-2 must-know
+
+### 0. Beginner primer
+
+**Simple problem:** Fetch many web pages, discover new links, avoid duplicates, and respect site rules without
+overwhelming hosts. **Mental model:** It is a polite delivery route planner: the frontier chooses the next stop,
+robots rules say where not to go, and dedup stops circling the same block. **Thought process:** Clarify general
+versus focused crawl, freshness, robots compliance, stored content, and indexing needs. Writes are fetched pages,
+new URLs, link graph rows, and index events; reads are scheduler pulls from the frontier and downstream indexing.
+Core data is normalized URL, host, priority, next fetch time, robots rule, content hash, and page store path. The
+bottleneck is fair scheduling and parser backlog, while consistency is approximate because missing a few URLs is
+less harmful than overloading a host. **Request flow:** Write path fetches a URL, stores content, parses links,
+deduplicates, and enqueues new URLs. Read path selects eligible URLs by priority and host politeness. **Key
+trade-offs and alternatives:** Central frontier is simple but bottlenecks; distributed frontier scales but
+complicates fairness. **How it scales:** Partition by host hash, lease work, apply backpressure, use Bloom
+filters carefully, and replay queues after worker failure.
 
 ### 1. Clarifying questions to ask
 - General web search crawler or focused domain crawler?

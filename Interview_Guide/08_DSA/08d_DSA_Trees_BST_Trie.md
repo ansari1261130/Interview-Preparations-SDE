@@ -5,6 +5,7 @@ Interview-ready Java guide for tree traversals, BST invariants, and Trie prefix 
 **Legend:** 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
 **Table of Contents**
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [Binary Tree Traversal Patterns](#binary-tree-traversal-patterns)
 - [BST Patterns](#bst-patterns)
 - [Trie and Prefix Search Patterns](#trie-and-prefix-search-patterns)
@@ -13,6 +14,83 @@ Interview-ready Java guide for tree traversals, BST invariants, and Trie prefix 
 - [Flashcards](#flashcards)
 
 > Java note: binary-tree solutions assume LeetCode's standard `TreeNode` class.
+
+## Beginner guide to this file
+
+### What this file teaches
+
+This file teaches tree-shaped Data Structures and Algorithms (DSA) thinking: how a node depends on its
+children, how Binary Search Tree (BST) ordering narrows decisions, and how Trie prefix trees make word lookup
+fast. Interviewers ask these problems because backend systems often traverse hierarchies, validate ordered data,
+serialize nested objects, and search dictionaries or prefixes.
+
+### Mental model
+
+Think of a tree as a family chart where each person asks children for answers before reporting upward.
+
+- Depth-First Search (DFS) is a deep branch conversation before returning.
+- Breadth-First Search (BFS) is a floor-by-floor elevator ride through levels.
+- A BST is a sorted decision tree with ancestor bounds.
+- A Trie is a shared-prefix map for words.
+- Backtracking keeps one path, then undoes a choice before trying another.
+
+### How to think through any question here
+
+1. Decide whether the answer is about a path, every node, levels, sorted order, or prefixes.
+2. Say what one node returns: height, validity, gain, a found target, or nothing.
+3. Use preorder for carried state, postorder for child answers, and inorder for BST sorted order.
+4. For BFS, process exactly the current queue size per level.
+5. For BSTs, write the low/high ancestor bounds before coding.
+6. For Tries, define character edges and the complete-word marker.
+7. State null, duplicate, skewed-tree, and recursion-depth edge cases.
+
+### Pattern recognition cues
+
+| If the question mentions... | Think about... | Why it fits |
+|---|---|---|
+| Height, depth, balance, diameter | Postorder DFS | Parent answers depend on child heights. |
+| Level order, zigzag, right side | BFS by level size | Output groups nodes by distance from root. |
+| BST validity or kth smallest | Bounds or inorder | BST order is global, not only parent-child. |
+| Lowest common ancestor | Split point or bubbling targets | The answer is where two searches meet. |
+| Preorder and inorder arrays | Root plus subtree ranges | Traversal order splits left and right subtrees. |
+| Path sum or max path | Backtracking or one-side gain | Path rules decide what can return upward. |
+| Serialize and deserialize | Null markers | Values alone do not preserve shape. |
+| Prefix or wildcard word search | Trie | Shared prefixes avoid repeated scans. |
+
+### Abbreviations and key terms
+
+| Short form | Expanded form | Plain meaning |
+|---|---|---|
+| AVL | Adelson-Velsky and Landis tree | A self-balancing BST follow-up. |
+| BFS | Breadth-First Search | Visit nearest nodes first using a queue. |
+| BST | Binary Search Tree | Left values are smaller and right values are larger. |
+| DFS | Depth-First Search | Explore one branch deeply before backtracking. |
+| DP | Dynamic Programming | Reuse overlapping subproblem answers. |
+| DSA | Data Structures and Algorithms | Coding-interview problem-solving topics. |
+| FAANG | Facebook, Apple, Amazon, Netflix, and Google | Shorthand for large product-company interviews. |
+| KMP | Knuth-Morris-Pratt | String matching that can compare serialized trees. |
+| LCA | Lowest Common Ancestor | Deepest node with both targets below it. |
+| O(...) | Big O notation | How time or space grows with input size. |
+| RMQ | Range Minimum Query | Preprocessing for fast range minimum answers. |
+| SDE | Software Development Engineer | Interview role level used in this guide. |
+| Trie | Trie | A prefix tree for strings. |
+
+### Common beginner traps
+
+- Validating a BST only against each direct parent instead of all ancestor bounds.
+- Returning both branches upward for diameter or max path sum when only one branch can extend.
+- Forgetting to freeze BFS queue size for each level.
+- Treating duplicate values as node identity in ancestor problems.
+- Serializing without null markers and losing tree shape.
+- Forgetting to undo path or board mutations during backtracking.
+
+### How to study this file
+
+1. Read the pattern section and say the invariant before looking at code.
+2. For each problem, cover the code and explain the short answer aloud.
+3. Use the detailed dry run to trace one small example by hand.
+4. Convert each edge-case line into a test idea.
+5. Revisit flashcards after coding to check pattern recognition.
 
 ## Binary Tree Traversal Patterns
 
@@ -146,6 +224,14 @@ class TrieTemplate {
 ### P1. Maximum Depth of Binary Tree (LeetCode 104)
 `🟢 Easy` `🔥` `Must-know SDE-1` · Pattern: Tree DFS · Commonly reported at: Amazon, Microsoft, Google; verify tags
 **Problem:** Return max root-to-leaf depth. Example `[3,9,20,null,null,15,7]` → `3`.
+
+**How to recognize and think:** The task is simply tree height: the number of nodes on the longest
+root-to-leaf route. Phrases like `maximum depth`, `root-to-leaf`, and `height` point to a depth-first answer.
+Enumerating every full path records far more than the final integer needs. Postorder is the small leap: a node
+cannot know its own depth until both children report theirs. The invariant is that `maxDepth(node)` returns
+the exact height of that subtree; `null` returns `0`, and a real node returns `1 + max(left, right)`. Picture
+`20` returning `2`, then root `3`. Say empty tree, single node, and a skewed chain.
+
 **How to recognize the pattern:** Answer is `1 + best child answer`.
 **Brute force:** Enumerate all paths — O(n) time, O(h) space.
 **Optimal:** Postorder DFS returns subtree height.
@@ -165,6 +251,15 @@ class Solution {
 ### P2. Invert Binary Tree (LeetCode 226)
 `🟢 Easy` `🔥` `Must-know SDE-1` · Pattern: Tree DFS mutation · Commonly reported at: Google, Amazon; verify tags
 **Problem:** Mirror a binary tree. Example `[4,2,7,1,3,6,9]` → `[4,7,2,9,6,3,1]`.
+
+**How to recognize and think:** Mirroring asks every node to trade its left and right subtrees. Words such as
+`invert`, `mirror`, and `swap children` identify local tree mutation. A copy-based solution builds a second
+tree and stores all nodes again, even though each existing node can be fixed in place. The recursive move is
+to save one child, assign the mirrored opposite child, then assign the saved side after it is mirrored. After
+the call returns, the subtree rooted at that node is already a mirror of its original shape. Visualize node
+`4` receiving mirrored `7` on the left and mirrored `2` on the right. Check empty input, one-child nodes, and
+repeated values.
+
 **How to recognize the pattern:** Same local child swap at every node.
 **Brute force:** Build a new mirrored tree — O(n) time, O(n) space.
 **Optimal:** Swap children in place and recurse.
@@ -187,6 +282,15 @@ class Solution {
 ### P3. Same Tree (LeetCode 100)
 `🟢 Easy` `🔥` `Must-know SDE-1` · Pattern: Dual-tree DFS · Commonly reported at: Amazon, Microsoft; verify tags
 **Problem:** Check structural and value equality. Example `[1,2,3]` and `[1,2,3]` → `true`.
+
+**How to recognize and think:** This asks whether two trees match at every corresponding position. The
+giveaway terms are `same`, `structure`, and `value equality`. Serializing both trees can work only with null
+markers, and it stores an entire representation before comparing. Direct recursion compares the two current
+nodes as a pair. If both are null, that position matches; if only one is null, the shape differs; otherwise
+values must match and both child pairs must match. The invariant is that each call represents one identical
+position in both trees. Trace equal roots, then left-left and right-right pairs. Call out both null, one null,
+and same values arranged in different shapes.
+
 **How to recognize the pattern:** Compare two nodes in lockstep.
 **Brute force:** Serialize both with null markers — O(n) time, O(n) space.
 **Optimal:** Recursive pair comparison.
@@ -206,6 +310,15 @@ class Solution {
 ### P4. Subtree of Another Tree (LeetCode 572)
 `🟢 Easy` `🔥` `Must-know SDE-1` · Pattern: Tree matching · Commonly reported at: Amazon, Meta, Microsoft; verify tags
 **Problem:** Check whether `subRoot` appears as an identical subtree. Example root `[3,4,5,1,2]`, sub `[4,1,2]` → `true`.
+
+**How to recognize and think:** The phrase `subtree` means a candidate root in the big tree must match
+`subRoot` completely, not just start with the same value. Trying the exact-tree helper at every node can
+repeat comparisons on duplicate or skewed data, but the separation of jobs is clear: scan for possible roots,
+then demand full structural equality. The Java solution is acceptable for typical interview constraints;
+null-marked serialization is the follow-up when repeated matching dominates. Its correctness comes from not
+skipping any root candidate, and from the helper refusing partial matches. Picture arriving at value `4`, then
+checking children `1` and `2`. Mention duplicate values, empty `subRoot`, and long repeated chains.
+
 **How to recognize the pattern:** Need candidate root search plus exact-tree comparison.
 **Brute force:** Compare `subRoot` at each `root` node — O(n*m) time.
 **Optimal:** Same DFS is accepted; serialization with null markers is an advanced alternative.
@@ -229,6 +342,15 @@ class Solution {
 ### P5. Diameter of Binary Tree (LeetCode 543)
 `🟢 Easy` `🔥` `Must-know SDE-1` · Pattern: Postorder with global best · Commonly reported at: Amazon, Google, Microsoft; verify tags
 **Problem:** Return longest path length in edges. Example `[1,2,3,4,5]` → `3`.
+
+**How to recognize and think:** Diameter is the longest path measured in edges, and it may bend through any
+node rather than through the root. The clue is that a parent needs child heights, while the answer might be
+`left height + right height` at the current node. Recomputing height for every possible center revisits the
+same subtrees. One postorder traversal returns the single-branch height usable by the parent and updates a
+shared best with the two-branch candidate. That division is the invariant: return one side upward, record both
+sides locally. At node `2`, the candidate is `2`; at root it becomes `3`. Check one-node diameter `0`, empty
+tree, and skewed trees.
+
 **How to recognize the pattern:** Parent needs height, but answer may pass through current node.
 **Brute force:** Recompute heights at every node — O(n²) worst-case.
 **Optimal:** One DFS returns height and updates `left + right`.
@@ -256,6 +378,14 @@ class Solution {
 ### P6. Balanced Binary Tree (LeetCode 110)
 `🟢 Easy` `🔥` `Must-know SDE-1` · Pattern: DFS sentinel · Commonly reported at: Amazon, Bloomberg, Microsoft; verify tags
 **Problem:** Every node's subtree heights differ by at most 1. Example `[3,9,20,null,null,15,7]` → `true`.
+
+**How to recognize and think:** A balanced tree needs the height difference rule to hold at every node.
+Calculating height separately for each node repeats the same child-height work on long chains. Combine the
+questions: return a height when the subtree is balanced, and return `-1` the moment it is not. The invariant
+is that a nonnegative result is a trustworthy height, while `-1` means no ancestor needs more detail. This
+short-circuits after the first bad subtree instead of continuing to measure it. Imagine a deep left chain
+sending `-1` upward like a red flag. Say empty tree, single node, and a long linked-list-shaped tree.
+
 **How to recognize the pattern:** Need height and validity together.
 **Brute force:** Recompute height for each node — O(n²) time.
 **Optimal:** Return `-1` when a subtree is already unbalanced.
@@ -282,6 +412,14 @@ class Solution {
 ### P7. Binary Tree Level Order Traversal (LeetCode 102)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: BFS by level · Commonly reported at: Amazon, Microsoft, Meta; verify tags
 **Problem:** Return values level by level. Example `[3,9,20,null,null,15,7]` → `[[3],[9,20],[15,7]]`.
+
+**How to recognize and think:** The output is grouped by distance from the root, so `level order`, `by level`,
+and nested lists point to breadth-first search. A depth-first bucket solution works, but it manually tracks
+levels and can grow recursion depth on a skewed tree. A queue already stores nodes in increasing distance.
+Capturing the queue size before a level starts freezes the boundary; children enqueued during the loop belong
+to the next group, not the current one. Trace the queue as `[3]`, then `[9,20]`, then `[15,7]`. Mention empty
+tree, a single node, and very wide levels that stress queue space.
+
 **How to recognize the pattern:** Output grouped by distance from root.
 **Brute force:** DFS with depth buckets — O(n) time, O(n) space.
 **Optimal:** Queue BFS and process current `size`.
@@ -316,6 +454,14 @@ class Solution {
 ### P8. Binary Tree Right Side View (LeetCode 199)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: BFS last per level · Commonly reported at: Amazon, Meta, Microsoft; verify tags
 **Problem:** Return visible values from the right. Example `[1,2,3,null,5,null,4]` → `[1,3,4]`.
+
+**How to recognize and think:** Right side view asks for the last visible node at each depth, not for all
+nodes. The words `right side` and `per level` reveal a level traversal with one chosen representative. Storing
+every level and taking the last value is correct but keeps more output than needed. During breadth-first
+search, process exactly one level at a time; with left-to-right enqueue order, the final node removed in that
+level is the rightmost visible one. On `[5,4]`, `4` wins that level even if values repeat elsewhere. Bring up
+a left-only tree, empty input, and duplicate values, because visibility depends on position rather than value.
+
 **How to recognize the pattern:** Need one representative per level.
 **Brute force:** Level-order all values then take last — O(n) time.
 **Optimal:** Record the last node polled at each level.
@@ -348,6 +494,15 @@ class Solution {
 ### P9. Binary Tree Zigzag Level Order Traversal (LeetCode 103)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: BFS alternating order · Commonly reported at: Amazon, Microsoft; verify tags
 **Problem:** Alternate level order direction. Example `[3,9,20,null,null,15,7]` → `[[3],[20,9],[15,7]]`.
+
+**How to recognize and think:** Zigzag traversal is ordinary level order with the displayed direction
+alternating each row. Doing a normal breadth-first traversal and reversing every odd list adds an extra pass
+over those values. Keep the queue behavior unchanged, and change only where you place each value in the level
+list: append on left-to-right rows, add to the front on right-to-left rows. The invariant is that children are
+still discovered in normal order, while the per-level container handles presentation. On the second level,
+visit `9` then `20`, but front-insertion yields `[20,9]`. Check a single node, sparse trees, and odd versus
+even depths.
+
 **How to recognize the pattern:** Same BFS levels with alternating insertion direction.
 **Brute force:** Normal BFS then reverse odd levels — O(n) time.
 **Optimal:** Add values to front or back of a `LinkedList`.
@@ -384,6 +539,14 @@ class Solution {
 ### P10. Lowest Common Ancestor of a BST (LeetCode 235)
 `🟢 Easy` `🔥` `Must-know SDE-1` · Pattern: BST guided walk · Commonly reported at: Amazon, Microsoft; verify tags
 **Problem:** Return LCA in a BST. Example root `[6,2,8,0,4,7,9,3,5]`, `p=2`, `q=8` → `6`.
+
+**How to recognize and think:** Lowest Common Ancestor (LCA) in a Binary Search Tree (BST) is about the first
+split in ordered search paths. The words `BST` and `ancestor of p and q` mean values tell you which branch can
+contain both targets. Building two root-to-node paths stores ancestors you can avoid. At each node, if both
+target values are smaller, move left; if both are larger, move right. Otherwise the current node is either
+between them or equal to one target, so it is their lowest shared ancestor. For `p=2`, `q=8`, `6` is the
+split. Cover one node being the ancestor, identical targets, and a skewed BST.
+
 **How to recognize the pattern:** BST ordering shows whether both targets are left, right, or split.
 **Brute force:** Build root-to-node paths — O(h) time, O(h) space.
 **Optimal:** Walk until current value is between `p` and `q`.
@@ -408,6 +571,15 @@ class Solution {
 ### P11. Lowest Common Ancestor of a Binary Tree (LeetCode 236)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Recursive ancestor bubbling · Commonly reported at: Amazon, Google, Meta; verify tags
 **Problem:** Return LCA in a general tree. Example root `[3,5,1,6,2,0,8,null,null,7,4]`, `p=5`, `q=1` → `3`.
+
+**How to recognize and think:** Lowest Common Ancestor (LCA) in a general binary tree has no ordering
+shortcut. A parent map plus ancestor set works, but it stores upward links for the whole tree. Recursion can
+answer bottom-up: a subtree returns `null` if it has neither target, returns the target or resolved ancestor
+if it has one side, and the current node becomes the LCA when both children return non-null. The invariant is
+that a non-null return means this subtree contains useful target information. In the sample, `5` comes from
+the left and `1` from the right, so `3` joins them. Mention ancestor-as-target, reference identity, and the
+guarantee that both nodes exist.
+
 **How to recognize the pattern:** No ordering; search both subtrees.
 **Brute force:** Parent map plus ancestor set — O(n) time, O(n) space.
 **Optimal:** Return found node from child; two non-null children mean current is LCA.
@@ -430,6 +602,15 @@ class Solution {
 ### P12. Validate Binary Search Tree (LeetCode 98)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: BST bounds · Commonly reported at: Amazon, Microsoft, Bloomberg; verify tags
 **Problem:** Check strict BST validity. Example `[5,1,4,null,null,3,6]` → `false`.
+
+**How to recognize and think:** Validating a Binary Search Tree (BST) is stricter than checking each
+parent-child pair. Signal words include `valid BST`, `strict`, and `descendants`, because a deep node can
+violate an ancestor bound. Recomputing subtree minima and maxima at every node repeats scans; checking only
+immediate children is incorrect. Carry open lower and upper bounds down the recursion. The invariant is that
+every node must fit all ancestor constraints, and each step narrows one side of the interval. In
+`[5,1,4,null,null,3,6]`, `3` is in the right subtree of `5` but falls below its lower bound. Say duplicates
+are invalid, integer extremes need `long`, and empty trees are valid.
+
 **How to recognize the pattern:** Descendants must respect ancestor bounds.
 **Brute force:** Scan min/max of each subtree — O(n²) time.
 **Optimal:** Carry `(low, high)` as `long` open bounds.
@@ -453,6 +634,14 @@ class Solution {
 ### P13. Kth Smallest Element in a BST (LeetCode 230)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: BST inorder · Commonly reported at: Amazon, Google, Microsoft; verify tags
 **Problem:** Return kth smallest BST value. Example root `[3,1,4,null,2]`, `k=1` → `1`.
+
+**How to recognize and think:** In a Binary Search Tree (BST), inorder traversal lists values in ascending
+order, so `kth smallest` is a traversal-stop problem. Building the entire inorder list ranks every node even
+when `k` is small. The iterative stack simulates the left-recursive walk and lets you stop on the kth pop. The
+invariant is that a popped node is the next unseen value in sorted order: all nodes in its left subtree are
+done, and its right subtree waits for later. For root `[3,1,4,null,2]`, the first pop is `1`. Discuss `k=1`,
+`k=n`, and a skewed tree where the stack may grow to height `n`.
+
 **How to recognize the pattern:** BST inorder is sorted ascending.
 **Brute force:** Store full inorder list — O(n) time, O(n) space.
 **Optimal:** Iterative inorder stops after kth pop.
@@ -479,6 +668,15 @@ class Solution {
 ### P14. Construct Binary Tree from Preorder and Inorder Traversal (LeetCode 105)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Divide and conquer · Commonly reported at: Amazon, Microsoft, Google; verify tags
 **Problem:** Build tree from preorder and inorder arrays. Example preorder `[3,9,20,15,7]`, inorder `[9,3,15,20,7]`.
+
+**How to recognize and think:** Preorder plus inorder reconstruction works because the two arrays answer
+different questions. `preorder` gives the next root; `inorder` tells which values belong to the left and right
+subtrees of that root. Searching the inorder array during every recursive call repeats linear scans. A hashmap
+makes root-position lookup constant time, and range boundaries define each subtree. The invariant is that
+`build(left, right)` consumes exactly the preorder values for that inorder slice and returns the tree for that
+slice. Root `3` splits inorder into `[9]` and `[15,20,7]`. Say empty arrays, a one-node tree, and the
+unique-values requirement; duplicates make the split ambiguous.
+
 **How to recognize the pattern:** Preorder gives root; inorder splits left/right.
 **Brute force:** Linear-search root in inorder each call — O(n²) time.
 **Optimal:** Hash value to inorder index and recurse on ranges.
@@ -512,6 +710,15 @@ class Solution {
 ### P15. Binary Tree Maximum Path Sum (LeetCode 124)
 `🔴 Hard` `🔥` `Stretch` · Pattern: DFS with global maximum · Commonly reported at: Amazon, Google, Meta; verify tags
 **Problem:** Max sum of any non-empty path. Example `[-10,9,20,null,null,15,7]` → `42`.
+
+**How to recognize and think:** The path may start and end anywhere, so it can pass through a node and use
+both children, but only one side can be extended to the parent. Trying endpoint pairs recomputes many path
+sums and gets tricky with negatives. The recursive gain function returns the best one-sided contribution
+upward, while a global answer checks the local two-sided candidate `node + left + right`. Clamping child gains
+at zero means a harmful negative branch is simply not used. The invariant is: return a path that can still be
+extended; record a path that may stop here. At `20`, `15 + 20 + 7` gives `42`. Mention all-negative trees,
+single node, and skewed shape.
+
 **How to recognize the pattern:** Path may start/end anywhere and pass through a node.
 **Brute force:** Try many endpoint pairs — O(n²) or worse.
 **Optimal:** Return one-side gain; update global with both child gains.
@@ -540,6 +747,15 @@ class Solution {
 ### P16. Serialize and Deserialize Binary Tree (LeetCode 297)
 `🔴 Hard` `🔥` `Stretch` · Pattern: Tree encoding · Commonly reported at: Amazon, Google, Microsoft; verify tags
 **Problem:** Convert tree to string and back. Example `[1,2,3,null,null,4,5]` round-trips.
+
+**How to recognize and think:** Serialization must preserve shape, not only values. The key clues are
+`serialize`, `deserialize`, and `round-trip`; without null markers, different trees can share the same
+preorder values. Breadth-first strings with nulls work but often carry many trailing placeholders. Preorder
+with `#` markers is compact and recursive: each token either creates `null` or creates a node followed by its
+left and right encodings. The invariant during decoding is that reading one token plus its required subtrees
+consumes exactly one serialized subtree. Trace `1,2,#,#,3,4,#,#,5,#,#` rebuilding in preorder. Check empty
+tree, negative numbers, and missing markers that break the shape.
+
 **How to recognize the pattern:** Must preserve null structure, not just values.
 **Brute force:** BFS with nulls — O(n) time, possible long trailing nulls.
 **Optimal:** Preorder with `#` null markers.
@@ -579,6 +795,14 @@ public class Codec {
 ### P17. Path Sum II (LeetCode 113)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Tree backtracking · Commonly reported at: Amazon, Microsoft; verify tags
 **Problem:** Return root-to-leaf paths summing to target. Example target `22` → `[[5,4,11,2],[5,8,4,5]]`.
+
+**How to recognize and think:** This asks for every root-to-leaf path whose sum equals the target, so `all
+paths`, `root-to-leaf`, and `target sum` point to backtracking. Storing all paths first copies many lists that
+will be discarded. Keep one mutable path while descending: add the node, subtract its value from the remaining
+sum, and only copy the path when you are at a leaf with remaining zero. The invariant is that the list exactly
+matches the current recursion route; removing the last value restores it for siblings. Trace `5,4,11,2`
+reaching zero. Say negative values, empty tree, and that target zero with no nodes is not a path.
+
 **How to recognize the pattern:** Need enumerate paths and undo after recursion.
 **Brute force:** Store all paths then filter — O(n*h) extra copying.
 **Optimal:** Maintain one path, copy only at valid leaf.
@@ -609,6 +833,15 @@ class Solution {
 ### P18. Count Good Nodes in Binary Tree (LeetCode 1448)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: DFS carrying state · Commonly reported at: Amazon, Google; verify tags
 **Problem:** Count nodes at least as large as every previous node on their root path. Example `[3,1,4,3,null,1,5]` → `4`.
+
+**How to recognize and think:** A good node is judged against earlier nodes on its own root path. The giveaway
+wording is `at least as large as every previous node`, which means each recursive branch needs a running
+maximum. Rescanning ancestors for every node repeats path work, especially in a chain. Pass `maxSoFar`
+downward instead. The invariant is that `maxSoFar` equals the maximum value from the root to the parent; the
+current node is good exactly when `node.val >= maxSoFar`, then the carried maximum updates for children.
+Picture `3 -> 4 -> 5` all counting, while `1` under `4` fails. Include negative values, equal values counting,
+and the single root case.
+
 **How to recognize the pattern:** Need running max along each path.
 **Brute force:** Rescan ancestors for every node — O(n*h) time.
 **Optimal:** DFS carries `maxSoFar`.
@@ -633,6 +866,15 @@ class Solution {
 ### P19. Implement Trie Prefix Tree (LeetCode 208)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Trie · Commonly reported at: Amazon, Google, Microsoft; verify tags
 **Problem:** Implement `insert`, `search`, `startsWith`. Example insert `apple`; search `app` → false; startsWith `app` → true.
+
+**How to recognize and think:** Trie questions announce themselves with `insert`, `search`, `startsWith`, and
+many prefix lookups. A set of whole words answers exact search, but prefix checks may scan many stored words
+or substrings. A trie shares common prefixes as nodes. The invariant is that walking from the root to a node
+spells exactly one prefix; the `word` flag says whether that prefix is also a complete inserted word. After
+inserting `apple`, the node for `app` exists but is not terminal, so `search("app")` is false and
+`startsWith("app")` is true. Mention duplicate inserts, prefix-not-word cases, and the lowercase `a` to `z`
+assumption.
+
 **How to recognize the pattern:** Many prefix queries over a dictionary.
 **Brute force:** Store words in set and scan all prefixes — O(number of words * L).
 **Optimal:** Store one node per character edge.
@@ -675,6 +917,15 @@ class Trie {
 ### P20. Word Search II (LeetCode 212)
 `🔴 Hard` `🔥` `Stretch` · Pattern: Trie plus backtracking · Commonly reported at: Amazon, Google, Meta; verify tags
 **Problem:** Return dictionary words found in a board by adjacent cells. Example board with words `[oath,pea,eat,rain]` → `[oath,eat]`.
+
+**How to recognize and think:** Word Search II combines board backtracking with a dictionary. Clues are many
+candidate words, adjacent cells, and shared prefixes. Running a separate depth-first search for each word
+repeats the same board prefixes from the same cells. Build a trie once, then a board path can stop immediately
+when the next character edge is missing. The invariant during search is that the trie node matches the exact
+letters currently marked on the board path, and `#` prevents reusing a cell. When `o -> a -> t -> h` reaches a
+terminal node, add `oath` and clear that terminal to avoid duplicates. Check duplicate words, no cell reuse,
+and a one-cell board.
+
 **How to recognize the pattern:** Many word searches share prefixes on one board.
 **Brute force:** DFS separately for each word — O(words*m*n*4^L).
 **Optimal:** Build Trie once and prune board DFS by missing prefix edge.
@@ -721,6 +972,15 @@ class Solution {
 ### P21. Design Add and Search Words Data Structure (LeetCode 211)
 `🟡 Medium` `🔥` `Must-know SDE-1` · Pattern: Trie wildcard DFS · Commonly reported at: Amazon, Google; verify tags
 **Problem:** Support `addWord` and `search` where `.` matches one character. Example add `bad`, `dad`; search `.ad` → true.
+
+**How to recognize and think:** The dot wildcard means exactly one unknown character, not any-length matching.
+Words like `addWord`, `search`, and `.` point to trie traversal with branching. Bucketing words by length and
+comparing each candidate repeats character checks for every wildcard search. In the trie, a normal letter
+follows one child; a dot tries all existing children at that depth. The invariant is that the recursion index
+equals the number of characters consumed, and the current node represents all prefixes matching the pattern so
+far. For `.ad`, branch over first letters, then require `a` and `d`. Call out all-dot patterns, length
+mismatch, and repeated adds.
+
 **How to recognize the pattern:** Dot wildcard causes branching over children.
 **Brute force:** Store words by length and compare — O(words of same length * L).
 **Optimal:** Trie DFS: normal char takes one edge, dot tries all edges.

@@ -1,9 +1,10 @@
-# 10c · LLD Problems Tier-1 Continued: Machine Coding Study Guide
+# 10c · Low-Level Design (LLD) Problems Tier 1 Continued: Machine-Coding Study Guide
 
 Continuation of Tier-1 LLD machine-coding problems. Code is Java 17, intentionally in-memory, and written
 as package sections; each public top-level type should be placed in its own `.java` file with the same name.
 
 **Table of Contents**
+- [Beginner reading rule for every problem](#beginner-reading-rule-for-every-problem)
 - [Q1. Design Logger](#q1-design-logger)
 - [Q2. Design Vending Machine](#q2-design-vending-machine)
 - [Q3. Design ATM](#q3-design-atm)
@@ -14,10 +15,144 @@ as package sections; each public top-level type should be placed in its own `.ja
 
 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
+## Beginner reading rule for every problem
+
+Read the beginner primer before the class diagram or code. It explains what the system is, how to derive the
+objects, why each pattern appears, and how one request moves through the system. In this file, Automated
+Teller Machine (ATM), JavaScript Object Notation (JSON), Time To Live (TTL), Dynamic Programming (DP),
+Application Programming Interface (API), and database (DB) are expanded before their short forms are used
+in an interview answer.
+
+### Mental model
+
+Think of these problems as small machines with a front desk, a set of internal parts, and rules about what can
+happen next. Logger routes messages, vending machine and ATM protect money-moving state, library protects book
+copy ownership, and elevator system schedules moving cars. The beginner goal is to see where each rule belongs:
+
+- A facade receives caller actions and hides several internal collaborators.
+- State objects or enums prevent invalid lifecycle transitions from spreading across many `if` statements.
+- Strategies isolate choices such as formatting, dispensing, scheduling, or change-making.
+- Records and enums make events, requests, statuses, and constants explicit.
+- Tests prove the most important promise: invalid operations fail and successful flows leave state consistent.
+
+### How to think through any question here
+
+1. Name the main actor and one complete request, such as log message, buy item, withdraw cash, borrow copy, or call elevator.
+2. List lifecycle states and say which actions are legal in each state.
+3. Identify the state that must stay consistent: sink output, stock and paid amount, bank balance and notes, copy loan, or stops.
+4. Put local validation inside the object that owns the state, then coordinate multi-object flows in a service.
+5. Choose interfaces only for real variation: sink, formatter, state, dispenser, scheduler, or repository.
+6. Define failure behavior before code: throw, reject, refund, reverse debit, keep current state, or retry later.
+7. Add thread-safety around the smallest shared mutable state, not around every helper object blindly.
+8. Finish with production concerns: durability, audit, idempotency, hardware adapters, search indexes, and monitoring.
+
+### Pattern recognition cues
+
+| If the question mentions... | Think about... | Why it fits |
+|---|---|---|
+| Severity, formatter, file, console, or multiple outputs | Logger facade plus sink and formatter strategies | Callers should not know how messages are filtered or written. |
+| Ordered filters or routers | Chain of Responsibility | Each handler can process and forward without caller branching. |
+| Select product, insert money, cancel, dispense | State machine | Legal actions depend on the customer session state. |
+| Exact change or denominations | Change strategy or Dynamic Programming | Greedy change fails for some denomination sets. |
+| Card inserted, authenticated, and withdrawal | ATM state machine plus compensation | Debit and physical dispense can fail independently. |
+| Book title versus physical barcode copy | Entity boundary | Borrowing applies to a copy, not the shared book metadata. |
+| One active loan per copy | Atomic update or database constraint | Two borrowers must not own the same copy concurrently. |
+| Hall calls, direction, and stops | Scheduling strategy | Dispatch policy can change without rewriting elevator movement. |
+| Moving up then down through ordered stops | SCAN or LOOK scheduling | Ordered sets model elevator-like traversal. |
+| Production hardware or external bank calls | Adapter plus idempotency | Device and gateway failures need explicit boundaries and retries. |
+
+### Abbreviations and key terms
+
+| Short form | Expanded form | Plain meaning |
+|---|---|---|
+| API | Application Programming Interface | Methods or endpoints used by callers, such as `log`, `select`, or `borrow`. |
+| ATM | Automated Teller Machine | Physical banking machine that authenticates users and dispenses cash. |
+| DB | Database | Durable storage for logs, inventory, accounts, loans, or elevator requests. |
+| DEBUG | Debug log level | Very detailed diagnostic log severity. |
+| DP | Dynamic Programming | Algorithmic technique useful for exact change with tricky denominations. |
+| EMV | Europay, Mastercard, and Visa | Card-chip payment standard relevant to real ATM or vending integrations. |
+| ERROR | Error log level | Log severity for failures that need attention. |
+| FAANG | Facebook, Amazon, Apple, Netflix, Google | Shorthand for large product-company interview style. |
+| ID | Identifier | Stable value that names a card, copy, elevator, request, or entity. |
+| INFO | Informational log level | Normal operational log severity. |
+| ISBN | International Standard Book Number | Global identifier for a book title or edition. |
+| JSON | JavaScript Object Notation | Text format often used for structured logs or APIs. |
+| LLD | Low-Level Design | Class, interface, method, and object-interaction design. |
+| LOOK | LOOK elevator scheduling | Elevator scheduling that continues in one direction until no further stops remain. |
+| PIN | Personal Identification Number | Secret number used to authenticate an ATM cardholder. |
+| QR | Quick Response code | Scannable code sometimes used for payment or pickup flows. |
+| SCAN | SCAN elevator scheduling | Disk/elevator-style scheduling that sweeps in one direction then reverses. |
+| SDK | Software Development Kit | Vendor library used to call a bank, device, or service. |
+| SDE-1 | Software Development Engineer level 1 | Entry-level engineering interview expectation. |
+| SDE-2 | Software Development Engineer level 2 | Mid-level expectation with more trade-off and scale discussion. |
+| TTL | Time To Live | Expiry duration for cache entries, sessions, or temporary requests. |
+| UI | User Interface | Screen, button, or console layer outside core business logic. |
+| UPI | Unified Payments Interface | Indian digital payment mode that can be modeled as a payment strategy. |
+| UTC | Coordinated Universal Time | Time standard for consistent timestamps. |
+| UUID | Universally Unique Identifier | Generated unique id for loans, payments, requests, or events. |
+| VM | Virtual Machine | Runtime environment; do not confuse it with a vending machine in this file. |
+| WARN | Warning log level | Log severity for suspicious but non-fatal conditions. |
+| Facade | Facade pattern | Small public entry point that hides several collaborators. |
+| State | State pattern | Object-based lifecycle rules where each state owns legal operations. |
+| Compensation | Compensation | Follow-up action, such as crediting money back after a failed dispense. |
+
+### Common beginner traps
+
+- Modeling hardware, database, and user interface details before the core state transitions are clear.
+- Forgetting cancellation, refund, eject, return, or failure paths because the happy path looks simple.
+- Letting one giant class own formatting, inventory, payment, scheduling, and persistence.
+- Updating money or stock before knowing how the design handles the second half of the transaction.
+- Treating search and checkout as equally consistent; search can lag, checkout cannot double-borrow.
+- Ignoring shutdown, flushing, audit, or device-health concerns in production follow-ups.
+
+### How to study this file
+
+1. For each problem, say the lifecycle states aloud before reading the code.
+2. Use the responsibility map to connect each class to one state, policy, or boundary.
+3. Practice the short answer as a 30-second design pitch, then expand it with the detailed flow.
+4. Re-run the flow for one failure case: debug filtered, cancel vending, bad PIN, double borrow, or busy elevator.
+5. Use the tests as prompts and explain which method throws, returns, or mutates state.
+6. Finish with flashcards, then propose one production extension such as async logging or bank reconciliation.
+
 ---
 
 ### Q1. Design Logger
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
+
+#### Beginner primer
+
+**Simple problem:** Application code submits messages with severity and context. The logger filters,
+formats, and writes them to destinations without making callers know output details.
+
+**Mental model:** `Logger` is the reception desk, immutable `LogEvent` is the envelope, handlers decide
+where it goes, a formatter writes the text, and a sink delivers it. Filtering answers “should this continue?”;
+routing answers “which sink?”; fan-out sends one event to several sinks.
+
+**Pattern recognition:** **Facade** gives callers small methods such as `info`; **Strategy** fits swappable
+formatters and sinks; **Chain of Responsibility** fits ordered filters or routers that may stop or forward.
+A chain is unnecessary when one threshold and one sink are the only requirements.
+
+**Flow, alternatives, and scale:** create event with injected clock → filter → format → write to sinks →
+apply explicit failure policy. Synchronous writes are simple but add latency. Asynchronous logging uses a
+bounded queue and worker, which needs a drop/block policy and shutdown flush. Production systems add file
+rotation, redaction, correlation identifiers, and dropped-event metrics.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+|---|---|---|---|
+| `Level` enum | Lists log severities in increasing order. | Constants are read-only; ordering via `ordinal()` is used by threshold checks; no mutation or failure behavior. | Used by `LogEvent`, `ThresholdHandler`, and `Logger`. |
+| `LogEvent` record | Carries one immutable log message. | Canonical constructor stores level, message, and timestamp; accessors return fields; no validation. | Created by `Logger` and consumed by handlers and formatters. |
+| `LogSink` interface | Defines output destination contract. | `write(String)` takes formatted text, may mutate destination state, returns void, and lets sink failures bubble up. | Implemented by console and memory sinks; called by handlers. |
+| `ConsoleSink` class | Writes log lines to standard output. | Synchronized `write` prints input line, returns void, and lets `System.out` issues bubble if any. | Implements `LogSink`; used by demo. |
+| `MemorySink` class | Stores log lines for tests. | Synchronized `write` appends a line; `lines()` returns a defensive copy; neither validates input. | Implements `LogSink`; used by `LoggerTest`. |
+| `LogFormatter` interface | Defines event-to-string conversion. | `format(LogEvent)` returns formatted text without required mutation; failures are implementation-defined. | Implemented by `TextFormatter`; used by `ThresholdHandler`. |
+| `TextFormatter` class | Creates simple text log format. | `format` reads event timestamp, level, and message, returns a string, and mutates nothing; null event would fail naturally. | Implements `LogFormatter`. |
+| `LogHandler` abstract class | Links handler chain and controls forwarding. | `link(LogHandler)` stores next handler and returns it; final `handle(LogEvent)` calls `process` then next handler; exceptions from processing stop the chain. | Parent of `ThresholdHandler`; owns next handler reference. |
+| `ThresholdHandler` class | Filters by level and writes accepted events. | Constructor stores threshold, sink, and formatter; `process` writes formatted line when event level meets threshold, otherwise mutates nothing; sink or formatter exceptions bubble. | Extends `LogHandler`; uses `LogSink` and `LogFormatter`. |
+| `Logger` class | Facade used by application code. | Constructor stores handler and clock; `debug`, `info`, and `error` call `log`; `log(Level,String)` creates `LogEvent` with current time and delegates; handler failures bubble. | Depends on `Clock`, `Level`, `LogEvent`, and `LogHandler`. |
+| `Main` class | Demonstrates configured logging. | `main(String[])` builds logger and writes info/debug messages; exceptions bubble up. | Wires `Logger`, `ThresholdHandler`, `ConsoleSink`, and `TextFormatter`. |
+| `LoggerTest` class | Verifies threshold behavior. | Test methods create `MemorySink`, log messages, and assert captured lines; assertion failures fail tests. | Exercises `Logger`, handlers, formatter, and sink. |
 
 **Why they ask:** Logger checks Chain of Responsibility, formatting, output abstraction, and safe concurrent writes.
 
@@ -306,6 +441,42 @@ class LoggerTest {
 
 ### Q2. Design Vending Machine
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
+
+#### Beginner primer
+
+**Simple problem:** A user selects a product, inserts money, receives the item and change, or cancels and
+gets a refund. Stock, balance, and cash inventory must remain consistent.
+
+**Mental model:** This is a **state machine**. The same action means different things in `IDLE`,
+`PRODUCT_SELECTED`, `MONEY_INSERTED`, and `DISPENSING`. Inventory owns product counts, cash inventory owns
+denominations, and the machine coordinates one customer session.
+
+**Pattern recognition and flow:** Use **State** when valid operations depend on lifecycle state and
+conditionals spread across methods. Use **Strategy** when change-making varies. Select available item →
+accept denomination → check payment → compute change without mutation → atomically reserve item and cash →
+dispense → return change → reset. Cancellation refunds and resets without reducing stock.
+
+**Alternatives and scale:** Guarded enum methods are clearer for a small machine; state classes help when
+each state has substantial behavior. Greedy change is not valid for every denomination set, so Dynamic
+Programming (DP) or backtracking may be needed. Hardware needs device adapters, durable audit, power-loss
+recovery, and one lock or serialized event loop per machine.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+|---|---|---|---|
+| `Money` enum | Lists accepted cash denominations. | Constructor stores amount; `amount()` returns integer value; no mutation or failure. | Passed to `VendingMachine.insert` and `CashBox.accept`. |
+| `Product` record | Describes a sellable item. | Canonical constructor stores code, name, and price; accessors return fields; no validation. | Stored in `Inventory` and returned in `DispenseResult`. |
+| `DispenseResult` record | Reports dispensed product and change. | Canonical constructor stores product and change; accessors return fields; no mutation or validation. | Returned by `VendingMachine.dispense`. |
+| `Inventory` class | Tracks products and quantities. | `add(Product,int)` stores product and merges quantity; `requireAvailable(String)` returns product or throws `IllegalStateException`; `decrement(String)` validates then reduces quantity. | Used by states through `VendingMachine.inventory`. |
+| `CashBox` class | Tracks accepted cash amount. | `accept(Money)` adds denomination amount; `returnChange(int)` subtracts and returns requested amount, throwing `IllegalStateException` for negative or insufficient cash. | Used by `SelectedState`, `PaidState`, and `VendingMachine`. |
+| `MachineState` interface | Defines legal vending actions per state. | `select`, `insert`, `dispense`, and `cancel` take the machine, may mutate it, return result or refund where applicable, and throw when action is invalid. | Implemented by idle, selected, and paid states. |
+| `IdleState` class | Handles machine with no active selection. | `select` validates product, sets selected code, and moves to selected; `insert` and `dispense` throw `IllegalStateException`; `cancel` returns zero. | Uses `Inventory`; sets `SelectedState`. |
+| `SelectedState` class | Handles selected product before enough money. | `select` changes selection after availability check; `insert` accepts money, increases paid amount, and moves to paid when enough; `dispense` throws; `cancel` refunds through machine reset. | Uses `CashBox`, `Inventory`, and `PaidState`. |
+| `PaidState` class | Handles enough money to dispense or cancel. | `select` throws; `insert` accepts extra money; `dispense` validates product, decrements inventory, returns change, resets session, and returns `DispenseResult`; `cancel` refunds paid amount. | Uses `Inventory`, `CashBox`, and machine reset helpers. |
+| `VendingMachine` class | Coordinates one customer session. | Constructor stores inventory and cash box; synchronized public methods delegate to current state; helpers mutate selected code, paid amount, and state; invalid actions throw from state. | Owns `MachineState`, `Inventory`, and `CashBox`. |
+| `Main` class | Demonstrates purchase flow. | `main(String[])` creates stock, selects item, inserts money, dispenses, and prints result; exceptions bubble up. | Wires model and service classes. |
+| `VendingMachineTest` class | Verifies dispense, invalid insert, and cancel. | Test methods call machine operations and assertions; invalid insert throws `IllegalStateException`; assertion failures fail tests. | Exercises `VendingMachine`, states, `Inventory`, `Money`, and records. |
 
 **Why they ask:** It tests state transitions, inventory, payment/change handling, and invalid operation behavior.
 
@@ -729,6 +900,39 @@ class VendingMachineTest {
 
 ### Q3. Design ATM
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
+
+#### Beginner primer
+
+**Terminology and problem:** An Automated Teller Machine (ATM) authenticates a cardholder, performs account
+operations through a bank, and dispenses physical cash. It must handle bank debit and cash-dispense failures
+without silently losing money.
+
+**Mental model:** The ATM orchestrates a session state machine, bank gateway, and cash dispenser. The bank
+balance is authoritative; the ATM separately owns physical-note inventory.
+
+**Pattern recognition:** **State** models card inserted, authenticated, transaction selected, and ejecting.
+**Command** fits transaction objects that need logging or reversal. **Adapter** shields the domain from a
+bank Software Development Kit (SDK).
+
+**Flow and failure handling:** validate card and Personal Identification Number (PIN) → authorize withdrawal
+→ choose notes → debit bank → dispense → produce receipt. On dispense failure, request reversal and report
+the failure. This is compensation, not a truly atomic bank-and-hardware transaction. Production needs
+idempotency, reconciliation, device health, limits, audit, and manual handling if reversal also fails.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+|---|---|---|---|
+| `Account` class | Stores one card credential and balance. | Constructor stores card, PIN, and balance; `matchesPin` returns boolean; `balance` returns amount; `debit` subtracts or throws `IllegalStateException` for insufficient funds; `credit` adds amount. | Owned by `BankService`; package-private domain helper. |
+| `BankService` class | Simulates account repository and bank operations. | `addAccount` creates account; synchronized `authenticate` returns boolean; synchronized `debit`, `credit`, and `balance` mutate or read account; unknown card throws `IllegalArgumentException`. | Used by ATM states through `Atm.bank`. |
+| `CashDispenser` class | Owns physical note counts and dispensing plan. | Constructor stores descending note counts; synchronized `dispense(int)` validates positive hundred-multiple amount, computes note plan, mutates counts after exact plan, returns notes, and throws for invalid or impossible amount. | Used by `AuthenticatedState` through `Atm.dispenser`. |
+| `AtmState` interface | Defines legal card-session actions. | `insertCard`, `authenticate`, `withdraw`, and `eject` take the `Atm`, may mutate session state, return notes for withdraw, and throw when action is invalid. | Implemented by idle, card-inserted, and authenticated states. |
+| `IdleState` class | Handles ATM with no card. | `insertCard` sets current card and moves to card-inserted; `authenticate` and `withdraw` throw `IllegalStateException`; `eject` is a no-op. | Sets `CardInsertedState` on `Atm`. |
+| `CardInsertedState` class | Handles card present before authentication. | `insertCard` throws; `authenticate` calls bank and moves to authenticated or throws `SecurityException`; `withdraw` throws; `eject` resets ATM. | Uses `BankService`; sets `AuthenticatedState`. |
+| `AuthenticatedState` class | Handles authenticated withdrawals. | `insertCard` throws; `authenticate` is a no-op; `withdraw` debits bank, dispenses cash, returns notes, credits back on runtime dispenser failure, and rethrows; `eject` resets. | Coordinates `BankService`, `CashDispenser`, and `Atm.reset`. |
+| `Atm` class | Facade and state holder for one physical ATM. | Constructor stores bank and dispenser; synchronized public methods delegate to state; package helpers expose collaborators and mutate card/state; `reset` clears card and returns to idle. | Owns current `AtmState`, `BankService`, and `CashDispenser`. |
+| `Main` class | Demonstrates successful withdrawal. | `main(String[])` creates bank, dispenser, ATM, authenticates, withdraws, and prints notes; exceptions bubble up. | Wires ATM service classes. |
+| `AtmTest` class | Verifies withdrawal, bad PIN, and debit reversal. | Test methods call ATM flow and assertions; bad PIN throws `SecurityException`; dispenser failure throws `IllegalStateException` and expected balance is asserted. | Exercises states, bank, dispenser, and `Atm`. |
 
 **Why they ask:** ATM combines state transitions, authentication, cash inventory, and transaction consistency.
 
@@ -1168,6 +1372,36 @@ class AtmTest {
 ### Q4. Design Library Management
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
+#### Beginner primer
+
+**Simple problem:** Members search titles and borrow or return physical copies. The system tracks the
+borrower, due date, availability, and optionally reservations and fines.
+
+**Mental model:** `Book` is shared bibliographic information; `BookCopy` is one physical barcode item;
+`Loan` records temporary ownership by a `Member`. Users borrow copies, not abstract titles.
+
+**Thought process and patterns:** Defend “one copy has at most one active loan.” **Repository** hides storage.
+**Strategy** fits varying loan-period and fine policies. `LibraryService` coordinates borrowing while
+entities protect local state.
+
+**Flow, alternatives, and scale:** load member and copy → verify eligibility and availability → atomically
+mark copy loaned and create loan → return due date. Returning closes the loan, releases the copy, and may
+fine or notify. An in-memory map works for a demo; a database should enforce one active loan per copy.
+Search may be eventually indexed, but checkout needs strongly consistent copy state.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+|---|---|---|---|
+| `CopyStatus` enum | Names physical copy lifecycle states. | Constants are read-only; no inputs, mutation, return value, or failure behavior. | Stored in `BookCopy` and checked by its state methods. |
+| `Book` record | Stores shared bibliographic data. | Canonical constructor stores ISBN, title, and author; accessors return fields; no validation. | Referenced by many `BookCopy` instances and search results. |
+| `Member` record | Identifies a library member. | Canonical constructor stores id and name immutably; accessors return fields; no validation. | Stored in `LibraryService.membersById` and used by loans. |
+| `Loan` record | Captures active borrowing of one copy. | Canonical constructor stores id, member id, copy id, and due date; no mutation or validation. | Created by `LibraryService.borrow` and tracked by copy id. |
+| `BookCopy` class | Owns one physical copy and availability status. | Constructor stores id and book; accessors return fields; `markBorrowed` changes available to borrowed or throws `IllegalStateException`; `markAvailable` changes borrowed to available or throws if not borrowed. | Belongs to a `Book`; stored in `LibraryService`. |
+| `LibraryService` class | Coordinates catalog, member, copy, and loan operations. | Constructor stores clock; add methods put books, copies, and members; `search(String)` returns matching books and mutates nothing; synchronized `borrow` validates member and copy, marks borrowed, creates loan, stores it, and throws on unknown or unavailable data; `returnCopy` marks available and removes loan; `hasActiveLoan` returns boolean; `requireCopy` throws for unknown copy. | Owns maps of records and `BookCopy`; uses `Clock` and `UUID`. |
+| `Main` class | Demonstrates adding and borrowing a copy. | `main(String[])` creates service, adds book/copy/member, borrows, and prints loan; exceptions bubble up. | Wires library model and service classes. |
+| `LibraryServiceTest` class | Verifies double-borrow prevention and return behavior. | Test methods add data, borrow, return, and assert status or expected exceptions; assertion failures fail tests. | Exercises `LibraryService`, `BookCopy`, records, and `CopyStatus`. |
+
 **Why they ask:** It tests entity boundaries, copy-vs-book modeling, search, loans, and double-borrow prevention.
 
 **Short answer (say this first, 20-40 sec):**
@@ -1477,6 +1711,37 @@ class LibraryServiceTest {
 
 ### Q5. Design Elevator System
 `🔴 Advanced` `🔥` `Must-know SDE-1/SDE-2`
+
+#### Beginner primer
+
+**Simple problem:** Passengers request pickup and destination. A dispatcher chooses an elevator; each
+elevator visits stops safely and fairly while minimizing wait and travel.
+
+**Mental model:** The dispatcher is a traffic controller. Each elevator is an independent actor with current
+floor, direction, door state, capacity, and ordered stops. Hall calls include direction; car calls are
+destinations selected inside.
+
+**Pattern recognition:** **Strategy** fits nearest-car or zone dispatch. **State** fits detailed door and
+motion safety. **Observer** may publish telemetry but should not control movement.
+
+**Flow and trade-offs:** hall request → score elevators → queue stop → move one floor at a time → open only
+when stopped → board/alight → choose next stop. Separate upward and downward ordered sets support a
+SCAN-like schedule, but heavy traffic may starve requests; aging improves fairness. Multiple controllers
+need durable requests, leader ownership, health monitoring, and fallback operation.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+|---|---|---|---|
+| `Direction` enum | Names elevator movement or hall-call direction. | Constants are read-only; no inputs, mutation, return value, or failure behavior. | Used by `Elevator`, `HallRequest`, and scheduler. |
+| `DoorState` enum | Names door lifecycle states. | Constants are read-only; no methods or mutation. | Stored in `Elevator` and asserted in tests. |
+| `HallRequest` record | Carries pickup floor and desired direction. | Canonical constructor stores floor and direction; accessors return fields; no validation. | Passed to `SchedulingStrategy.choose`. |
+| `Elevator` class | Owns one elevator car state and ordered stops. | Constructor stores id and start floor; synchronized `addStop` queues up or down stop or opens door at current floor; `step` closes door, moves one floor, opens at stop, updates direction or idles; getters return id, floor, direction, door, and pending count; no floor-range validation. | Chosen by scheduler and owned by `ElevatorSystem`. |
+| `SchedulingStrategy` interface | Defines dispatcher selection policy. | `choose(List<Elevator>, HallRequest)` returns an elevator or throws according to implementation when none exists. | Implemented by `LookSchedulingStrategy`; used by `ElevatorSystem`. |
+| `LookSchedulingStrategy` class | Scores elevators by direction, distance, load, and id. | `choose` returns minimum-cost elevator and throws if list is empty; private `cost` reads elevator state, mutates nothing, and penalizes wrong-direction cars. | Depends on `Elevator` getters and `HallRequest`. |
+| `ElevatorSystem` class | Coordinates fleet-level pickup and destination requests. | Constructor creates elevators; synchronized `requestPickup` chooses elevator, adds pickup stop, returns id; `requestDestination` adds car stop by id; `stepAll` advances every elevator; `elevator` returns selected car; bad id bubbles from list access. | Owns elevators and `SchedulingStrategy`. |
+| `Main` class | Demonstrates pickup, movement, and destination. | `main(String[])` creates system, requests pickup, steps cars, requests destination, and prints floor; exceptions bubble up. | Wires `ElevatorSystem` and `LookSchedulingStrategy`. |
+| `ElevatorSystemTest` class | Verifies movement, assignment, and scheduler preference. | Test methods mutate elevators and system, then assert floor, door, id, or chosen car; assertion failures fail tests. | Exercises model enums, `Elevator`, strategy, and system. |
 
 **Why they ask:** Elevator combines scheduling, state machines, queues, direction, and concurrent requests.
 

@@ -1,10 +1,16 @@
-# 10d · LLD Problems Tier 2 Part 1
+# 10d · Low-Level Design (LLD) Problems Tier 2 Part 1
 
-SDE-2 machine-coding designs with compact, runnable Java 17 sketches, diagrams, tests, and follow-ups. Use these as interview blueprints: clarify first, code the core flow, then discuss concurrency and extensions.
+Software Development Engineer level 2 (SDE-2) machine-coding designs with runnable Java 17 sketches,
+diagrams, tests, and follow-ups. Each problem now begins with a beginner primer; use the later compact
+sections for revision.
 
 **Legend:** 🟢 Beginner · 🟡 Intermediate · 🔴 Advanced · ⚫ FAANG · 🔥 = very frequently asked
 
+**Common terms:** Time To Live (TTL), Application Programming Interface (API), database (DB), Java
+Persistence API (JPA), Structured Query Language (SQL), and Unified Modeling Language (UML).
+
 ## Table of Contents
+- [Beginner guide to this file](#beginner-guide-to-this-file)
 - [1. Design BookMyShow](#1-design-bookmyshow)
 - [2. Design Splitwise](#2-design-splitwise)
 - [3. Design Ride Booking / Uber](#3-design-ride-booking--uber)
@@ -15,8 +21,130 @@ SDE-2 machine-coding designs with compact, runnable Java 17 sketches, diagrams, 
 - [Revision Cheat Sheet](#revision-cheat-sheet)
 - [Flashcards](#flashcards)
 
+## Beginner guide to this file
+
+### What this file teaches
+
+This file teaches medium-complexity Low-Level Design (LLD) problems where a Java backend service must protect
+shared resources: seats, money, drivers, orders, rooms, inventory, carts, and coupons. Interviewers ask these
+because they reveal whether you can move from objects to state transitions, contracts, concurrency, and failure
+handling. In real backend work, the same patterns appear in booking flows, payment-adjacent ledgers, checkout,
+marketplaces, and calendar-style availability systems.
+
+### Mental model
+
+Think of each design as a small control desk for scarce things that many users want at the same time.
+
+- A service is the coordinator: it validates the request, calls helpers, and decides the state change.
+- Entities and records are the nouns: seat, booking, expense split, ride, order line, room, coupon.
+- State machines describe what changes are legal and what changes must be rejected.
+- Strategies let one design swap pricing, matching, discount, or split rules without rewriting the service.
+- Locks, transactions, and idempotency keep a repeated or concurrent request from corrupting shared state.
+- Tests show the invariant: no double booking, no oversell, no invalid transition, no wrong discount.
+
+### How to think through any question here
+
+1. Restate the main resource in plain words: seat, balance, driver, order, room, stock, or cart total.
+2. Define the lifecycle states and say which transitions are legal, rejected, or retried.
+3. Pick the core entities first, then the service that owns the workflow and the repository or map that stores it.
+4. Find the race condition: two users selecting the same seat, booking the same room, or reserving the same
+   Stock Keeping Unit (SKU).
+5. Decide which rule belongs in a Strategy, Validator, or state check instead of hard-coding it everywhere.
+6. Name the failure path: payment failure, expired lock, invalid split, unavailable driver, or low inventory.
+7. Explain the production guard after the in-memory version: database constraint, row lock, version check, or queue.
+
+### Pattern recognition cues
+
+| If the question mentions... | Think about... | Why it fits |
+| --- | --- | --- |
+| Temporary seat hold or checkout timeout | Lease plus Time To Live (TTL) | The resource should return to available if the user abandons payment. |
+| Splitting a bill among many users | Ledger and simplification | Net balances are easier to settle than storing every pairwise debt forever. |
+| Nearby driver assignment | Matching Strategy | Distance ranking changes independently from the ride request workflow. |
+| Food order progress | State machine | Only some status transitions are valid, and invalid jumps must fail fast. |
+| Meeting room or hotel availability | Interval overlap | The key check is whether two time ranges intersect for the same resource. |
+| Inventory before payment | Reservation then release | Stock must be protected while payment is pending and restored on failure. |
+| Coupon combinations | Validator plus Discount Strategy | Eligibility and discount math vary by coupon type and should be pluggable. |
+| Double booking or overselling | Transactional guard | In-memory checks are a teaching aid; production needs an authoritative write guard. |
+| Repeated confirm or payment request | Idempotency key | Retrying a request should not create a second booking, expense, or order. |
+
+### Abbreviations and key terms
+
+| Short form | Expanded form | Plain meaning |
+| --- | --- | --- |
+| API | Application Programming Interface | A callable boundary between services, clients, or modules. |
+| BOGO | Buy One, Get One | A promotion where buying one item gives another item free or discounted. |
+| DB | Database | Durable storage that should be the source of truth for final writes. |
+| FAANG | Facebook, Amazon, Apple, Netflix, Google | Shorthand for large product-company interview style and bar. |
+| FX | Foreign Exchange | Currency conversion rate used when expenses involve multiple currencies. |
+| H3 | H3 geospatial index | A hexagon-based location index often used to narrow nearby-search candidates. |
+| JPA | Java Persistence API | Java specification for mapping objects to relational database tables. |
+| JUnit | Java unit testing framework | The test library used by the example test sections. |
+| JVM | Java Virtual Machine | The runtime that executes Java bytecode; process-local locks live only inside one JVM. |
+| LLD | Low-Level Design | Object, class, method, and interaction design for a focused component. |
+| LR | Left to Right | Mermaid diagram direction where nodes flow horizontally. |
+| RRULE | Recurrence Rule | Calendar rule format for repeated meetings or bookings. |
+| SDE-2 | Software Development Engineer level 2 | Mid-level engineering interview expectation with design and trade-off depth. |
+| SKU | Stock Keeping Unit | Unique product inventory identifier used for reservation and stock checks. |
+| SLA | Service Level Agreement | Expected time or reliability target, such as food preparation timing. |
+| SMS | Short Message Service | Text-message channel mentioned as an extension for booking notifications. |
+| SQL | Structured Query Language | Relational database query language used for transactional guards. |
+| TD | Top Down | Mermaid diagram direction where nodes flow vertically. |
+| TTL | Time To Live | Expiry duration for locks, holds, reservations, or cache entries. |
+| UML | Unified Modeling Language | Diagram notation used for class relationships. |
+| UUID | Universally Unique Identifier | Random-looking identifier generated for demo bookings, rides, and orders. |
+
+### Common beginner traps
+
+- Drawing many classes before naming the one invariant that must never break.
+- Treating an in-memory synchronized block as if it protected a distributed production system.
+- Forgetting the failure path after payment, restaurant rejection, expired hold, or invalid coupon.
+- Mixing validation, pricing, matching, and persistence into one large class instead of separating responsibilities.
+- Not explaining why a State, Strategy, Repository, or Validator pattern is useful for this specific problem.
+- Ignoring idempotency when an external client can retry the same checkout or payment request.
+
+### How to study this file
+
+1. For each problem, read the beginner primer and responsibility map before looking at the code.
+2. Say the short answer aloud: main entities, workflow, invariant, and the concurrency guard.
+3. Walk the Java code method by method and connect each method to a row in the responsibility map.
+4. Use the JUnit examples to identify the invariant each design protects.
+5. Convert the flashcards into active prompts: answer, then check the detailed sections for missed trade-offs.
+6. Re-implement one problem from memory, then add one production concern such as idempotency or row locking.
+
+### Scalability and production lens
+
+The demos are intentionally single-process so the object model is easy to see. In production, the final decision
+usually moves to a database transaction, unique constraint, conditional update, or queue consumer. Cache search
+and catalog reads, but do not trust a cache for booking, inventory, wallet, or coupon finality. Add observability
+around lock expiry, payment failure, oversell attempts, and latency because these are the signals that the toy
+answer needs stronger production controls.
+
 ## 1. Design BookMyShow
 Tier 2 · SDE-2 must-know
+
+### 0. Beginner primer
+
+**Problem and mental model:** Users search shows, temporarily hold seats, pay, and confirm a booking. Think
+of every show-seat as a resource moving `AVAILABLE → LOCKED → BOOKED`; a lock is a lease that expires.
+`BookingService` orchestrates, `SeatLockProvider` owns leases, `PaymentService` owns the external payment
+boundary, and repositories persist show-seat and booking state.
+
+**Recognition and flow:** State fits the lifecycle; Strategy fits pricing; Repository hides storage. Search
+show → choose seats → atomically create user-owned hold → charge with idempotency key → atomically confirm
+booking or release on failure/expiry. A plain status check is unsafe across servers; production uses row
+locks, optimistic versions, or a unique `(show_id, seat_id)` booking constraint. Cache search, not the final
+booking decision.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+| --- | --- | --- | --- |
+| BookMyShowDemo | Demo namespace and executable sample for the booking design. | main(String[] args) builds a provider and service, places a hold, confirms it, prints the result, and propagates any booking exception. | Owns the nested enum, record, services, and demo flow. |
+| SeatStatus | Seat lifecycle marker. | Constants AVAILABLE, LOCKED, and BOOKED carry no methods or state changes; invalid movement is enforced by SeatLockProvider. | Stored per show-seat key in SeatLockProvider. |
+| Hold | Immutable lock lease for selected seats. | Canonical record constructor receives id, showId, seats, user, and expiresAt; accessors return those values; it changes no state and has no validation beyond Java record construction. | Created by SeatLockProvider and returned through BookingService. |
+| SeatLockProvider | Owns seat availability, active holds, lock expiry, release, and final booking state. | lock(showId, seats, user) cleans expired holds, verifies every seat is AVAILABLE, marks seats LOCKED, stores and returns a Hold, and throws IllegalStateException when any seat is unavailable. confirm(holdId, user) cleans up, finds the hold, validates user and expiry, marks seats BOOKED, removes the hold, and throws when missing, expired, or wrong user. release(holdId) removes the hold, returns locked seats to AVAILABLE, and is a no-op for an unknown hold. | Used by BookingService; stores Hold and SeatStatus by show-seat key. |
+| BookingService | Small orchestration layer exposed to callers. | hold(seats, user) delegates to SeatLockProvider with the demo show id and returns a Hold; confirm(holdId, user) delegates confirmation and returns a booking string; failures come from the lock provider. | Depends on SeatLockProvider and hides the lower-level show-seat key detail. |
+| BookMyShowDemoTest | JUnit 5 regression tests for seat locking invariants. | cannotDoubleLock, releaseAllowsRelock, and confirmMakesSeatUnavailable use local providers, return void, and fail through JUnit assertions if locking behavior changes. | Exercises SeatLockProvider directly. |
 
 ### 1. Clarifying questions & requirements
 - Cities, movies, theatres, shows, seats; users search shows and book contiguous/selected seats.
@@ -215,6 +343,30 @@ class BookMyShowDemoTest {
 ## 2. Design Splitwise
 Tier 2 · SDE-2 must-know
 
+### 0. Beginner primer
+
+**Problem and mental model:** A user records a group expense, chooses how participants split it, and the
+system reports who owes whom. `Expense` is immutable history; `Split` is one participant’s share; balances
+are a derived ledger view, not money stored in a wallet.
+
+**Recognition and flow:** Strategy fits equal, exact, and percentage split rules because validation and
+calculation vary together. Validate payer/participants and total shares → create expense → write ledger
+entries → update or derive balances → optionally simplify debts. Storing only pairwise balances is simpler
+but loses audit history. At scale, serialize updates per group or use a transaction and idempotency key;
+rebuild materialized balances from the ledger when needed.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+| --- | --- | --- | --- |
+| SplitwiseDemo | Demo namespace and executable sample for expense splitting. | main(String[] args) creates ExpenseService, adds an equal split, prints simplified transactions, and lets validation exceptions surface. | Owns split records, strategy, service, and demo flow. |
+| Split | Immutable amount owed or credited by one user. | Canonical record constructor takes user and paise; accessors return values; it mutates nothing and performs no validation. | Returned by SplitStrategy and used inside ExpenseService priority queues. |
+| Txn | Immutable settlement instruction. | Canonical record constructor takes from, to, and paise; accessors return values; it mutates nothing and performs no validation. | Produced by ExpenseService.simplify. |
+| SplitStrategy | Pluggable split calculation contract. | split(amount, users) receives total amount and participants, returns per-user Split rows, and should not mutate service state; invalid inputs are strategy-specific. | Implemented by EqualSplit and consumed before ExpenseService.add. |
+| EqualSplit | Divides an amount as evenly as possible. | split(amount, users) returns one Split per user, distributing remainder by list order; it changes no state and fails with ArithmeticException if users is empty. | Implements SplitStrategy and creates Split records. |
+| ExpenseService | Tracks net balances and converts them into minimum settlement transactions. | add(paidBy, amount, splits) verifies split total equals amount, mutates net balances, returns void, and throws IllegalArgumentException for a bad total. simplify() reads net balances, returns Txn rows between debtors and creditors, and does not mutate the stored net map. | Uses Split as balance entries and emits Txn settlements. |
+| SplitwiseDemoTest | JUnit 5 tests for settlement behavior. | simplifies, equalSplitHandlesRemainder, and invalidSplitTotalFails build local services or strategies, return void, and fail through assertions or expected exceptions. | Exercises EqualSplit and ExpenseService. |
+
 ### 1. Clarifying questions & requirements
 - Groups, users, expenses; split equally, exact, or percentage.
 - Show balances between users and simplify debts inside a group.
@@ -364,6 +516,32 @@ class SplitwiseDemoTest {
 
 ## 3. Design Ride Booking / Uber
 Tier 2 · SDE-2 must-know
+
+### 0. Beginner primer
+
+**Problem and mental model:** A rider requests a trip; the system finds an eligible nearby driver, one driver
+accepts, and the ride advances through a lifecycle. `MatchingStrategy` ranks candidates, `RideService`
+coordinates, and `Ride` owns status transitions.
+
+**Recognition and flow:** Strategy fits replaceable matching/pricing. State fits
+`REQUESTED → ACCEPTED → STARTED → COMPLETED/CANCELLED`. Validate request → query nearby available drivers →
+rank/offer → atomically claim one driver → create ride → track transitions → calculate fare and settle.
+First-accept wins must be a compare-and-set or conditional database update. At scale, partition location
+indexes by region, expire stale driver locations, and separate real-time dispatch from trip history.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+| --- | --- | --- | --- |
+| RideBookingDemo | Demo namespace and executable sample for ride matching. | main(String[] args) creates one driver and a RideService, requests a ride, prints the driver id, and propagates matching failures. | Owns location, driver, strategy, ride, and service types. |
+| Location | Immutable two-dimensional point used for demo distance ranking. | dist(Location other) reads both locations and returns Euclidean distance; it mutates nothing and has no explicit failure path. | Stored on Driver and Ride and passed to MatchingStrategy. |
+| RideStatus | Ride lifecycle marker. | Constants REQUESTED, ACCEPTED, STARTED, COMPLETED, and CANCELLED carry no methods; service code chooses the status. | Stored in Ride. |
+| Driver | Mutable driver aggregate for availability and location. | Constructor Driver(id, loc) initializes id, loc, and available=true; no methods return values or throw explicitly. | Read by Nearest and mutated by RideService.request. |
+| Ride | Immutable accepted ride snapshot. | Canonical record constructor takes id, rider, from, to, driver, and status; accessors return values; it mutates nothing and performs no validation. | Created by RideService after MatchingStrategy selects a Driver. |
+| MatchingStrategy | Driver selection contract. | match(pickup, drivers) receives the pickup point and candidates, returns Optional<Driver>, mutates no service state, and represents no-match as Optional.empty. | Implemented by Nearest and called by RideService. |
+| Nearest | Selects the closest available driver. | match(pickup, drivers) filters available drivers, returns the nearest by Location.dist, mutates nothing, and returns Optional.empty if none are available. | Implements MatchingStrategy and reads Driver availability. |
+| RideService | Orchestrates ride request and driver claiming. | request(rider, from, to) is synchronized, asks the matcher for a driver, marks that driver unavailable, returns an ACCEPTED Ride, and throws NoSuchElementException when no driver is matched. | Holds Driver list and MatchingStrategy; creates Ride. |
+| RideBookingDemoTest | JUnit 5 tests for matching and driver availability. | picksNearest, assignedDriverBecomesUnavailable, and unavailableDriversAreSkipped use local drivers and services, return void, and fail through assertions or Optional checks. | Exercises Nearest and RideService. |
 
 ### 1. Clarifying questions & requirements
 - Riders request rides; nearby drivers receive offers; driver accepts; trip moves through lifecycle.
@@ -527,6 +705,29 @@ class RideBookingDemoTest {
 ## 4. Design Food Delivery
 Tier 2 · SDE-2 must-know
 
+### 0. Beginner primer
+
+**Problem and mental model:** A customer builds a restaurant-specific cart, places an order, pays, and
+receives restaurant and delivery updates. `Order` is the aggregate; restaurant, payment, and delivery are
+external collaborators coordinated by an application service.
+
+**Recognition and flow:** State fits order lifecycle; Strategy fits fees and delivery assignment; Adapter
+wraps payment/map providers. Validate menu snapshot → price cart → create pending order → authorize payment
+→ restaurant accepts → assign courier → deliver → settle. A single synchronous transaction cannot include
+all businesses; use idempotent steps, events, and compensation. Scale reads with cached menus and partition
+writes by restaurant/region while preserving one authoritative order state.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+| --- | --- | --- | --- |
+| FoodDeliveryDemo | Demo namespace and executable sample for order state transitions. | main(String[] args) places an order, transitions it to PAID, prints total and status, and propagates invalid-transition failures. | Owns order status, item, order, and service types. |
+| Status | Food order lifecycle marker. | Constants CREATED, PAID, ACCEPTED, PREPARING, PICKED_UP, DELIVERED, CANCELLED, and REFUNDED carry no methods; OrderService.allowed defines legal movement. | Stored on Order and passed to OrderService.transition. |
+| Item | Immutable order line. | Canonical record constructor receives id, qty, and price; accessors return values; it changes no state and performs no validation. | Stored inside Order. |
+| Order | Mutable order aggregate with items and current status. | Constructor Order(items) copies input items, initializes a new id and CREATED status, and throws only if List.copyOf rejects invalid input. total() returns sum of qty times price and mutates nothing. | Created and stored by OrderService. |
+| OrderService | Owns order placement and state transition rules. | place(items) creates and stores an Order, returns it, and mutates the orders map. transition(id, next) finds the order, validates the transition, mutates status, returns void, throws IllegalStateException for invalid movement, and may throw NullPointerException for an unknown id. allowed(current, next) returns the transition decision without mutating state. | Stores Order objects keyed by id and uses Status rules. |
+| FoodDeliveryDemoTest | JUnit 5 tests for state and total invariants. | invalidTransitionFails, validTransitionUpdatesStatus, and totalUsesQuantityAndPrice create local orders, return void, and fail through assertions or expected exceptions. | Exercises Order and OrderService. |
+
 ### 1. Clarifying questions & requirements
 - Customer browses restaurants/menu, places order, pays, restaurant accepts, delivery partner delivers.
 - Track order lifecycle and cancellations/refunds.
@@ -689,6 +890,29 @@ class FoodDeliveryDemoTest {
 ## 5. Design Hotel / Meeting Room Booking & Calendar
 Tier 2 · SDE-2 must-know
 
+### 0. Beginner primer
+
+**Problem and mental model:** A user searches a resource for a time interval and books it without overlap.
+`Resource` is a room, `TimeRange` is a value object, `Booking` claims the interval, and the service protects
+the no-overlap invariant.
+
+**Recognition and flow:** Repository hides calendar storage; Strategy can choose available rooms or price
+stays. Normalize the interval rule—usually `[start, end)`—then search candidates → recheck availability
+inside a transaction → insert booking → return confirmation. “Check then insert” without one atomic
+boundary double-books. At scale, partition by resource/property, index `(resource_id, start, end)`, and use
+database exclusion constraints or ordered locking when available.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+| --- | --- | --- | --- |
+| RoomBookingDemo | Demo namespace and executable sample for interval booking. | main(String[] args) creates a room, books a one-hour range, prints the booking id, and propagates availability failures. | Owns room, range, booking, and service types. |
+| Room | Immutable bookable resource. | Canonical record constructor receives id and capacity; accessors return values; it mutates nothing and performs no validation. | Stored by BookingService and referenced by Booking. |
+| Range | Immutable half-open time interval. | overlaps(Range other) returns true when two ranges intersect and false for back-to-back ranges; it mutates nothing and has no explicit failure path. | Used by BookingService.available and BookingService.book. |
+| Booking | Immutable room reservation. | Canonical record constructor takes id, room, range, and user; accessors return values; it mutates nothing and performs no validation. | Created and stored by BookingService. |
+| BookingService | Owns availability search and synchronized reservation creation. | available(range, capacity) returns rooms with enough capacity and no overlapping booking, mutating no state. book(room, range, user) is synchronized, verifies the room is still available, stores and returns a Booking, and throws IllegalStateException when unavailable. | Reads Room list and writes Booking list. |
+| RoomBookingDemoTest | JUnit 5 tests for overlap and capacity behavior. | overlapRejected, backToBackBookingAllowed, and capacityFilterWorks create local ranges and rooms, return void, and fail through assertions or expected exceptions. | Exercises Range and BookingService. |
+
 ### 1. Clarifying questions & requirements
 - Search available rooms/resources by time range and capacity.
 - Create booking only if no overlapping confirmed booking exists.
@@ -834,6 +1058,30 @@ class RoomBookingDemoTest {
 
 ## 6. Design Inventory & Order Management
 Tier 2 · SDE-2 must-know
+
+### 0. Beginner primer
+
+**Problem and mental model:** Orders reserve stock, later confirm or release it, and must never make
+available inventory negative. Track `onHand`, `reserved`, and `available = onHand - reserved`; reservations
+are leases tied to an order.
+
+**Recognition and flow:** State fits order/reservation lifecycle; Repository hides inventory storage;
+Strategy fits warehouse selection. Validate quantities → reserve every Stock Keeping Unit (SKU) atomically
+→ create order → confirm payment and deduct, or release on failure/expiry. Reserving items one by one without
+rollback leaves partial state. Production uses conditional updates, ordered row locks for multiple SKUs,
+idempotency, an outbox for events, and reconciliation against warehouse systems.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+| --- | --- | --- | --- |
+| InventoryOrderDemo | Demo namespace and executable sample for stock reservation and order placement. | main(String[] args) creates seeded inventory, places a paid order, prints it, and propagates stock failures. | Owns line, status, order, inventory, and order service types. |
+| Line | Immutable order line by Stock Keeping Unit (SKU). | Canonical record constructor receives sku and qty; accessors return values; it mutates nothing and performs no validation. | Passed to InventoryService and stored in Order. |
+| Status | Order outcome marker. | Constants CREATED, CONFIRMED, and CANCELLED carry no methods; OrderService chooses final status. | Stored in Order. |
+| Order | Immutable order result. | Canonical record constructor takes id, lines, and status; accessors return values; it mutates nothing and performs no validation. | Returned by OrderService.place. |
+| InventoryService | Owns available stock counts and reservation reversal. | reserve(lines) is synchronized, verifies every SKU has enough stock before decrementing, returns void, and throws IllegalStateException if any item is short. release(lines) is synchronized, increments stock back, and returns void. stock(sku) returns current available units and mutates nothing. | Used by OrderService and stores counts in a concurrent map. |
+| OrderService | Orchestrates reserve, payment result, and final order status. | place(lines, paymentOk) reserves stock, releases and returns CANCELLED when paymentOk is false, returns CONFIRMED when true, and propagates reserve failures. | Depends on InventoryService and creates Order records. |
+| InventoryOrderDemoTest | JUnit 5 tests for oversell and release behavior. | noOversell, paymentFailureReleasesStock, and successfulOrderConsumesStock create local inventory, return void, and fail through assertions or expected exceptions. | Exercises InventoryService and OrderService. |
 
 ### 1. Clarifying questions & requirements
 - Products have SKU inventory in warehouses; orders reserve stock, payment confirms, shipment consumes.
@@ -999,6 +1247,34 @@ class InventoryOrderDemoTest {
 
 ## 7. Design Shopping Cart + Coupon Engine
 Tier 2 · SDE-2 must-know
+
+### 0. Beginner primer
+
+**Problem and mental model:** A cart stores intended purchases; a pricing pipeline calculates item totals,
+discounts, tax, and final payable amount. Coupons are rules plus benefits, not `if` statements inside Cart.
+
+**Recognition and flow:** Strategy fits discount calculations; Specification fits composable eligibility
+rules; Chain or Pipeline fits ordered adjustments. Load current product prices → validate cart → evaluate
+coupon eligibility → resolve stacking order → calculate discount/tax → return an immutable quote. Never
+trust stale client totals at checkout. A switch is simpler for two permanent coupon types; a rule engine is
+justified only when business users need many changing rules. Cache product reads, version promotion rules,
+and preserve the applied-rule audit on the order.
+
+**Responsibility map:**
+
+| Class or interface | Responsibility | Key methods and contract | Relationships |
+| --- | --- | --- | --- |
+| CartCouponDemo | Demo namespace and executable sample for cart pricing. | main(String[] args) creates a cart and percent coupon, prints the priced total, and propagates validation failures. | Owns item, cart, coupon, discount, validator, and pricing service types. |
+| Item | Immutable priced cart line. | Canonical record constructor receives sku, qty, and price; accessors return values; it mutates nothing and performs no validation. | Stored inside Cart. |
+| Cart | Immutable cart wrapper with subtotal calculation. | subtotal() returns sum of qty times price across items and mutates nothing; the record constructor stores the provided item list reference. | Read by Validator and PricingService. |
+| Coupon | Immutable coupon definition. | Canonical record constructor takes code, minSubtotal, and Discount; accessors return values; it mutates nothing and performs no validation. | Consumed by validators and PricingService. |
+| Discount | Pluggable discount calculation contract. | amount(subtotal) receives the current discountable subtotal, returns a discount amount, mutates no shared state, and defines no failure behavior by itself. | Implemented by Percent and Flat, referenced by Coupon. |
+| Percent | Percentage discount implementation. | Constructor Percent(pct) stores the percent. amount(subtotal) returns subtotal times pct divided by 100, mutates nothing, and uses integer truncation. | Implements Discount and is held by Coupon. |
+| Flat | Fixed-value discount implementation. | Constructor Flat(value) stores the cap. amount(subtotal) returns the smaller of value and subtotal, mutates nothing, and never discounts below zero by itself. | Implements Discount and is held by Coupon. |
+| Validator | Coupon eligibility contract. | validate(cart, coupon) returns void when eligible, mutates no shared state, and throws an implementation-specific exception when invalid. | Implemented by MinSubtotalValidator and used by PricingService. |
+| MinSubtotalValidator | Enforces coupon minimum subtotal. | validate(cart, coupon) compares Cart.subtotal to coupon.minSubtotal, returns void when eligible, and throws IllegalArgumentException when the cart is too small. | Implements Validator and reads Cart and Coupon. |
+| PricingService | Applies validators and discounts to produce the final payable total. | total(cart, coupons) computes subtotal, validates each coupon, accumulates discounts against remaining subtotal, returns at least zero, mutates no service state, and propagates validation failures. | Uses Validator list plus each Coupon's Discount. |
+| CartCouponDemoTest | JUnit 5 tests for coupon math and validation. | appliesPercent, flatDiscountIsCappedAtSubtotal, and minimumSubtotalIsValidated create local carts and coupons, return void, and fail through assertions or expected exceptions. | Exercises PricingService, Discount, and Validator implementations. |
 
 ### 1. Clarifying questions & requirements
 - Cart supports add/remove/update items, price snapshot, coupons, taxes, shipping.
