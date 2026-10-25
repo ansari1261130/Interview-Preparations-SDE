@@ -5,6 +5,7 @@ A beginner-first, interview-ready Java 17 guide for object-oriented design, SOLI
 answer is where you should build intuition.
 
 **Table of Contents**
+
 - [How to learn Low-Level Design from this series](#how-to-learn-low-level-design-from-this-series)
 - [Core OOD Fundamentals](#core-ood-fundamentals)
 - [SOLID and Design Principles](#solid-and-design-principles)
@@ -59,75 +60,75 @@ should either answer a question or perform a clearly named state change.
 
 ### Abbreviations used in the LLD guides
 
-| Short form | Expanded form | Meaning in these guides |
-|---|---|---|
-| AOP | Aspect-Oriented Programming | Cross-cutting behavior such as logging or transactions around core code |
-| API | Application Programming Interface | A callable contract exposed to another component |
-| AST | Abstract Syntax Tree | Tree representation of parsed code, useful in tooling or interpreters |
-| ATM | Automated Teller Machine | A stateful machine often used to explain State and Command patterns |
-| AWT | Abstract Window Toolkit | Older Java user-interface toolkit, mentioned only as Java ecosystem context |
-| CDI | Contexts and Dependency Injection | Java dependency-injection standard used in enterprise applications |
-| CSRF | Cross-Site Request Forgery | Web attack where an unwanted action is submitted using a user's session |
-| DAO | Data Access Object | Persistence abstraction usually organized around tables or queries |
-| DB | Database | Persistent storage used by repositories, DAOs, or services |
-| DCL | Double-Checked Locking | Lazy Singleton technique that is only safe with a volatile field in Java |
-| DI | Dependency Injection | Supplying collaborators from outside an object |
-| DIP | Dependency Inversion Principle | High-level policy depends on abstractions rather than concrete details |
-| DRY | Don't Repeat Yourself | Avoid duplicating the same rule, decision, or knowledge in many places |
-| DTO | Data Transfer Object | Data-shaped object used to cross a boundary |
-| ETL | Extract, Transform, Load | Data pipeline style for moving and reshaping data |
-| FAANG | Facebook, Amazon, Apple, Netflix, Google | Shorthand for large product-company interview style |
-| GoF | Gang of Four | Authors who catalogued 23 classic object-oriented patterns |
-| HLD | High-Level Design | Services, storage, deployment, and system-wide data flow |
-| HTTP | Hypertext Transfer Protocol | Protocol used by most web APIs |
-| ID | Identifier | Value used to distinguish one object or row from another |
-| IO | Input/Output | Reading from or writing to files, network, console, or other external systems |
-| ISP | Interface Segregation Principle | Prefer small client-specific interfaces over one broad interface |
-| JAXP | Java API for XML Processing | Java API family for parsing and transforming XML |
-| JDBC | Java Database Connectivity | Java API for talking to relational databases |
-| JDK | Java Development Kit | Java compiler, runtime tools, and standard libraries |
-| JPA | Java Persistence API | Java specification for object-relational mapping |
-| JVM | Java Virtual Machine | Runtime that executes Java bytecode |
-| KISS | Keep It Simple, Stupid | Choose the simplest design that satisfies the real requirement |
-| LLD | Low-Level Design | Classes, interfaces, methods, and object collaboration |
-| LLM | Large Language Model | AI model sometimes hidden behind a gateway or adapter in examples |
-| LSP | Liskov Substitution Principle | A subtype must honor the expectations of its parent type |
-| MVC | Model-View-Controller | UI/application pattern separating data, presentation, and input handling |
-| OCP | Open/Closed Principle | Add new behavior with new code instead of changing tested code |
-| OOD | Object-Oriented Design | The design activity that produces the object model |
-| OOP | Object-Oriented Programming | Modeling behavior and state through collaborating objects |
-| RAG | Retrieval-Augmented Generation | AI flow where retrieved documents are provided to a model before answering |
-| REST | Representational State Transfer | Common HTTP style for exposing resources through APIs |
-| SDK | Software Development Kit | Vendor library used to integrate an external system |
-| SDE-1 | Software Development Engineer level 1 | Early-career engineering interview level focused on fundamentals and coding |
-| SLF4J | Simple Logging Facade for Java | Java logging facade often used behind application logging calls |
-| SOLID | Five object-design principles | SRP, OCP, LSP, ISP, and DIP together |
-| SQL | Structured Query Language | Language used to query and update relational databases |
-| SRP | Single Responsibility Principle | A class should have one reason to change |
-| TD | Top Down | Mermaid flowchart direction from top to bottom |
-| UI | User Interface | The screen or command surface used by a person |
-| UML | Unified Modeling Language | Standard visual notation for class and sequence diagrams |
-| YAGNI | You Aren't Gonna Need It | Do not build speculative features until the requirement appears |
-| Cohesion | Not an abbreviation | How tightly the responsibilities inside one class belong together |
-| Coupling | Not an abbreviation | How strongly one class depends on another class's details |
-| Invariant | Not an abbreviation | A rule that must remain true before and after every operation |
-| Value object | Not an abbreviation | Immutable object identified by its values rather than database identity |
+| Short form   | Expanded form                            | Meaning in these guides                                                       |
+| ------------ | ---------------------------------------- | ----------------------------------------------------------------------------- |
+| AOP          | Aspect-Oriented Programming              | Cross-cutting behavior such as logging or transactions around core code       |
+| API          | Application Programming Interface        | A callable contract exposed to another component                              |
+| AST          | Abstract Syntax Tree                     | Tree representation of parsed code, useful in tooling or interpreters         |
+| ATM          | Automated Teller Machine                 | A stateful machine often used to explain State and Command patterns           |
+| AWT          | Abstract Window Toolkit                  | Older Java user-interface toolkit, mentioned only as Java ecosystem context   |
+| CDI          | Contexts and Dependency Injection        | Java dependency-injection standard used in enterprise applications            |
+| CSRF         | Cross-Site Request Forgery               | Web attack where an unwanted action is submitted using a user's session       |
+| DAO          | Data Access Object                       | Persistence abstraction usually organized around tables or queries            |
+| DB           | Database                                 | Persistent storage used by repositories, DAOs, or services                    |
+| DCL          | Double-Checked Locking                   | Lazy Singleton technique that is only safe with a volatile field in Java      |
+| DI           | Dependency Injection                     | Supplying collaborators from outside an object                                |
+| DIP          | Dependency Inversion Principle           | High-level policy depends on abstractions rather than concrete details        |
+| DRY          | Don't Repeat Yourself                    | Avoid duplicating the same rule, decision, or knowledge in many places        |
+| DTO          | Data Transfer Object                     | Data-shaped object used to cross a boundary                                   |
+| ETL          | Extract, Transform, Load                 | Data pipeline style for moving and reshaping data                             |
+| FAANG        | Facebook, Amazon, Apple, Netflix, Google | Shorthand for large product-company interview style                           |
+| GoF          | Gang of Four                             | Authors who catalogued 23 classic object-oriented patterns                    |
+| HLD          | High-Level Design                        | Services, storage, deployment, and system-wide data flow                      |
+| HTTP         | Hypertext Transfer Protocol              | Protocol used by most web APIs                                                |
+| ID           | Identifier                               | Value used to distinguish one object or row from another                      |
+| IO           | Input/Output                             | Reading from or writing to files, network, console, or other external systems |
+| ISP          | Interface Segregation Principle          | Prefer small client-specific interfaces over one broad interface              |
+| JAXP         | Java API for XML Processing              | Java API family for parsing and transforming XML                              |
+| JDBC         | Java Database Connectivity               | Java API for talking to relational databases                                  |
+| JDK          | Java Development Kit                     | Java compiler, runtime tools, and standard libraries                          |
+| JPA          | Java Persistence API                     | Java specification for object-relational mapping                              |
+| JVM          | Java Virtual Machine                     | Runtime that executes Java bytecode                                           |
+| KISS         | Keep It Simple, Stupid                   | Choose the simplest design that satisfies the real requirement                |
+| LLD          | Low-Level Design                         | Classes, interfaces, methods, and object collaboration                        |
+| LLM          | Large Language Model                     | AI model sometimes hidden behind a gateway or adapter in examples             |
+| LSP          | Liskov Substitution Principle            | A subtype must honor the expectations of its parent type                      |
+| MVC          | Model-View-Controller                    | UI/application pattern separating data, presentation, and input handling      |
+| OCP          | Open/Closed Principle                    | Add new behavior with new code instead of changing tested code                |
+| OOD          | Object-Oriented Design                   | The design activity that produces the object model                            |
+| OOP          | Object-Oriented Programming              | Modeling behavior and state through collaborating objects                     |
+| RAG          | Retrieval-Augmented Generation           | AI flow where retrieved documents are provided to a model before answering    |
+| REST         | Representational State Transfer          | Common HTTP style for exposing resources through APIs                         |
+| SDK          | Software Development Kit                 | Vendor library used to integrate an external system                           |
+| SDE-1        | Software Development Engineer level 1    | Early-career engineering interview level focused on fundamentals and coding   |
+| SLF4J        | Simple Logging Facade for Java           | Java logging facade often used behind application logging calls               |
+| SOLID        | Five object-design principles            | SRP, OCP, LSP, ISP, and DIP together                                          |
+| SQL          | Structured Query Language                | Language used to query and update relational databases                        |
+| SRP          | Single Responsibility Principle          | A class should have one reason to change                                      |
+| TD           | Top Down                                 | Mermaid flowchart direction from top to bottom                                |
+| UI           | User Interface                           | The screen or command surface used by a person                                |
+| UML          | Unified Modeling Language                | Standard visual notation for class and sequence diagrams                      |
+| YAGNI        | You Aren't Gonna Need It                 | Do not build speculative features until the requirement appears               |
+| Cohesion     | Not an abbreviation                      | How tightly the responsibilities inside one class belong together             |
+| Coupling     | Not an abbreviation                      | How strongly one class depends on another class's details                     |
+| Invariant    | Not an abbreviation                      | A rule that must remain true before and after every operation                 |
+| Value object | Not an abbreviation                      | Immutable object identified by its values rather than database identity       |
 
 ### How to recognize a design pattern
 
 Do not begin with “I will use Strategy.” Begin with the pressure in the requirement:
 
-| Requirement signal | Likely pattern | Recognition question |
-|---|---|---|
-| “Several algorithms can be selected or replaced” | Strategy | Does one policy vary while the caller stays the same? |
-| “Behavior changes when lifecycle state changes” | State | Do valid operations depend on the object’s current state? |
-| “Create one of several related types” | Factory Method or Abstract Factory | Is object construction conditional or family-based? |
-| “Integrate an incompatible vendor library” | Adapter | Must data, methods, units, or errors be translated? |
-| “Add optional behavior around the same contract” | Decorator | Can wrappers be stacked independently? |
-| “Notify multiple interested components” | Observer | Should the producer avoid knowing every consumer? |
-| “Process a request through ordered steps” | Chain of Responsibility | May each step handle, reject, or forward the request? |
-| “Hide a complex subsystem behind one use-case API” | Facade | Should callers know fewer collaborators? |
-| “Store and retrieve domain aggregates” | Repository | Should domain logic be independent of storage technology? |
+| Requirement signal                                   | Likely pattern                     | Recognition question                                       |
+| ---------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------- |
+| “Several algorithms can be selected or replaced”   | Strategy                           | Does one policy vary while the caller stays the same?      |
+| “Behavior changes when lifecycle state changes”    | State                              | Do valid operations depend on the object’s current state? |
+| “Create one of several related types”              | Factory Method or Abstract Factory | Is object construction conditional or family-based?        |
+| “Integrate an incompatible vendor library”         | Adapter                            | Must data, methods, units, or errors be translated?        |
+| “Add optional behavior around the same contract”   | Decorator                          | Can wrappers be stacked independently?                     |
+| “Notify multiple interested components”            | Observer                           | Should the producer avoid knowing every consumer?          |
+| “Process a request through ordered steps”          | Chain of Responsibility            | May each step handle, reject, or forward the request?      |
+| “Hide a complex subsystem behind one use-case API” | Facade                             | Should callers know fewer collaborators?                   |
+| “Store and retrieve domain aggregates”             | Repository                         | Should domain logic be independent of storage technology?  |
 
 Pattern suitability has three parts: the requirement exposes a variation or coupling problem, the pattern
 localizes that problem, and the added indirection costs less than repeated conditionals or hard-coded
@@ -137,17 +138,17 @@ dependencies. If a direct method or small `switch` is clearer and unlikely to ch
 
 Use the following questions whenever you read or present a solution:
 
-| Element | What to explain | Example |
-|---|---|---|
-| Class | Its single responsibility, state it owns, and invariant it protects | `ParkingSpot` owns occupancy and prevents a second vehicle |
-| Interface | The variation or external boundary it represents | `PricingStrategy` allows fee algorithms to change |
-| Constructor | Required collaborators and validation needed for a valid object | `BookingService` requires repositories, lock provider, and payment gateway |
-| Query method | What it returns and whether it changes state | `availableSeats()` reads current availability |
-| Command method | Preconditions, state change, postcondition, and failure | `confirm()` requires a valid hold and ends in booked or explicit failure |
-| Association | One object knows or uses another | `Ticket` references its allocated `ParkingSpot` |
-| Composition | Parent owns the child lifecycle | `ParkingFloor` owns its `ParkingSpot` objects |
-| Dependency | Temporary method-level use | `PaymentService` calls a gateway during checkout |
-| Inheritance/implementation | The substitutable contract being honored | `EmailSender` implements `ChannelSender` |
+| Element                    | What to explain                                                     | Example                                                                      |
+| -------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Class                      | Its single responsibility, state it owns, and invariant it protects | `ParkingSpot` owns occupancy and prevents a second vehicle                 |
+| Interface                  | The variation or external boundary it represents                    | `PricingStrategy` allows fee algorithms to change                          |
+| Constructor                | Required collaborators and validation needed for a valid object     | `BookingService` requires repositories, lock provider, and payment gateway |
+| Query method               | What it returns and whether it changes state                        | `availableSeats()` reads current availability                              |
+| Command method             | Preconditions, state change, postcondition, and failure             | `confirm()` requires a valid hold and ends in booked or explicit failure   |
+| Association                | One object knows or uses another                                    | `Ticket` references its allocated `ParkingSpot`                          |
+| Composition                | Parent owns the child lifecycle                                     | `ParkingFloor` owns its `ParkingSpot` objects                            |
+| Dependency                 | Temporary method-level use                                          | `PaymentService` calls a gateway during checkout                           |
+| Inheritance/implementation | The substitutable contract being honored                            | `EmailSender` implements `ChannelSender`                                 |
 
 For each public method, say:
 
@@ -191,6 +192,7 @@ interview solution.
 ## Core OOD Fundamentals
 
 ### Q1. How do you apply the four OOP pillars in an LLD problem?
+
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** They check whether you can convert requirements into maintainable classes, not just recite definitions.
@@ -205,12 +207,13 @@ you can turn requirements into collaborators and stable extension points, not te
 Encapsulation protects invariants, abstraction exposes only required behavior, inheritance models true is-a reuse, and polymorphism lets clients depend on contracts. Start from use cases, identify entities/services, keep state private, and introduce interfaces where variation is expected.
 
 **Detailed answer:**
-| Pillar | Interview use | Java cue |
-|---|---|---|
-| Encapsulation | protect balance, spot count, state transitions | private fields + validation |
-| Abstraction | hide payment, storage, matching, rate limit algorithm | interface boundary |
-| Inheritance | stable is-a taxonomy only | Car extends Vehicle |
-| Polymorphism | swap pricing/notification/scheduling | Strategy.calculate() |
+
+| Pillar        | Interview use                                         | Java cue                    |
+| ------------- | ----------------------------------------------------- | --------------------------- |
+| Encapsulation | protect balance, spot count, state transitions        | private fields + validation |
+| Abstraction   | hide payment, storage, matching, rate limit algorithm | interface boundary          |
+| Inheritance   | stable is-a taxonomy only                             | Car extends Vehicle         |
+| Polymorphism  | swap pricing/notification/scheduling                  | Strategy.calculate()        |
 
 ```mermaid
 classDiagram
@@ -221,18 +224,22 @@ PaymentGateway <|.. StripeGateway
 PaymentGateway <|.. RazorpayGateway
 CheckoutService --> PaymentGateway
 ```
+
 Resume hook: frame your Spring Boot/RAG projects as controllers depending on services/repositories, not concrete DB or LLM details.
 
 **Common mistakes:**
+
 - Creating one god class.
 - Exposing mutable collections directly.
 - Using inheritance only for code reuse.
 
 **Follow-ups:**
+
 - *When avoid inheritance?* → When behavior varies independently.
 - *Where is polymorphism useful?* → Pricing, rate limiting, scheduling, payment modes.
 
 ### Q2. Why prefer composition over inheritance?
+
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Deep inheritance hierarchies make machine-coding designs rigid.
@@ -247,6 +254,7 @@ must disable or contradict parent behavior.
 Composition gives behavior by holding collaborators; inheritance gives behavior from a parent. Prefer composition when behavior changes independently.
 
 **Detailed answer:**
+
 ```java
 // Bad
 class Bird { void fly() {} }
@@ -266,18 +274,22 @@ final class Bird2 {
     }
 }
 ```
+
 Use inheritance for stable taxonomy; use composition for strategies, policies, and capabilities.
 
 **Common mistakes:**
+
 - Overriding methods to throw exceptions.
 - Deep Vehicle to Car to ElectricCar trees.
 - Not naming collaborators by role.
 
 **Follow-ups:**
+
 - *Example?* → Parking fee policy composed into ParkingLot.
 - *JDK?* → Collections use Comparator composition.
 
 ### Q3. Interface vs abstract class: how do you choose?
+
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** They want practical Java design judgment.
@@ -292,6 +304,7 @@ or a template algorithm. The interviewer is checking practical Java trade-offs, 
 Use an interface for a capability or boundary with multiple implementations. Use an abstract class when closely related classes share state, protected helpers, or a fixed template algorithm.
 
 **Detailed answer:**
+
 ```java
 interface Sink { void write(String msg); }
 abstract class AbstractLogger {
@@ -302,20 +315,24 @@ abstract class AbstractLogger {
   protected String format(String msg){ return java.time.Instant.now() + " " + msg; }
 }
 ```
+
 Java 8 added default interface methods; Java 9 added private helpers. Still avoid stateful fat interfaces.
 
 **Common mistakes:**
+
 - Using abstract classes only to avoid duplication.
 - Forgetting Java single class inheritance.
 - Making interfaces too broad.
 
 **Follow-ups:**
+
 - *Testing impact?* → Interfaces are easier to fake.
 - *Can abstract class implement interface?* → Yes.
 
 ## SOLID and Design Principles
 
 ### Q4. Explain Single Responsibility Principle with bad to good Java code.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** SOLID quickly reveals whether your design survives extensions.
@@ -330,6 +347,7 @@ keeping orchestration readable.
 A class should have one reason to change. Split orchestration, persistence, formatting, and policy.
 
 **Detailed answer:**
+
 ```java
 // Bad
 class InvoiceService {
@@ -348,18 +366,22 @@ class InvoiceRepository { void save(Invoice i){} }
 class InvoicePrinter { String print(Invoice i){ return i.toString(); } }
 class TaxCalculator { double tax(Invoice i){ return i.total()*0.18; } }
 ```
+
 In interviews, name the likely future change: new vehicle type, sink, payment mode, or repository.
 
 **Common mistakes:**
+
 - Quoting the principle without code.
 - Overengineering every small class.
 - Depending on concrete classes inside services.
 
 **Follow-ups:**
+
 - *Is it mandatory everywhere?* → No; apply where change/testing pressure exists.
 - *Spring help?* → DI injects abstractions and lets tests replace beans.
 
 ### Q5. Explain Open Closed Principle with bad to good Java code.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** SOLID quickly reveals whether your design survives extensions.
@@ -374,6 +396,7 @@ branch is clearer.
 Code should be open for extension and closed for modification. Add variants through interfaces, strategies, or registration.
 
 **Detailed answer:**
+
 ```java
 // Bad
 class Fee { int fee(String type){ return type.equals("CAR") ? 40 : 20; } }
@@ -382,18 +405,22 @@ interface FeePolicy { int fee(); }
 class CarFee implements FeePolicy { public int fee(){ return 40; } }
 class BikeFee implements FeePolicy { public int fee(){ return 20; } }
 ```
+
 In interviews, name the likely future change: new vehicle type, sink, payment mode, or repository.
 
 **Common mistakes:**
+
 - Quoting the principle without code.
 - Overengineering every small class.
 - Depending on concrete classes inside services.
 
 **Follow-ups:**
+
 - *Is it mandatory everywhere?* → No; apply where change/testing pressure exists.
 - *Spring help?* → DI injects abstractions and lets tests replace beans.
 
 ### Q6. Explain Liskov Substitution Principle with bad to good Java code.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** SOLID quickly reveals whether your design survives extensions.
@@ -408,6 +435,7 @@ interface that says only what every implementation can truly do.
 A subtype must be usable wherever its parent is expected without weakening behavior or surprising callers.
 
 **Detailed answer:**
+
 ```java
 // Bad
 class Rectangle { int w,h; void setW(int w){this.w=w;} void setH(int h){this.h=h;} }
@@ -417,18 +445,22 @@ interface Shape { int area(); }
 record Rect(int w, int h) implements Shape { public int area(){ return w*h; } }
 record Square2(int side) implements Shape { public int area(){ return side*side; } }
 ```
+
 In interviews, name the likely future change: new vehicle type, sink, payment mode, or repository.
 
 **Common mistakes:**
+
 - Quoting the principle without code.
 - Overengineering every small class.
 - Depending on concrete classes inside services.
 
 **Follow-ups:**
+
 - *Is it mandatory everywhere?* → No; apply where change/testing pressure exists.
 - *Spring help?* → DI injects abstractions and lets tests replace beans.
 
 ### Q7. Explain Interface Segregation Principle with bad to good Java code.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** SOLID quickly reveals whether your design survives extensions.
@@ -443,6 +475,7 @@ interfaces, so split only around real client needs.
 Clients should not depend on methods they do not use. Prefer small role-specific interfaces.
 
 **Detailed answer:**
+
 ```java
 // Bad
 interface Machine { void print(); void scan(); void fax(); }
@@ -450,18 +483,22 @@ interface Machine { void print(); void scan(); void fax(); }
 interface Printer { void print(); } interface Scanner { void scan(); }
 class SimplePrinter implements Printer { public void print(){} }
 ```
+
 In interviews, name the likely future change: new vehicle type, sink, payment mode, or repository.
 
 **Common mistakes:**
+
 - Quoting the principle without code.
 - Overengineering every small class.
 - Depending on concrete classes inside services.
 
 **Follow-ups:**
+
 - *Is it mandatory everywhere?* → No; apply where change/testing pressure exists.
 - *Spring help?* → DI injects abstractions and lets tests replace beans.
 
 ### Q8. Explain Dependency Inversion Principle with bad to good Java code.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** SOLID quickly reveals whether your design survives extensions.
@@ -476,6 +513,7 @@ abstraction when there is only one local helper and no realistic variation.
 High-level modules should depend on abstractions, not low-level concretions. Pass dependencies through constructors.
 
 **Detailed answer:**
+
 ```java
 // Bad
 class OrderService { private final MySqlOrderRepo repo = new MySqlOrderRepo(); }
@@ -489,18 +527,22 @@ class OrderService2 {
     }
 }
 ```
+
 In interviews, name the likely future change: new vehicle type, sink, payment mode, or repository.
 
 **Common mistakes:**
+
 - Quoting the principle without code.
 - Overengineering every small class.
 - Depending on concrete classes inside services.
 
 **Follow-ups:**
+
 - *Is it mandatory everywhere?* → No; apply where change/testing pressure exists.
 - *Spring help?* → DI injects abstractions and lets tests replace beans.
 
 ### Q9. How do DRY, KISS, YAGNI, Law of Demeter, cohesion, and coupling guide LLD?
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** These show practical judgment under time pressure.
@@ -515,12 +557,13 @@ framework. Use them to justify concrete moves, not as slogans.
 Keep code simple, avoid premature abstractions, remove duplicated knowledge, and avoid long object chains. High cohesion means one focused class; low coupling means classes know only required collaborators.
 
 **Detailed answer:**
-| Principle | Interview sentence |
-|---|---|
-| DRY | duplicate knowledge is worse than repeated lines |
-| KISS | simple code beats clever generic engines |
-| YAGNI | do not build DB/UI/distributed locks unless asked |
-| Law of Demeter | talk to direct collaborators only |
+
+| Principle      | Interview sentence                                |
+| -------------- | ------------------------------------------------- |
+| DRY            | duplicate knowledge is worse than repeated lines  |
+| KISS           | simple code beats clever generic engines          |
+| YAGNI          | do not build DB/UI/distributed locks unless asked |
+| Law of Demeter | talk to direct collaborators only                 |
 
 ```java
 // Bad train wreck
@@ -530,15 +573,18 @@ boolean ok = order.canDeliverTo("Lucknow");
 ```
 
 **Common mistakes:**
+
 - Utility-class dumping.
 - Overengineering.
 - Refactoring before understanding variation.
 
 **Follow-ups:**
+
 - *DRY vs readability?* → Prefer readable duplication until abstraction is stable.
 - *Cohesion smell?* → Vague Manager classes.
 
 ### Q10. Draw UML relationships used in class diagrams.
+
 `🟢 Beginner` `🔥` `Must-know SDE-1`
 
 **Why they ask:** LLD interviews require quick, correct diagrams before coding.
@@ -553,6 +599,7 @@ the code flow and invariants, not whether every symbol is artistically perfect.
 Association is knows, aggregation is weak whole-part, composition is strong owned lifecycle, inheritance is is-a, and dependency is temporary use.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class ParkingLot
@@ -569,18 +616,22 @@ Vehicle <|-- Car : inheritance
 PaymentService ..> FeePolicy : dependency
 Ticket --> Spot : association
 ```
+
 Use composition when deleting parent deletes child; use aggregation when part can outlive or be shared. Mermaid generics use List~Spot~.
 
 **Common mistakes:**
+
 - Drawing composition for every relation.
 - Missing multiplicity.
 - Showing too many fields.
 
 **Follow-ups:**
+
 - *Dependency vs association?* → Method-local use vs stored reference.
 - *Aggregation in code?* → Usually references; lifecycle is semantic.
 
 ### Q11. What are immutable objects and value objects?
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Thread-safety, equality, and domain modeling depend on this.
@@ -595,6 +646,7 @@ keys, but avoid huge immutable copies in hot paths.
 An immutable object cannot change after construction. A value object is identified by values, not database identity. Java records are good for small immutable value objects.
 
 **Detailed answer:**
+
 ```java
 import java.math.BigDecimal;
 public record Money(BigDecimal amount, String currency) {
@@ -608,18 +660,22 @@ public record Money(BigDecimal amount, String currency) {
   }
 }
 ```
+
 Entity: BookCopy has identity/lifecycle. Value object: Money, Email, Position.
 
 **Common mistakes:**
+
 - Exposing mutable lists.
 - Assuming records are deeply immutable.
 - Giving value objects setters.
 
 **Follow-ups:**
+
 - *How copy collections?* → List.copyOf.
 - *Where useful?* → Cache keys, money, coordinates, user IDs.
 
 ### Q12. How do you design for testability?
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Hidden tests and extension requests punish tightly coupled code.
@@ -634,6 +690,7 @@ The alternative is end-to-end-only testing, which is slower and harder to debug.
 Isolate pure logic, inject dependencies, depend on interfaces, and wrap time/random/IO. Services should run without Spring, DB, network, or filesystem.
 
 **Detailed answer:**
+
 ```java
 interface Clock { long millis(); }
 class SystemClock implements Clock { public long millis(){ return System.currentTimeMillis(); } }
@@ -643,18 +700,22 @@ class TokenBucket {
   boolean allow(String user){ return clock.millis() >= 0; }
 }
 ```
+
 Checklist: constructor injection, deterministic IDs, repository interfaces, no static mutable state, driver separate from logic.
 
 **Common mistakes:**
+
 - Static singletons everywhere.
 - Direct time/random in algorithms.
 - Tests that inspect only console output.
 
 **Follow-ups:**
+
 - *How test concurrency?* → Latches and small capacities.
 - *Need Mockito?* → Hand-written fakes are fine.
 
 ### Q13. How should exceptions and validation be modeled?
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** They check robust boundaries and clear failure modes.
@@ -669,6 +730,7 @@ objects. Avoid swallowing exceptions or returning `null`, because callers lose t
 Validate at boundaries and constructors, use meaningful domain exceptions for invalid operations, and fail fast instead of returning null.
 
 **Detailed answer:**
+
 ```java
 class OutOfStockException extends RuntimeException {
     OutOfStockException(String item) {
@@ -695,20 +757,24 @@ class Inventory {
     }
 }
 ```
+
 In REST apps, map domain exceptions to HTTP status in controller advice, not in domain services.
 
 **Common mistakes:**
+
 - Returning null for errors.
 - Catching and swallowing exceptions.
 - Throwing generic Exception.
 
 **Follow-ups:**
+
 - *Checked or unchecked?* → Domain validation is usually unchecked.
 - *Where validate?* → Constructors and workflow service methods.
 
 ## GoF and Enterprise Patterns
 
 ### Q14. Explain Singleton, five variants, and how it can break.
+
 `🔴 Advanced` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Singleton checks whether you understand global state, JVM class loading, and Java object-creation loopholes.
@@ -723,6 +789,7 @@ should still depend on injected abstractions rather than calling `getInstance()`
 Use Singleton only when exactly one shared coordinator is required. Enum is safest; holder is lazy and simple; double-checked locking needs `volatile`. In Spring, prefer DI-managed singleton beans over manual global access.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class ConfigRegistry { -ConfigRegistry() +getInstance() ConfigRegistry }
@@ -730,6 +797,7 @@ class Holder { +INSTANCE ConfigRegistry }
 ConfigRegistry --> Holder
 Client ..> ConfigRegistry
 ```
+
 ```java
 public enum AppConfig {
     INSTANCE;
@@ -748,17 +816,21 @@ public final class HolderSingleton {
     }
 }
 ```
+
 one controlled instance. Use: stateless config, logger adapters, or metadata registries. Avoid for request/user state, hidden dependencies, or anything tests must replace. JDK: `Runtime.getRuntime()`. Spring: singleton bean scope is one bean per container, not a GoF singleton. LLD: config registry or logging sink in Parking Lot.
 
 **Common mistakes:**
+
 - Missing volatile in DCL.
 - Using Singleton for mutable business state.
 
 **Follow-ups:**
+
 - *How can it break?* → Reflection, serialization, or cloning can create extra instances unless blocked.
 - *Enum singleton?* → Safest Java option; JVM protects enum constants during reflection and serialization.
 
 ### Q15. Explain the Factory Method pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Factory Method tests whether you can hide creation choices without overengineering every constructor.
@@ -773,6 +845,7 @@ family member, while Abstract Factory creates related products together.
 Factory Method creates a product through a method while clients depend on the product interface. Use when the concrete class depends on input, config, or subtype. Avoid it for one obvious constructor.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class Vehicle { <<interface>> +type() VehicleType }
@@ -781,6 +854,7 @@ class VehicleFactory { +create(VehicleType) Vehicle }
 Vehicle <|.. Car
 VehicleFactory --> Vehicle
 ```
+
 ```java
 enum VehicleType {
     CAR,
@@ -803,17 +877,21 @@ final class VehicleFactory {
     }
 }
 ```
+
 centralize product selection. Use when variants should not change clients. Avoid when `new` is stable and readable. JDK/Spring: `Calendar.getInstance()`, `NumberFormat.getCurrencyInstance()`, Spring `FactoryBean`. LLD: creating vehicle, ticket, or fee-policy objects.
 
 **Common mistakes:**
+
 - Mixing creation with business rules.
 - Returning concrete types instead of product interfaces.
 
 **Follow-ups:**
+
 - *Factory Method vs Abstract Factory?* → Factory Method creates one product; Abstract Factory creates related products.
 - *When avoid it?* → When a direct constructor is stable and readable.
 
 ### Q16. Explain the Abstract Factory pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Abstract Factory checks whether you can keep related provider-specific objects consistent.
@@ -828,6 +906,7 @@ related product types, not just one conditional object.
 Abstract Factory creates families of related objects without binding clients to concrete classes. Use when products must be compatible, like payment gateway plus refund service. Avoid it for one product type.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class PaymentFactory { <<interface>> +gateway() Gateway +refunds() RefundService }
@@ -838,6 +917,7 @@ PaymentFactory <|.. RazorpayFactory
 PaymentFactory --> Gateway
 PaymentFactory --> RefundService
 ```
+
 ```java
 interface Gateway {
     Receipt charge(long paise);
@@ -860,17 +940,21 @@ final class RazorpayFactory implements PaymentFactory {
     }
 }
 ```
+
 create compatible product families. Use: provider suites selected by config. Avoid when one simple factory or DI profile is enough. JDK/Spring: JAXP factories, Spring profiles/config classes. LLD: payment provider family in Food Delivery or BookMyShow.
 
 **Common mistakes:**
+
 - Creating factories before family variation exists.
 - Mixing products from different families.
 
 **Follow-ups:**
+
 - *Spring alternative?* → Profiles or conditional beans can select a compatible family.
 - *When avoid it?* → When a single factory method is enough.
 
 ### Q17. Explain the Builder pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Builder shows whether you can handle optional fields without unreadable constructors.
@@ -885,6 +969,7 @@ a builder assembles one complex instance.
 Builder constructs an object step by step and validates at `build()`. Use it for many optional fields, named construction, or immutable commands. Avoid it for two mandatory fields.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class Order { -customerId String -coupon String }
@@ -892,6 +977,7 @@ class Builder { +coupon(String) Builder +build() Order }
 Order --> Builder
 Client ..> Builder
 ```
+
 ```java
 public record Order(String customerId, String coupon, boolean giftWrap) {
     public static Builder builder(String customerId) {
@@ -918,17 +1004,21 @@ public record Order(String customerId, String coupon, boolean giftWrap) {
     }
 }
 ```
+
 readable construction plus validation. Use: immutable requests, notification templates, and search filters. Avoid if fields are few and validation is absent. JDK/Spring: `StringBuilder`, `UriComponentsBuilder`, `ResponseEntity.BodyBuilder`. LLD: order creation request or report filter.
 
 **Common mistakes:**
+
 - Using Builder with no invariants.
 - Forgetting mandatory fields or validation.
 
 **Follow-ups:**
+
 - *Builder vs telescoping constructors?* → Builder names optional fields and avoids overload ambiguity.
 - *Lombok @Builder?* → It reduces boilerplate, but invariants still need explicit validation.
 
 ### Q18. Explain the Prototype pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Prototype reveals whether you understand copying, mutability, and configured templates.
@@ -943,6 +1033,7 @@ inputs. Watch deep versus shallow copy bugs.
 Prototype creates new objects by copying an existing configured instance. Use when setup is expensive or templates vary slightly. Avoid shallow copies of mutable fields.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class CouponRule { +copyFor(String) CouponRule }
@@ -950,6 +1041,7 @@ class RuleRegistry { +prototype(String) CouponRule }
 RuleRegistry --> CouponRule
 Client ..> RuleRegistry
 ```
+
 ```java
 import java.util.List;
 record CouponRule(String name, List<String> actions) {
@@ -961,17 +1053,21 @@ record CouponRule(String name, List<String> actions) {
     }
 }
 ```
+
 clone a known-good template. Use: game pieces, coupon rules, or tenant defaults. Prefer explicit copy methods over Java `Cloneable`. JDK/Spring: `Object.clone()` concept, Spring prototype bean scope. LLD: Chess piece prototypes or coupon templates.
 
 **Common mistakes:**
+
 - Sharing mutable collections between copies.
 - Copying identity fields that should be regenerated.
 
 **Follow-ups:**
+
 - *Deep vs shallow copy?* → Deep-copy owned mutable state; share immutable values.
 - *Why avoid Cloneable?* → It is shallow by default and awkward to make safe.
 
 ### Q19. Explain the Adapter pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Adapter checks whether you can integrate external APIs without leaking vendor details.
@@ -986,6 +1082,7 @@ larger subsystem for easier use.
 Adapter converts an incompatible interface into the interface your code expects. Use it around SDKs, legacy code, or different data shapes. Avoid it if clients can directly use the dependency cleanly.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class PaymentGateway { <<interface>> +charge(long) boolean }
@@ -995,6 +1092,7 @@ PaymentGateway <|.. VendorAdapter
 VendorAdapter --> VendorSdk
 CheckoutService --> PaymentGateway
 ```
+
 ```java
 interface PaymentGateway {
     boolean charge(long paise);
@@ -1014,17 +1112,21 @@ final class VendorAdapter implements PaymentGateway {
     }
 }
 ```
+
 translate interface, units, exceptions, and models. Use: payments, email providers, or storage clients. Avoid passing vendor DTOs into domain services. JDK/Spring: `InputStreamReader`, `Arrays.asList()`, Spring MVC adapters. LLD: payment gateway in BookMyShow or Food Delivery.
 
 **Common mistakes:**
+
 - Leaking vendor DTOs or exceptions.
 - Putting retries, pricing, and persistence inside the adapter.
 
 **Follow-ups:**
+
 - *Adapter vs Proxy?* → Adapter changes an interface; Proxy controls access to the same interface.
 - *Adapter vs Facade?* → Adapter translates; Facade simplifies a subsystem.
 
 ### Q20. Explain the Decorator pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Decorator tests whether you can add behavior without subclass explosion.
@@ -1039,6 +1141,7 @@ remote calls to the same underlying subject.
 Decorator wraps an object with the same interface and adds behavior before or after delegation. Use it for optional, stackable features. Avoid it when one explicit class is clearer.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class Notifier { <<interface>> +send(String) void }
@@ -1048,6 +1151,7 @@ Notifier <|.. EmailNotifier
 Notifier <|.. AuditingNotifier
 AuditingNotifier --> Notifier
 ```
+
 ```java
 interface Notifier {
     void send(String message);
@@ -1068,17 +1172,21 @@ final class AuditingNotifier implements Notifier {
     }
 }
 ```
+
 add responsibilities dynamically while preserving the interface. Use: caching, logging, metrics, compression, or notification add-ons. Avoid deep wrapper stacks. JDK/Spring: `BufferedInputStream`, `Collections.unmodifiableList()`, bean decorators. LLD: logging/metrics around gateways.
 
 **Common mistakes:**
+
 - Changing the interface while decorating.
 - Creating deep wrapper stacks that are hard to debug.
 
 **Follow-ups:**
+
 - *Decorator vs Proxy vs Adapter?* → Decorator adds behavior; Proxy controls access; Adapter changes interface.
 - *When avoid it?* → When the behavior is mandatory core behavior.
 
 ### Q21. Explain the Facade pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Facade shows whether you can make a subsystem usable without creating a god service.
@@ -1093,6 +1201,7 @@ API look like a specific expected contract.
 Facade exposes a small use-case API over several collaborating classes. Use it to reduce client coupling to subsystem details. Avoid letting it absorb all business logic.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class CheckoutFacade { +checkout(Cart) Receipt }
@@ -1104,6 +1213,7 @@ CheckoutFacade --> PaymentGateway
 CheckoutFacade --> OrderRepository
 Client ..> CheckoutFacade
 ```
+
 ```java
 final class CheckoutFacade {
     private final InventoryService inventory;
@@ -1125,17 +1235,21 @@ final class CheckoutFacade {
     }
 }
 ```
+
 provide one stable entry point to a complex workflow. Use: checkout, booking, or report generation. Avoid vague `Manager` classes. JDK/Spring: `JdbcTemplate` simplifies JDBC; service layers often act as facades. LLD: BookMyShow booking facade.
 
 **Common mistakes:**
+
 - Turning the facade into a god service.
 - Exposing subsystem internals through facade methods.
 
 **Follow-ups:**
+
 - *Facade vs Adapter?* → Facade simplifies a subsystem; Adapter converts an incompatible interface.
 - *When avoid it?* → When one direct collaborator is already simple.
 
 ### Q22. Explain the Proxy pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Proxy connects LLD to Spring AOP, transactions, caching, and access control.
@@ -1150,6 +1264,7 @@ Decorator is about stacking optional features.
 Proxy exposes the same interface as the real object and controls access to it. Use it for lazy loading, authorization, caching, retries, or transactions. Avoid it when it hides remote or expensive work.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class ReportService { <<interface>> +report(String) String }
@@ -1160,6 +1275,7 @@ ReportService <|.. AuthProxy
 AuthProxy --> ReportService
 Client --> ReportService
 ```
+
 ```java
 interface ReportService {
     String report(String userId);
@@ -1182,17 +1298,21 @@ final class AuthProxy implements ReportService {
     }
 }
 ```
+
 control access while preserving the target interface. Use: protection, virtual, remote, and smart-reference proxies. JDK/Spring: `java.lang.reflect.Proxy`, Hibernate lazy proxies, Spring AOP `@Transactional` and `@Cacheable`. LLD: access-controlled admin service.
 
 **Common mistakes:**
+
 - Confusing Proxy with Adapter.
 - Forgetting Spring self-invocation bypasses proxy advice.
 
 **Follow-ups:**
+
 - *How does @Transactional work?* → Spring wraps the bean and manages transaction boundaries around proxied calls.
 - *Proxy vs Decorator?* → Proxy controls access; Decorator adds optional behavior.
 
 ### Q23. Explain the Composite pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Composite checks if you can model tree structures without type checks everywhere.
@@ -1203,10 +1323,11 @@ fits because callers can treat leaf and container through one component contract
 Decorator; Composite models part-whole hierarchy, while Decorator wraps one object to add behavior without
 making a tree of children.
 
-**Short answer (say this first, 20-40 sec):**
+**u fjf yoShort answer (say this first, 20-40 sec):**
 Composite lets clients treat leaves and groups through the same interface. Use it for recursive structures like menus, folders, comments, or org charts. Avoid it when the domain is flat.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class MenuNode { <<interface>> +pricePaise() long }
@@ -1216,6 +1337,7 @@ MenuNode <|.. MenuItem
 MenuNode <|.. Combo
 Combo o-- MenuNode
 ```
+
 ```java
 interface MenuNode {
     long pricePaise();
@@ -1232,17 +1354,21 @@ final class Combo implements MenuNode {
     }
 }
 ```
+
 uniform operations over part-whole trees. Use when recursion is natural. Avoid forcing flat data into a tree. JDK/Spring: Swing/AWT component trees, expression trees conceptually. LLD: file system, menu combos, nested comments.
 
 **Common mistakes:**
+
 - Putting child operations on leaves without meaning.
 - Forgetting cycle prevention when reparenting.
 
 **Follow-ups:**
+
 - *Transparent vs safe composite?* → Transparent exposes child methods everywhere; safe keeps them on composites.
 - *When avoid it?* → When the model is flat and not recursive.
 
 ### Q24. Explain the Bridge pattern.
+
 `🔴 Advanced` `🔥` `Stretch`
 
 **Why they ask:** Bridge tests if you can separate two dimensions of variation instead of creating class explosions.
@@ -1257,6 +1383,7 @@ to separate dimensions, while Adapter usually reconciles an existing incompatibl
 Bridge decouples an abstraction from its implementation so both can vary independently. Use when type and platform/channel/provider vary separately. Avoid it when Strategy or simple composition is enough.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class Notification { -sender MessageSender +send(String) void }
@@ -1269,6 +1396,7 @@ Notification <|-- UrgentNotification
 MessageSender <|.. EmailSender
 MessageSender <|.. SmsSender
 ```
+
 ```java
 interface MessageSender {
     void send(String text);
@@ -1292,17 +1420,21 @@ final class UrgentNotification extends Notification {
     }
 }
 ```
+
 avoid `EmailUrgentNotification`, `SmsUrgentNotification`, etc. Use when abstraction type and implementation channel grow independently. JDK/Spring: JDBC API to drivers; SLF4J to logging implementations. LLD: notification type plus delivery channel.
 
 **Common mistakes:**
+
 - Calling any delegation Bridge.
 - Creating two hierarchies before two axes really vary.
 
 **Follow-ups:**
+
 - *Bridge vs Strategy?* → Bridge separates two class hierarchies; Strategy swaps one algorithm.
 - *LLD clue?* → Two independent dimensions such as message type and channel both expand.
 
 ### Q25. Explain the Flyweight pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Flyweight checks whether you separate shared intrinsic state from per-object extrinsic state.
@@ -1317,6 +1449,7 @@ enforces one global instance.
 Flyweight shares immutable common state across many small objects. Use when object count is huge and shared state is duplicated. Avoid it if sharing adds complexity without memory pressure.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class PieceType { +icon String +color String }
@@ -1325,6 +1458,7 @@ class PieceTypeFactory { +get(String,String) PieceType }
 Piece --> PieceType
 PieceTypeFactory --> PieceType
 ```
+
 ```java
 record PieceType(String icon, String color) {
 }
@@ -1338,17 +1472,21 @@ final class PieceTypeFactory {
     }
 }
 ```
+
 share intrinsic immutable data and keep extrinsic coordinates outside. Use: chess pieces, map tiles, text glyphs. Avoid sharing mutable per-object state. JDK/Spring: `Integer` cache, string interning. LLD: Chess board or game map.
 
 **Common mistakes:**
+
 - Sharing mutable state accidentally.
 - Adding a factory when object counts are tiny.
 
 **Follow-ups:**
+
 - *Intrinsic vs extrinsic?* → Intrinsic is shared immutable data; extrinsic is per-use context.
 - *Thread safety?* → Immutable flyweights are safe; guard a concurrent factory cache.
 
 ### Q26. Explain the Strategy pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Strategy checks if you replace conditionals with injectable algorithms only where variation matters.
@@ -1363,6 +1501,7 @@ State changes behavior because the object's lifecycle state changes.
 Strategy encapsulates interchangeable algorithms behind one interface. Use when behavior varies by policy, tenant, or runtime configuration. Avoid it for stable two-line conditionals.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class PricingStrategy { <<interface>> +pricePaise(int) long }
@@ -1371,6 +1510,7 @@ class ParkingService { -pricing PricingStrategy +feePaise(int) long }
 PricingStrategy <|.. HourlyPricing
 ParkingService --> PricingStrategy
 ```
+
 ```java
 interface PricingStrategy {
     long pricePaise(int hours);
@@ -1390,17 +1530,21 @@ final class ParkingService {
     }
 }
 ```
+
 swap algorithms without changing the context class. Use: pricing, scheduling, matching, or rate limiting. Avoid class-per-enum-value when a switch is clearer. JDK/Spring: `Comparator`, `FileVisitor`, Spring interface injection. LLD: parking fee policy, elevator scheduling, Splitwise split strategy.
 
 **Common mistakes:**
+
 - Creating one class per tiny branch too early.
 - Letting strategies mutate context internals.
 
 **Follow-ups:**
+
 - *Strategy vs State?* → Strategy is chosen from outside; State changes with lifecycle.
 - *Spring selection?* → Inject a Map of strategy beans or mark a default with @Primary.
 
 ### Q27. Explain the Observer pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Observer tests loose coupling, ordering, backpressure, and sync vs async event delivery.
@@ -1415,6 +1559,7 @@ Event Bus centralizes routing across broader parts of a system.
 Observer lets subscribers react when a subject changes. Use it for in-process notifications where the subject should not know every consumer. Avoid it when reliable distributed delivery needs a broker.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class OrderListener { <<interface>> +onPaid(String) void }
@@ -1423,6 +1568,7 @@ class OrderEvents { +subscribe(OrderListener) void +paid(String) void }
 OrderListener <|.. EmailListener
 OrderEvents o-- OrderListener
 ```
+
 ```java
 interface OrderListener {
     void onPaid(String orderId);
@@ -1439,17 +1585,21 @@ final class OrderEvents {
     }
 }
 ```
+
 notify dependents without hard-coding them. Use: UI/domain events inside one process. Avoid slow synchronous observers on critical paths. JDK/Spring: Swing listeners, `PropertyChangeListener`, Spring `ApplicationEventPublisher`. LLD: stock alerts or order notification fan-out.
 
 **Common mistakes:**
+
 - Forgetting unsubscribe and leaks.
 - Letting one observer failure stop all observers accidentally.
 
 **Follow-ups:**
+
 - *Observer vs Pub-Sub?* → Observer is usually in-process; Pub-Sub uses broker topics and durable delivery.
 - *Sync or async?* → Async needs queues, retries, ordering, and failure handling.
 
 ### Q28. Explain the State pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** State checks if you can model lifecycle behavior without giant transition switches.
@@ -1464,6 +1614,7 @@ is selected to vary an algorithm.
 State delegates behavior to the current state object, and transitions replace the state. Use when allowed operations depend heavily on lifecycle state. Avoid it when an enum transition table is simpler.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class OrderState { <<interface>> +pay(Order) void +cancel(Order) void }
@@ -1474,6 +1625,7 @@ OrderState <|.. CreatedState
 OrderState <|.. PaidState
 Order --> OrderState
 ```
+
 ```java
 interface OrderState {
     void pay(Order order);
@@ -1496,17 +1648,21 @@ final class PaidState implements OrderState {
     }
 }
 ```
+
 keep state-specific operations near state-specific rules. Use: vending machine, ATM, order, or booking lifecycle. Avoid simple two-state flags. JDK/Spring: `Thread.State`, Spring StateMachine for heavy workflows. LLD: Vending Machine and BookMyShow booking status.
 
 **Common mistakes:**
+
 - Keeping a giant switch inside each state.
 - Persisting state objects instead of stable status values.
 
 **Follow-ups:**
+
 - *Strategy vs State?* → Strategy is a chosen algorithm; State represents current lifecycle behavior.
 - *How persist it?* → Store an enum/status and reconstruct behavior in domain code.
 
 ### Q29. Explain the Command pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Command checks if you can queue, retry, log, or undo operations cleanly.
@@ -1521,6 +1677,7 @@ interchangeable algorithm policy.
 Command wraps a request as an object with `execute`. Use when requests need queuing, retries, scheduling, logging, or undo. Avoid it when a direct method call is enough.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class Command { <<interface>> +execute() void }
@@ -1530,6 +1687,7 @@ Command <|.. TransferCommand
 Invoker --> Command
 TransferCommand --> AccountService
 ```
+
 ```java
 interface Command {
     void execute();
@@ -1550,17 +1708,21 @@ final class TransferCommand implements Command {
     }
 }
 ```
+
 turn requests into data-like objects. Use: job queues, editor undo, ATM transactions, or scheduling. Avoid command classes with no lifecycle benefit. JDK/Spring: `Runnable`, `Callable`, Swing `Action`, Spring Batch tasklets. LLD: ATM transaction commands.
 
 **Common mistakes:**
+
 - Capturing stale mutable objects.
 - Forgetting idempotency for queued retries.
 
 **Follow-ups:**
+
 - *How implement undo?* → Store enough before-state or an inverse command.
 - *Command vs Strategy?* → Command is a request; Strategy is an algorithm.
 
 ### Q30. Explain the Chain of Responsibility pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Chain maps directly to filters, interceptors, and validation pipelines in Java web apps.
@@ -1575,6 +1737,7 @@ every stage.
 Chain passes a request through ordered handlers until one handles it or all run. Use it for filters, validation, authorization, or logging steps. Avoid it when order is unclear.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class Handler { <<interface>> +handle(Request, Chain) void }
@@ -1583,6 +1746,7 @@ class Chain { +next(Request) void }
 Handler <|.. AuthHandler
 Chain o-- Handler
 ```
+
 ```java
 interface Handler {
     void handle(Request request, Chain chain);
@@ -1600,17 +1764,21 @@ final class Chain {
     }
 }
 ```
+
 decouple sender from ordered processing steps. Use: servlet filters, logging, auth, validation, and approvals. Avoid if direct calls are easier to trace. JDK/Spring: Servlet `FilterChain`, Spring Security filter chain, Spring MVC interceptors. LLD: request pipeline or logger chain.
 
 **Common mistakes:**
+
 - Not defining whether the chain stops or continues.
 - Hiding important handler order constraints.
 
 **Follow-ups:**
+
 - *Servlet filters?* → Each filter wraps chain.doFilter, so order affects request and response handling.
 - *Spring Security?* → Auth, CSRF, session, and authorization filters run as an ordered chain.
 
 ### Q31. Explain the Template Method pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Template Method tests whether you can fix algorithm order while letting selected steps vary.
@@ -1625,6 +1793,7 @@ Strategy uses composition and replaceable collaborators.
 Template Method defines an algorithm skeleton in a base class and lets subclasses override steps. Use when order is stable and steps vary. Avoid it when composition avoids inheritance more cleanly.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class ImportJob { +run() void #read() List~String~ #write(List~String~) void }
@@ -1632,6 +1801,7 @@ class CsvImportJob
 ImportJob <|-- CsvImportJob
 Client ..> ImportJob
 ```
+
 ```java
 abstract class ImportJob {
     public final void run() {
@@ -1648,17 +1818,21 @@ abstract class ImportJob {
     protected abstract void write(java.util.List<String> rows);
 }
 ```
+
 keep invariant algorithm order in one place. Use: import jobs, game turns, or report generation. Avoid if subclasses need to change the whole flow. JDK/Spring: `AbstractList`, `JdbcTemplate` callback flow, `TransactionTemplate`. LLD: ETL/import workflow.
 
 **Common mistakes:**
+
 - Allowing subclasses to override the template method.
 - Using inheritance when composition is simpler.
 
 **Follow-ups:**
+
 - *JdbcTemplate?* → It owns JDBC lifecycle and calls callbacks for variable query-mapping steps.
 - *Template vs Strategy?* → Template fixes order with inheritance; Strategy swaps behavior via composition.
 
 ### Q32. Explain the Iterator pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Iterator checks traversal abstraction and Java collection fail-fast behavior.
@@ -1673,6 +1847,7 @@ itself.
 Iterator exposes sequential traversal without revealing internal structure. Use it for custom collections or paged traversal. Avoid custom iterators when standard collections and streams are enough.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class Iterator~T~ { <<interface>> +hasNext() boolean +next() T }
@@ -1681,6 +1856,7 @@ class PlaylistIterator
 Iterator <|.. PlaylistIterator
 Playlist --> PlaylistIterator
 ```
+
 ```java
 import java.util.Iterator;
 import java.util.List;
@@ -1694,17 +1870,21 @@ final class Playlist implements Iterable<String> {
     }
 }
 ```
+
 decouple traversal from storage. Use: custom collections, tree traversal, cursor-like pages. Avoid exposing mutable internals. JDK/Spring: `Iterator`, `Iterable`, `Spliterator`, JDBC `ResultSet` cursor concept. LLD: playlist, catalog pagination, file tree traversal.
 
 **Common mistakes:**
+
 - Mutating a collection while iterating incorrectly.
 - Not defining traversal order.
 
 **Follow-ups:**
+
 - *What is fail-fast?* → JDK iterators best-effort throw ConcurrentModificationException after structural changes.
 - *Iterator vs Stream?* → Iterator is pull traversal; Stream adds lazy functional operations.
 
 ### Q33. Explain the Mediator pattern.
+
 `🔴 Advanced` `🔥` `Stretch`
 
 **Why they ask:** Mediator tests if you can reduce many-to-many object chatter in collaborative workflows.
@@ -1719,6 +1899,7 @@ broadcasts changes to listeners without central business orchestration.
 Mediator centralizes communication between components so they do not depend on each other directly. Use when many objects coordinate through rules. Avoid it if the mediator becomes a god object.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class ChatRoom { +send(User,String) void }
@@ -1726,6 +1907,7 @@ class User { -room ChatRoom +send(String) void +receive(String) void }
 ChatRoom o-- User
 User --> ChatRoom
 ```
+
 ```java
 final class ChatRoom {
     private final java.util.List<User> users = new java.util.ArrayList<>();
@@ -1741,17 +1923,21 @@ final class ChatRoom {
     }
 }
 ```
+
 move coordination rules out of peer objects. Use: chat rooms, UI dialogs, control towers, or auctions. Avoid when direct dependencies are few and clearer. JDK/Spring: controllers and dispatchers often mediate interactions. LLD: group chat or elevator controller.
 
 **Common mistakes:**
+
 - Moving all business logic into the mediator.
 - Using Mediator when Observer or direct calls are simpler.
 
 **Follow-ups:**
+
 - *Mediator vs Observer?* → Mediator coordinates peers; Observer broadcasts changes to subscribers.
 - *When avoid it?* → When there is no many-to-many communication problem.
 
 ### Q34. Explain the Memento pattern.
+
 `🔴 Advanced` `🔥` `Stretch`
 
 **Why they ask:** Memento checks whether you can support undo without exposing private internals.
@@ -1766,6 +1952,7 @@ at a point in time.
 Memento captures an object's state so it can be restored later. Use it for undo/redo or checkpoints. Avoid it for huge state unless you use diffs or persistence.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class Editor { +save() Snapshot +restore(Snapshot) void }
@@ -1774,6 +1961,7 @@ class History { +push(Snapshot) void +pop() Snapshot }
 Editor --> Snapshot
 History o-- Snapshot
 ```
+
 ```java
 final class Editor {
     private String text = "";
@@ -1790,17 +1978,21 @@ final class Editor {
     }
 }
 ```
+
 restore previous state without exposing mutable internals. Use: text editor undo, game checkpoints, or wizard drafts. Avoid storing huge full snapshots on every change. JDK/Spring: transaction savepoints are a related idea. LLD: text editor or game restore.
 
 **Common mistakes:**
+
 - Capturing mutable references instead of copies.
 - Keeping unlimited history in memory.
 
 **Follow-ups:**
+
 - *Full snapshot vs diff?* → Full is simple; diff is cheaper but harder to apply correctly.
 - *How limit memory?* → Cap history, compress snapshots, or persist versions.
 
 ### Q35. Explain the Visitor pattern.
+
 `🔴 Advanced` `🔥` `Stretch`
 
 **Why they ask:** Visitor tests double dispatch and adding operations across stable class hierarchies.
@@ -1815,6 +2007,7 @@ while Strategy swaps one algorithm for one context.
 Visitor adds operations to a stable object structure without modifying each class for every operation. Use when element types are stable but operations change. Avoid it when new element types are common.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class Shape { <<interface>> +accept(ShapeVisitor) void }
@@ -1826,6 +2019,7 @@ Shape <|.. RectangleShape
 ShapeVisitor --> Circle
 ShapeVisitor --> RectangleShape
 ```
+
 ```java
 interface Shape {
     void accept(ShapeVisitor visitor);
@@ -1845,17 +2039,21 @@ interface ShapeVisitor {
     void visit(RectangleShape rectangle);
 }
 ```
+
 separate operations from element classes. Use: ASTs, reports over graphs, or export formats. Avoid it for changing element hierarchies. JDK/Spring: `FileVisitor`, annotation/AST visitors. LLD: file-system reports or expression evaluator.
 
 **Common mistakes:**
+
 - Using Visitor when methods are clearer.
 - Forgetting new element types require visitor changes.
 
 **Follow-ups:**
+
 - *Why double dispatch?* → accept picks the runtime element, then visitor overload handles that type.
 - *When avoid it?* → When new element types are added more often than operations.
 
 ### Q36. Explain the Repository pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Repository checks whether you separate domain logic from persistence and can test without a DB.
@@ -1870,6 +2068,7 @@ while DAO is often table or query oriented.
 Repository provides collection-like access to aggregate roots and hides persistence details. Use it behind domain services. Avoid putting workflows or HTTP concerns into repositories.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class OrderRepository { <<interface>> +save(Order) void +findById(String) Optional~Order~ }
@@ -1879,6 +2078,7 @@ OrderRepository <|.. JpaOrderRepository
 OrderService --> OrderRepository
 JpaOrderRepository ..> Database
 ```
+
 ```java
 import java.util.Optional;
 interface OrderRepository {
@@ -1897,17 +2097,21 @@ final class OrderService {
     }
 }
 ```
+
 isolate persistence and keep domain code storage-agnostic. Use: aggregates such as Booking, Order, or Account. Avoid generic repositories that expose every table operation. JDK/Spring: Spring Data and JPA repositories. LLD: BookMyShow, Parking Lot, or Splitwise storage.
 
 **Common mistakes:**
+
 - Putting business decisions in query methods.
 - Leaking SQL or JPA APIs into domain services.
 
 **Follow-ups:**
+
 - *DAO vs Repository?* → DAO is table-oriented; Repository is aggregate/domain-oriented.
 - *How test?* → Use an in-memory fake implementing the repository interface.
 
 ### Q37. Explain the Dependency Injection pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** DI checks whether your design is testable and not hard-wired to concrete infrastructure.
@@ -1922,6 +2126,7 @@ registry at runtime.
 Dependency Injection gives an object its collaborators from outside instead of constructing them internally. Prefer constructor injection for required dependencies. Avoid service locators and static globals.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class EmailSender { <<interface>> +send(String) void }
@@ -1930,6 +2135,7 @@ class SignupService { -sender EmailSender +signup(String) void }
 EmailSender <|.. SmtpEmailSender
 SignupService --> EmailSender
 ```
+
 ```java
 interface EmailSender {
     void send(String address);
@@ -1944,17 +2150,21 @@ final class SignupService {
     }
 }
 ```
+
 invert object assembly and make dependencies explicit. Use: repositories, gateways, clocks, ID generators, and notifiers. Avoid field injection and hidden lookups. JDK/Spring: Spring constructor injection, CDI/Guice. LLD: testable services in every machine-coding problem.
 
 **Common mistakes:**
+
 - Calling new for infrastructure inside services.
 - Using field injection for required dependencies.
 
 **Follow-ups:**
+
 - *Constructor vs setter injection?* → Constructor for required dependencies; setter for optional reconfiguration.
 - *DI vs Factory?* → DI supplies collaborators; Factory creates products based on runtime choice.
 
 ### Q38. Explain the Null Object pattern.
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** Null Object checks if you can remove null checks without hiding real absence or errors.
@@ -1969,6 +2179,7 @@ to handle possible absence.
 Null Object provides a do-nothing implementation of an interface. Use when absence means safe no-op. Avoid it when absence is an error or caller must know no value exists.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class AuditSink { <<interface>> +record(String) void }
@@ -1978,6 +2189,7 @@ AuditSink <|.. DbAuditSink
 AuditSink <|.. NoOpAuditSink
 OrderService --> AuditSink
 ```
+
 ```java
 interface AuditSink {
     void record(String event);
@@ -1997,17 +2209,21 @@ final class OrderService {
     }
 }
 ```
+
 replace repeated null checks with polymorphism. Use: optional logging, metrics, or notifications. Avoid when no-op hides failed payment, missing user, or corrupt state. JDK/Spring: `Collections.emptyList()`, no-op loggers, test fakes. LLD: optional notification/audit sink.
 
 **Common mistakes:**
+
 - Hiding real errors with no-op behavior.
 - Using Null Object where Optional or an exception is clearer.
 
 **Follow-ups:**
+
 - *Null Object vs Optional?* → Null Object is behavior; Optional is explicit value absence.
 - *When dangerous?* → Payment, security, and persistence failures must not become no-ops.
 
 ### Q39. What are Specification, Event Bus, and Pipeline patterns?
+
 `🔴 Advanced` `🔥` `Stretch`
 
 **Why they ask:** These appear when filtering, event routing, or staged processing grows beyond simple methods.
@@ -2022,6 +2238,7 @@ Specification is confused with Strategy, Event Bus with Observer, and Pipeline w
 Specification composes predicates, Event Bus routes events to handlers, and Pipeline runs ordered transformation/validation stages. Use them when rules, event consumers, or stages grow independently. Avoid them for one condition, one listener, or two fixed steps.
 
 **Detailed answer:**
+
 ```mermaid
 classDiagram
 class Specification~T~ { <<interface>> +isSatisfiedBy(T) boolean }
@@ -2031,6 +2248,7 @@ Specification --> Candidate
 EventBus o-- EventHandler
 Pipeline o-- Stage
 ```
+
 ```java
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -2054,19 +2272,23 @@ final class Pipeline<T> {
     }
 }
 ```
+
 Specification names composable rules; Event Bus decouples event producers and consumers; Pipeline makes staged processing explicit. Use Specification for eligibility/search, Event Bus for in-process notifications, Pipeline for validation/enrichment/imports. JDK/Spring: `Predicate`, Spring events, servlet/filter-style pipelines. LLD: cab matching filters, order events, request validation.
 
 **Common mistakes:**
+
 - Building an Event Bus when Observer is enough.
 - Continuing a pipeline after mandatory validation fails.
 
 **Follow-ups:**
+
 - *Specification vs Strategy?* → Specification composes yes/no rules; Strategy performs an algorithm.
 - *Pipeline vs Chain?* → Pipeline usually transforms through all stages; Chain may stop when handled.
 
 ## Machine Coding Round Strategy
 
 ### Q40. How should you approach a 90-120 minute machine-coding LLD round?
+
 `🟡 Intermediate` `🔥` `Must-know SDE-1`
 
 **Why they ask:** A good plan prevents half-built, untestable systems.
@@ -2081,6 +2303,7 @@ leaves no working demo. Mention production concerns briefly, then defer them.
 Clarify, design the smallest extensible model, code core flows first, then demo and test. State assumptions loudly and defer non-goals like DB/UI unless asked.
 
 **Detailed answer:**
+
 ```mermaid
 flowchart TD
 A["Clarify requirements 10 min"] --> B["Entities and relationships 10 min"]
@@ -2090,26 +2313,30 @@ D --> E["Driver demo 10 min"]
 E --> F["Focused tests 10-15 min"]
 F --> G["Discuss extensions and trade-offs"]
 ```
-| Rubric area | What good looks like |
-|---|---|
-| Working code | demo covers happy path and edge cases |
-| Modularity | model, service, repository, strategy, exception |
-| Extensibility | new vehicle/payment/rule added by new class |
+
+| Rubric area   | What good looks like                                   |
+| ------------- | ------------------------------------------------------ |
+| Working code  | demo covers happy path and edge cases                  |
+| Modularity    | model, service, repository, strategy, exception        |
+| Extensibility | new vehicle/payment/rule added by new class            |
 | Thread-safety | lock/concurrent collection around shared mutable state |
-| Tests | deterministic unit tests, not console-only validation |
+| Tests         | deterministic unit tests, not console-only validation  |
 
 ```text
 com.example.parking
   model/ service/ repository/ strategy/ exception/ Main.java
 ```
+
 Common failures: coding before requirements, no driver, no tests, god service, null-heavy code, missing concurrency story, overusing patterns.
 
 **Common mistakes:**
+
 - Spending 40 minutes drawing.
 - No runnable main method.
 - Adding Spring Boot when plain Java was requested.
 
 **Follow-ups:**
+
 - *What code first?* → Domain models and one successful main flow.
 - *If time is low?* → Finish demo path, then outline extensions.
 

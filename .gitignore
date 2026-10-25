@@ -1,0 +1,4 @@
+# Environment files may contain local credentials; use .env.example for safe templates.
+**/.env
+**/.env.*
+!**/.env.example
