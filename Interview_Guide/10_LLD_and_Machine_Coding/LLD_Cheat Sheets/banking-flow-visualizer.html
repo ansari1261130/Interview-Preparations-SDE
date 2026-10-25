@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f6fb">
+  <title>Banking LLD — Animated Flow</title>
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#18243a;background:#f3f6fb;--blue:#4563e9;--blue-soft:#edf0ff;--green:#12836d;--green-soft:#e2f6ef;--red:#bd4651;--red-soft:#fff0f0;--amber:#a66a10;--amber-soft:#fff5df;--line:#dce3ef;--muted:#68768d;--card:#fff;--shadow:0 18px 48px #1f35520c}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 8% 0%,#4563e915,transparent 27rem),radial-gradient(circle at 98% 15%,#12836d10,transparent 24rem),#f3f6fb}.shell{width:min(1180px,calc(100% - 32px));margin:auto;padding:38px 0 54px}.eyebrow{font-size:.74rem;font-weight:850;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}h1{font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-.045em;line-height:1.08;margin:10px 0}.intro{max-width:800px;color:var(--muted);line-height:1.65;margin:0}.intro strong{color:#18243a}.layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.8fr);gap:18px;margin-top:26px;align-items:stretch}.card{background:#ffffffed;border:1px solid #dce3ef;border-radius:21px;box-shadow:var(--shadow)}.visual{padding:24px;overflow:hidden}.visual-head{display:flex;justify-content:space-between;gap:12px;align-items:start}.visual-head h2,.explain h2{font-size:1.1rem;margin:0}.visual-head p{color:var(--muted);font-size:.85rem;margin:6px 0 0}.badge{padding:7px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue);font-weight:800;font-size:.75rem;white-space:nowrap}.progress{height:7px;background:#edf0f5;border-radius:99px;margin:19px 0 25px;overflow:hidden}.progress>i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),#8296ff);transition:width .4s ease}.flow{display:grid;grid-template-columns:1fr 54px 1fr 54px 1fr;gap:9px;align-items:center;min-height:210px}.node{min-height:137px;border:1.5px solid var(--line);border-radius:16px;background:var(--card);padding:15px 13px;transition:.3s ease}.node.active{border-color:var(--blue);box-shadow:0 0 0 4px #4563e916,0 12px 24px #4563e912;transform:translateY(-3px)}.node.done{border-color:#a8dccb;background:#f7fffc}.node.fail{border-color:#efb9bc;background:#fffafa}.node-kicker{font-size:.65rem;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:#8190a5;display:flex;align-items:center;gap:7px}.dot{width:8px;height:8px;border-radius:50%;background:#b9c3d1}.active .dot{background:var(--blue);box-shadow:0 0 0 4px #4563e91c}.done .dot{background:var(--green)}.fail .dot{background:var(--red)}.node h3{font-size:.92rem;margin:10px 0 5px}.node p{font-size:.76rem;line-height:1.4;color:var(--muted);margin:0}.amount{font-variant-numeric:tabular-nums;font-weight:850;color:#18243a;transition:color .3s}.amount.bump{animation:bump .5s ease}.amount.positive{color:var(--green)}.amount.negative{color:var(--red)}.wire{height:2px;background:var(--line);position:relative;transition:background .25s}.wire:after{content:"";position:absolute;right:1px;top:-4px;width:8px;height:8px;border-top:2px solid var(--line);border-right:2px solid var(--line);transform:rotate(45deg);transition:border-color .25s}.wire.lit{background:var(--blue)}.wire.lit:after{border-color:var(--blue)}.wire span{position:absolute;left:50%;top:-19px;transform:translateX(-50%);font-size:.61rem;color:#8995a7;white-space:nowrap}.wire.lit span{color:var(--blue);font-weight:800}.gate{grid-column:1/-1;display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-top:15px;padding:12px 14px;border:1px dashed #d5deeb;border-radius:14px;background:#fafbfe}.gate-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:#8390a3;font-weight:850}.gate-lock{color:var(--amber);background:var(--amber-soft);padding:7px 10px;border-radius:9px;font-size:.7rem;font-weight:800;white-space:nowrap}.gate-caption{text-align:right;font-size:.74rem;color:var(--muted)}.controls{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid #edf0f5;margin-top:20px;padding-top:17px}.group{display:flex;gap:7px;flex-wrap:wrap}.btn{min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:11px;background:white;color:#27344a;font:inherit;font-size:.8rem;font-weight:750;cursor:pointer;transition:.15s}.btn:hover:not(:disabled){transform:translateY(-1px);border-color:#aab8f6}.btn:focus-visible{outline:3px solid #4563e945;outline-offset:2px}.btn:disabled{opacity:.42;cursor:not-allowed}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn.play{background:var(--blue-soft);border-color:transparent;color:var(--blue)}.operation-tabs{display:flex;gap:7px;margin-top:18px}.tab{border:1px solid var(--line);background:#fff;color:var(--muted);padding:8px 12px;border-radius:10px;font-size:.75rem;font-weight:800;cursor:pointer}.tab[aria-pressed=true]{background:var(--blue-soft);color:var(--blue);border-color:#c4ceff}.explain{padding:23px;display:flex;flex-direction:column;min-height:410px}.phase{display:inline-block;width:max-content;margin:18px 0 9px;background:var(--green-soft);color:var(--green);font-size:.66rem;font-weight:850;letter-spacing:.08em;text-transform:uppercase;padding:6px 9px;border-radius:8px}.explain h3{font-size:1.25rem;line-height:1.25;letter-spacing:-.025em;margin:0 0 8px}.description{font-size:.87rem;line-height:1.65;color:var(--muted);min-height:110px;margin:0}.code-label{font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;color:#8490a4;font-weight:850;margin:15px 0 7px}.code{display:block;min-height:52px;background:#18243a;color:#dceaff;border-radius:11px;padding:12px;font: .75rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}.callout{margin-top:auto;background:#f7f9fc;border:1px solid #e8edf4;border-radius:12px;padding:12px;font-size:.76rem;line-height:1.5;color:#59677d}.callout strong{color:#18243a}.result{margin-top:12px;border-radius:11px;padding:11px 12px;font-size:.77rem;line-height:1.45;font-weight:700}.result.ok{background:var(--green-soft);color:#236454}.result.bad{background:var(--red-soft);color:#9f3c47}.result.neutral{background:#f2f5fa;color:#5d6b82}.legend{display:flex;flex-wrap:wrap;gap:13px;margin:16px 0 0;color:var(--muted);font-size:.7rem}.legend span{display:flex;align-items:center;gap:6px}.legend i{width:9px;height:9px;border-radius:50%;background:var(--blue)}.legend .lg-green{background:var(--green)}.legend .lg-amber{background:#e5a73e}.takeaway{margin-top:17px;padding:15px 17px;border-radius:15px;background:#eaf5f3;color:#315e57;font-size:.85rem;line-height:1.55}.takeaway strong{color:#173e38}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.16)}100%{transform:scale(1)}}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}.explain{min-height:350px}.description{min-height:0}}@media(max-width:600px){.shell{width:calc(100% - 20px);padding-top:25px}.visual{padding:15px}.flow{grid-template-columns:1fr 24px 1fr 24px 1fr;gap:5px;min-height:185px}.node{min-height:133px;padding:11px 8px}.node h3{font-size:.78rem}.node p{font-size:.67rem}.node-kicker{font-size:.54rem}.wire span{font-size:.53rem}.gate{grid-template-columns:1fr auto;}.gate-caption{grid-column:1/-1;text-align:left}.controls{flex-direction:column;align-items:stretch}.group{justify-content:space-between}.btn{flex:1;padding:0 8px}.operation-tabs .tab{flex:1;padding:8px 5px}.explain{padding:19px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="eyebrow">Beginner LLD · Banking example</div>
+      <h1>Follow the money<br>through the objects</h1>
+      <p class="intro">See how a deposit or withdrawal travels from the API to the account balance. Step through slowly, or press <strong>Play</strong>. Try a successful withdrawal and one that should fail.</p>
+    </header>
+
+    <div class="operation-tabs" role="group" aria-label="Choose banking scenario">
+      <button class="tab" type="button" data-scenario="deposit" aria-pressed="true">Deposit $1,000</button>
+      <button class="tab" type="button" data-scenario="withdraw" aria-pressed="false">Withdraw $2,500</button>
+      <button class="tab" type="button" data-scenario="insufficient" aria-pressed="false">Withdraw $6,000</button>
+    </div>
+
+    <section class="layout" aria-label="Animated bank transaction walkthrough">
+      <article class="card visual">
+        <div class="visual-head"><div><h2>Follow the request</h2><p>Each box has a distinct responsibility.</p></div><div class="badge" id="stepBadge" aria-live="polite">Step 1 of 5</div></div>
+        <div class="progress" aria-hidden="true"><i id="progress"></i></div>
+        <div class="flow">
+          <div class="node" id="controllerNode"><div class="node-kicker"><i class="dot"></i>HTTP boundary</div><h3>Controller</h3><p>Receives accountId + amount from the request.</p></div>
+          <div class="wire" id="wireOne"><span>calls</span></div>
+          <div class="node" id="serviceNode"><div class="node-kicker"><i class="dot"></i>Use-case flow</div><h3>Service</h3><p id="serviceState">Validate request & load account.</p></div>
+          <div class="wire" id="wireTwo"><span>loads</span></div>
+          <div class="node" id="accountNode"><div class="node-kicker"><i class="dot"></i>Domain rule owner</div><h3>BankAccount</h3><p>Balance: <span class="amount" id="balance">$5,000.00</span></p><p id="accountState">Waiting for transaction.</p></div>
+          <div class="gate"><div><div class="gate-label">Persistence boundary</div><strong>BankAccountRepository</strong></div><div class="gate-lock" id="lockState">🔒 Row lock: waiting</div><div class="gate-caption">Transaction holds the lock until commit.</div></div>
+        </div>
+        <div class="legend"><span><i></i>current step</span><span><i class="lg-green"></i>successful state change</span><span><i class="lg-amber"></i>serialized update</span></div>
+        <div class="controls">
+          <div class="group"><button class="btn" id="back" type="button">← Back</button><button class="btn" id="next" type="button">Next →</button></div>
+          <div class="group"><button class="btn play" id="play" type="button">▶ Play</button><button class="btn" id="reset" type="button">↺ Restart</button></div>
+        </div>
+      </article>
+
+      <aside class="card explain" aria-live="polite" aria-atomic="true">
+        <h2>What happens now?</h2>
+        <div class="phase" id="phase">Request enters</div>
+        <h3 id="title">1. Controller receives the request</h3>
+        <p class="description" id="description">The API endpoint receives a TransactionRequest containing an account ID and amount. The controller delegates the operation to the service; it does not calculate the new balance itself.</p>
+        <div class="code-label">Related code</div>
+        <code class="code" id="code">bankingService.deposit(request)</code>
+        <div class="result neutral" id="result">Starting balance: $5,000.00</div>
+        <div class="callout" id="callout"><strong>Remember:</strong> Controller handles HTTP; business rules belong deeper in the model.</div>
+      </aside>
+    </section>
+    <p class="sr-only" id="announcer" aria-live="assertive"></p>
+    <div class="takeaway"><strong>Connect the dots:</strong> Controller receives → Service coordinates and starts a transaction → Repository finds and locks the row → `BankAccount` enforces the balance rule → transaction commits (or rolls back on error).</div>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+      const initialBalance = 5000;
+      const scenarios = {
+        deposit: { name: "Deposit $1,000", action: "deposit", amount: 1000 },
+        withdraw: { name: "Withdraw $2,500", action: "withdraw", amount: 2500 },
+        insufficient: { name: "Withdraw $6,000", action: "withdraw", amount: 6000 }
+      };
+      const steps = [
+        { phase: "Request enters", title: "1. Controller receives the request", description: "The API endpoint receives a TransactionRequest containing an account ID and amount. The controller delegates the operation to the service; it does not calculate the new balance itself.", code: "bankingService.{action}(request)", node: "controller", wire: null, lock: "🔒 Row lock: waiting", callout: "Controller handles HTTP; business rules belong deeper in the model." },
+        { phase: "Use-case starts", title: "2. Service validates and coordinates", description: "The service checks that the request and account ID are valid, then begins a database transaction. It coordinates the steps but leaves the actual balance rule to BankAccount.", code: "@Transactional · getAccountForUpdate(id)", node: "service", wire: "one", lock: "🔒 Row lock: requested", callout: "Service coordinates the use case. It should not duplicate the entity's balance rules." },
+        { phase: "Protect shared state", title: "3. Repository loads the account safely", description: "The repository loads the account row using a pessimistic write lock. Another transaction that tries to change this same account must wait, preventing two requests from spending the same old balance at once.", code: "findByIdForUpdate(accountId)", node: "service", wire: "two", lock: "🔒 Row lock: acquired", callout: "A lock matters when requests can happen concurrently; the transaction must remain open while the lock is used." },
+        { phase: "Apply domain rule", title: "4. BankAccount changes its own balance", description: "The service calls the account's deposit(amount) or withdraw(amount). The account rejects null/non-positive amounts; withdrawal also rejects amounts larger than the current balance.", code: "account.{action}(amount)", node: "account", wire: "two", lock: "🔒 Row lock: held", callout: "The entity owns balance because it owns the balance invariant: balance must never become negative." },
+        { phase: "Finish transaction", title: "5. Commit success—or roll back failure", description: "If the operation succeeds, JPA writes the changed balance at transaction commit and the lock is released. If validation throws, the transaction rolls back and the stored balance remains unchanged.", code: "transaction commit / rollback", node: "service", wire: "one", lock: "🔓 Row lock: released", callout: "The controller returns success only if the service call completes without an exception." }
+      ];
+      const $ = (id) => document.getElementById(id);
+      const ui = {
+        badge: $("stepBadge"), progress: $("progress"), balance: $("balance"), accountState: $("accountState"), serviceState: $("serviceState"),
+        controller: $("controllerNode"), service: $("serviceNode"), account: $("accountNode"), wireOne: $("wireOne"), wireTwo: $("wireTwo"), lock: $("lockState"),
+        phase: $("phase"), title: $("title"), description: $("description"), code: $("code"), result: $("result"), callout: $("callout"),
+        back: $("back"), next: $("next"), play: $("play"), reset: $("reset"), announcer: $("announcer")
+      };
+      let scenario = scenarios.deposit;
+      let stepIndex = 0;
+      let timer = null;
+
+      const money = (value) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(value);
+      function finalBalance() {
+        return scenario.action === "deposit" ? initialBalance + scenario.amount : initialBalance - scenario.amount;
+      }
+      function opName() { return scenario.action === "deposit" ? "deposit" : "withdraw"; }
+      function render(index, animate = false) {
+        stepIndex = Math.max(0, Math.min(index, steps.length - 1));
+        const step = steps[stepIndex];
+        const succeeds = scenario.action === "deposit" || scenario.amount <= initialBalance;
+        const amountDone = stepIndex >= 3;
+        const showsFinal = amountDone && succeeds;
+        const shownBalance = showsFinal ? finalBalance() : initialBalance;
+
+        ui.badge.textContent = `Step ${stepIndex + 1} of ${steps.length}`;
+        ui.progress.style.width = `${stepIndex / (steps.length - 1) * 100}%`;
+        ui.phase.textContent = step.phase;
+        ui.title.textContent = step.title;
+        ui.description.textContent = step.description;
+        ui.code.textContent = step.code.replaceAll("{action}", opName());
+        ui.callout.innerHTML = `<strong>Remember:</strong> ${step.callout}`;
+        ui.lock.textContent = step.lock;
+        ui.serviceState.textContent = stepIndex < 2 ? "Validate request & load account." : stepIndex < 4 ? `Call account.${opName()}(amount).` : succeeds ? "Operation completed; return success." : "Exception returned; transaction rolls back.";
+        ui.accountState.textContent = stepIndex < 3 ? "Waiting for transaction." : !succeeds ? "Rejected: insufficient balance. Balance unchanged." : scenario.action === "deposit" ? `Deposited ${money(scenario.amount)}.` : `Withdrew ${money(scenario.amount)}.`;
+        ui.balance.textContent = money(shownBalance);
+        ui.balance.className = `amount${showsFinal ? scenario.action === "deposit" ? " positive" : " negative" : ""}`;
+        if (animate && showsFinal) { ui.balance.classList.remove("bump"); void ui.balance.offsetWidth; ui.balance.classList.add("bump"); }
+
+        [ui.controller, ui.service, ui.account].forEach((node) => node.classList.remove("active", "done", "fail"));
+        ui.wireOne.classList.remove("lit"); ui.wireTwo.classList.remove("lit");
+        const activeNode = step.node === "controller" ? ui.controller : step.node === "account" ? ui.account : ui.service;
+        activeNode.classList.add("active");
+        if (stepIndex > 0) ui.controller.classList.add("done");
+        if (stepIndex >= 3) ui.service.classList.add("done");
+        if (showsFinal) ui.account.classList.add("done");
+        if (stepIndex >= 1) ui.wireOne.classList.add("lit");
+        if (stepIndex >= 2 && stepIndex <= 3) ui.wireTwo.classList.add("lit");
+        if (stepIndex === 4 && !succeeds) { ui.account.classList.add("fail"); ui.service.classList.add("fail"); }
+
+        if (stepIndex < 3) {
+          ui.result.className = "result neutral";
+          ui.result.textContent = `Starting balance: ${money(initialBalance)} · Request: ${scenario.name}`;
+        } else if (!succeeds) {
+          ui.result.className = "result bad";
+          ui.result.textContent = `Rejected: ${money(scenario.amount)} exceeds ${money(initialBalance)}. Balance stays ${money(initialBalance)}.`;
+        } else {
+          ui.result.className = "result ok";
+          ui.result.textContent = `Success: ${money(initialBalance)} → ${money(finalBalance())}`;
+        }
+        ui.back.disabled = stepIndex === 0;
+        ui.next.disabled = stepIndex === steps.length - 1;
+        ui.play.textContent = timer ? "❚❚ Pause" : stepIndex === steps.length - 1 ? "↺ Replay" : "▶ Play";
+        ui.announcer.textContent = `${step.title}. ${step.description}`;
+      }
+      function stop() { if (timer) clearInterval(timer); timer = null; ui.play.textContent = stepIndex === steps.length - 1 ? "↺ Replay" : "▶ Play"; }
+      function advance() { if (stepIndex >= steps.length - 1) { stop(); return; } render(stepIndex + 1, true); if (stepIndex === steps.length - 1) stop(); }
+      document.querySelectorAll("[data-scenario]").forEach((button) => button.addEventListener("click", () => {
+        stop(); scenario = scenarios[button.dataset.scenario];
+        document.querySelectorAll("[data-scenario]").forEach((tab) => tab.setAttribute("aria-pressed", String(tab === button)));
+        render(0);
+      }));
+      ui.back.addEventListener("click", () => { stop(); render(stepIndex - 1); });
+      ui.next.addEventListener("click", () => { stop(); render(stepIndex + 1, true); });
+      ui.reset.addEventListener("click", () => { stop(); render(0); });
+      ui.play.addEventListener("click", () => {
+        if (timer) { stop(); return; }
+        if (stepIndex === steps.length - 1) render(0);
+        timer = setInterval(advance, 2400);
+        ui.play.textContent = "❚❚ Pause";
+      });
+      render(0);
+    })();
+  </script>
+</body>
+</html>
